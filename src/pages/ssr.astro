@@ -1149,7 +1149,7 @@ import Footer from '../components/Footer.astro';
                 The grey italic comments explain what each part does at runtime. Two things to spot in the template:
               </p>
               <div style="display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;padding:.75rem 1rem;background:rgba(0,0,0,.03);border:1px solid var(--grid);border-radius:.55rem;font-size:.74rem;">
-                <p><strong style="color:var(--blue);">📄 template block</strong> — Angular evaluates this against the component's properties to produce the HTML String</p>
+                <p><strong style="color:#a78bfa;">📄 template block</strong> — Angular evaluates this against the component's properties to produce the HTML String</p>
                 <p><strong style="color:var(--green);">🌳 HTML tags inside the template</strong> — each tag becomes a DOM Node in the browser after parsing</p>
               </div>
               <div class="callout callout-amber" style="margin-bottom:1rem;font-size:.73rem;">
@@ -1171,7 +1171,7 @@ import Footer from '../components/Footer.astro';
                 <span class="ky">@Component</span>(&#123;<br/>
                 &nbsp;&nbsp;<span class="hi">selector</span>: <span class="st">'app-hello'</span>,<span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 🌳 Angular matches this tag to a DOM Node</span><br/>
                 <br/>
-                &nbsp;&nbsp;<span class="cm">// ── 📄 TEMPLATE: Angular evaluates this → produces the HTML String ──</span><br/>
+                &nbsp;&nbsp;<span class="cm" style="color:#a78bfa;">// ── 📄 TEMPLATE: Angular evaluates this → produces the HTML String ──</span><br/>
                 &nbsp;&nbsp;<span class="hi">template</span>: <span class="st">`</span><br/>
                 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">&lt;<span class="ky">h1</span>&gt;</span><span class="st">Hello, &#123;&#123; name &#125;&#125;!</span><span class="ok">&lt;/<span class="ky">h1</span>&gt;</span><span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 🌳 → &lt;h1&gt; DOM Node in browser</span><br/>
                 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">&lt;<span class="ky">p</span>&gt;</span><span class="st">Running on: &#123;&#123; platform &#125;&#125;</span><span class="ok">&lt;/<span class="ky">p</span>&gt;</span><span class="cm">&nbsp;&nbsp;&nbsp;// 🌳 → &lt;p&gt; DOM Node in browser</span><br/>
