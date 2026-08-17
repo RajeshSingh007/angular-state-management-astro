@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Dark mode CSS variables ─────────────────────────────── */
+:root {
+  --bg-base: #f9fafb;
+  --bg-surface: #ffffff;
+  --bg-surface2: #f3f4f6;
+  --text-primary: #1a1a2e;
+  --text-secondary: #6b7280;
+  --border: #e5e7eb;
+}
+
+[data-theme="dark"] {
+  --bg-base: #0f0f1a;
+  --bg-surface: #1a1a2e;
+  --bg-surface2: #252540;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --border: #374151;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    transition: background-color 0.3s, color 0.3s;
+  }
+}
+
+/* ── Typography scale ────────────────────────────────────── */
+/*
+  Based on a 1.25 Major Third modular scale with Inter.
+
+  Display  — 3rem   / 48px  / weight 800  — hero headlines
+  H1       — 2.25rem/ 36px  / weight 800  — page titles
+  H2       — 1.6rem / 25px  / weight 800  — section titles     ← .sec-title
+  H3       — 1.2rem / 19px  / weight 700  — card/sub-headers
+  H4       — 1rem   / 16px  / weight 700  — labels
+  Lead     — 0.9rem / 14px  / weight 400  / line-height 1.75  ← .sec-lead
+  Body     — 0.875rem/14px  / weight 400  / line-height 1.7
+  Small    — 0.75rem/ 12px  / weight 400
+  Eyebrow  — 0.65rem/ 10px  / weight 700  / tracking 0.1em    ← .sec-eyebrow
+  Mono     — 0.72rem/ 11px  — code blocks
+*/
+
+/* ── Scroll reveal ───────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Mobile nav ──────────────────────────────────────────── */
+#mobile-menu {
+  display: none;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem 1rem;
+  background: rgba(255,255,255,0.98);
+  border-top: 1px solid var(--border);
+}
+#mobile-menu.open { display: flex; }
+
+[data-theme="dark"] #mobile-menu {
+  background: rgba(26,26,46,0.98);
+}
+
+/* ── Flash animation for playground components ───────────── */
+@keyframes flashGreen {
+  0%   { background-color: #c8e6c9; border-color: #4caf50; box-shadow: 0 0 12px rgba(76,175,80,0.5); }
+  100% { background-color: transparent; border-color: inherit; box-shadow: none; }
+}

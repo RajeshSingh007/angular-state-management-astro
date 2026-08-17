@@ -1,0 +1,25 @@
+---
+interface Props {
+  items: string[];
+  color?: 'purple' | 'blue' | 'green' | 'amber';
+}
+const { items, color = 'purple' } = Astro.props;
+const colors = {
+  purple: { bg: 'bg-purple-50', border: 'border-purple-300', title: 'text-purple-800', num: 'bg-purple-600' },
+  blue:   { bg: 'bg-blue-50',   border: 'border-blue-300',   title: 'text-blue-800',   num: 'bg-blue-600' },
+  green:  { bg: 'bg-green-50',  border: 'border-green-300',  title: 'text-green-800',  num: 'bg-green-600' },
+  amber:  { bg: 'bg-amber-50',  border: 'border-amber-300',  title: 'text-amber-800',  num: 'bg-amber-600' },
+};
+const c = colors[color];
+---
+<div class={`${c.bg} border-2 ${c.border} rounded-2xl p-6 mb-8 reveal`}>
+  <h4 class={`font-extrabold text-base mb-4 ${c.title}`}>📚 What You'll Learn</h4>
+  <ol class="space-y-2">
+    {items.map((item, i) => (
+      <li class="flex items-start gap-3 text-sm text-gray-700">
+        <span class={`${c.num} text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5`}>{i+1}</span>
+        <span set:html={item} />
+      </li>
+    ))}
+  </ol>
+</div>

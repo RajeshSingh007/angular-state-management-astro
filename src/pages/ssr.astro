@@ -1,0 +1,2541 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+---
+<MainLayout
+  title="Angular SSR & Hybrid Rendering — Angular State Management Visualizer"
+  description="Learn Angular SSR, CSR, SSG and Hybrid Rendering in plain English with real-world analogies, diagrams and code examples.">
+  <Navbar active="/ssr" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Tokens ── */
+    :root {
+      --red:        #dd0031;
+      --red-dim:    #b8002a;
+      --red-tint:   #fff0f3;
+      --red-border: #ffc9d3;
+      --ink-1:      #0b0b0f;
+      --ink-2:      #4a4a5a;
+      --ink-3:      #8a8a9a;
+      --surface:    #ffffff;
+      --page:       #f8f8fb;
+      --grid:       #e8e8f0;
+      --blue:       #2563eb;
+      --teal:       #0d9488;
+      --orange:     #ea580c;
+      --green:      #16a34a;
+      --warn:       #d97706;
+      --dark:       #0d0e14;
+      --dark-2:     #161720;
+      --dark-3:     #1e1f2e;
+    }
+
+    * { box-sizing: border-box; }
+    body { background: var(--page); font-family: 'Sora', system-ui, sans-serif; }
+
+    /* ── Hero ── */
+    .hero {
+      background: var(--dark);
+      background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
+      background-size: 24px 24px;
+      padding: 5rem 1.5rem 4rem;
+      border-bottom: 1px solid #2a2b3d;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(221,0,49,.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-inner { max-width: 52rem; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(221,0,49,.15); border: 1px solid rgba(221,0,49,.35);
+      color: #ff6b8a; font-size: .65rem; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase;
+      padding: .3rem .85rem; border-radius: 99px; margin-bottom: 1.25rem;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.25rem); font-weight: 800;
+      color: #ffffff; line-height: 1.1; margin-bottom: 1.1rem;
+      letter-spacing: -.02em;
+    }
+    .hero h1 span { color: var(--red); }
+    .hero-lead {
+      font-size: .95rem; color: #a0a0b8; line-height: 1.75;
+      max-width: 46ch; margin-bottom: 2rem;
+    }
+    .hero-pills { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .hero-pill {
+      display: inline-flex; align-items: center; gap: .35rem;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+      color: #c0c0d8; font-size: .7rem; font-weight: 600;
+      padding: .35rem .85rem; border-radius: 99px;
+    }
+
+    /* ── 3-col shell ── */
+    .page-shell   { max-width: 90rem; margin: 0 auto; padding: 2.5rem 1.5rem; }
+    .page-cols    { display: grid; grid-template-columns: 14rem 1fr; gap: 2.5rem; align-items: flex-start; }
+    @media (max-width: 1024px) { .page-cols { grid-template-columns: 1fr; } .left-nav { display: none; } }
+
+    /* ── Left nav ── */
+    .left-nav { position: sticky; top: 5.5rem; }
+    .left-nav-head {
+      font-size: .6rem; font-weight: 700; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--red);
+      padding-bottom: .6rem; margin-bottom: .75rem;
+      border-bottom: 1px solid var(--grid);
+    }
+    .left-nav-section { margin-bottom: 1.25rem; }
+    .left-nav-section-label {
+      font-size: .58rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--ink-3);
+      padding: 0 .6rem; margin-bottom: .3rem;
+    }
+    .left-nav-item {
+      display: flex; align-items: center; gap: .55rem;
+      padding: .38rem .6rem; border-radius: .45rem;
+      font-size: .72rem; color: var(--ink-2);
+      text-decoration: none; transition: all .15s; line-height: 1.3;
+    }
+    .left-nav-item:hover { background: var(--grid); color: var(--ink-1); }
+    .left-nav-item.active { background: var(--red-tint); color: var(--red); font-weight: 700; }
+    .left-nav-dot { width: .45rem; height: .45rem; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+    .left-nav-num { font-size: .58rem; font-weight: 700; color: var(--ink-3); width: 1rem; text-align: right; flex-shrink: 0; }
+
+
+    /* ── Section ── */
+    .section { margin-bottom: 3.5rem; scroll-margin-top: 5.5rem; }
+    .eyebrow {
+      font-size: .6rem; font-weight: 700; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--red); margin-bottom: .4rem;
+    }
+    .sec-title {
+      font-size: 1.45rem; font-weight: 800; color: var(--ink-1);
+      line-height: 1.2; margin-bottom: .9rem; letter-spacing: -.02em;
+    }
+    .sec-lead {
+      font-size: .875rem; color: var(--ink-2); line-height: 1.75;
+      max-width: 62ch; margin-bottom: 1.5rem;
+    }
+    .divider { border: none; border-top: 1px solid var(--grid); margin: 3rem 0; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--grid);
+      border-radius: .75rem; padding: 1.25rem 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.04);
+      transition: box-shadow .2s, transform .2s;
+    }
+    .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+    .card-red   { border-left: 3px solid var(--red); }
+    .card-blue  { border-left: 3px solid var(--blue); }
+    .card-teal  { border-left: 3px solid var(--teal); }
+    .card-green { border-left: 3px solid var(--green); }
+    .card-warn  { border-left: 3px solid var(--warn); }
+    .card-orange{ border-left: 3px solid var(--orange); }
+
+    /* ── Rendering Matrix ── */
+    .matrix {
+      border: 1px solid var(--grid); border-radius: .75rem;
+      overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+    .matrix-header {
+      display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      background: var(--dark); padding: .75rem 1rem; gap: .5rem;
+    }
+    .matrix-header-cell { font-size: .72rem; font-weight: 700; color: #9090aa; }
+    .matrix-header-cell.mode { text-align: center; }
+    .matrix-row {
+      display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      padding: .7rem 1rem; gap: .5rem; border-top: 1px solid var(--grid);
+      align-items: center; transition: background .15s;
+    }
+    .matrix-row:hover { background: #f5f5fb; }
+    .matrix-row:nth-child(even) { background: var(--page); }
+    .matrix-row:nth-child(even):hover { background: #f0f0f8; }
+    .matrix-aspect { font-size: .75rem; font-weight: 600; color: var(--ink-1); }
+    .matrix-cell { text-align: center; font-size: .72rem; color: var(--ink-2); line-height: 1.45; }
+    .mtag {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-size: .65rem; font-weight: 700; letter-spacing: .05em;
+      padding: .2rem .6rem; border-radius: 99px;
+    }
+    .mtag-csr  { background: #fff3e8; color: #9a3412; border: 1px solid #fed7aa; }
+    .mtag-ssr  { background: #eff5ff; color: #1e40af; border: 1px solid #bfdbfe; }
+    .mtag-ssg  { background: #f0fdf8; color: #065f46; border: 1px solid #99f6e4; }
+    .mode-icon { font-size: 1.1rem; margin-bottom: .25rem; display: block; }
+    .matrix-mode-head {
+      text-align: center; display: flex; flex-direction: column; align-items: center; gap: .2rem;
+    }
+    .perf-tag {
+      display: inline-block; font-size: .6rem; font-weight: 700;
+      padding: .1rem .45rem; border-radius: 99px; margin-top: .15rem;
+    }
+    .perf-slow   { background: #fef2f2; color: var(--red); }
+    .perf-fast   { background: #eff5ff; color: var(--blue); }
+    .perf-instant{ background: #f0fdf8; color: var(--teal); }
+    .check { color: var(--green); font-weight: 700; }
+    .cross { color: var(--red); }
+
+    /* ── Mode cards (3-col) ── */
+    .g3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 720px) { .g3 { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) { .g2 { grid-template-columns: 1fr; } }
+
+    .mode-card {
+      background: var(--surface); border: 1px solid var(--grid);
+      border-radius: .75rem; padding: 1.35rem;
+      display: flex; flex-direction: column; gap: .6rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.04);
+      transition: box-shadow .2s, transform .2s;
+    }
+    .mode-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.1); transform: translateY(-2px); }
+    .mode-badge {
+      display: inline-block; font-size: .6rem; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      padding: .15rem .6rem; border-radius: 99px;
+    }
+    .mode-title { font-size: 1rem; font-weight: 800; color: var(--ink-1); letter-spacing: -.01em; }
+    .mode-desc  { font-size: .77rem; color: var(--ink-2); line-height: 1.65; }
+    .mode-pros-cons { font-size: .72rem; line-height: 1.65; display: flex; flex-direction: column; gap: .2rem; }
+    .pro { color: var(--green); }
+    .con { color: var(--red); }
+    .mode-code {
+      background: var(--dark); border-radius: .4rem; padding: .45rem .75rem;
+      font-size: .68rem; font-family: 'JetBrains Mono','Fira Code',monospace;
+      color: #6ee7b7; margin-top: auto; letter-spacing: .02em;
+    }
+
+    /* ── Glassmorphism analogy cards ── */
+    .analogy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+    @media (max-width: 600px) { .analogy-grid { grid-template-columns: 1fr; } }
+    .analogy-card {
+      border-radius: .9rem; padding: 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .analogy-card-restaurant {
+      background: linear-gradient(135deg, #1e0a2e 0%, #2d1040 100%);
+      border: 1px solid rgba(255,100,150,.25);
+      box-shadow: 0 8px 32px rgba(200,0,80,.15), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .analogy-card-apartment {
+      background: linear-gradient(135deg, #0a1a2e 0%, #0d2240 100%);
+      border: 1px solid rgba(80,160,255,.25);
+      box-shadow: 0 8px 32px rgba(0,80,200,.15), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .analogy-card::before {
+      content: ''; position: absolute;
+      top: -40px; right: -40px;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      filter: blur(48px); opacity: .35;
+      pointer-events: none;
+    }
+    .analogy-card-restaurant::before { background: #dd0031; }
+    .analogy-card-apartment::before  { background: #2563eb; }
+    .analogy-tag {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .62rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; margin-bottom: .9rem;
+      padding: .25rem .7rem; border-radius: 99px;
+    }
+    .analogy-card-restaurant .analogy-tag { background: rgba(221,0,49,.2); color: #ff8fab; border: 1px solid rgba(221,0,49,.3); }
+    .analogy-card-apartment  .analogy-tag { background: rgba(37,99,235,.2); color: #93c5fd; border: 1px solid rgba(37,99,235,.3); }
+    .analogy-icon { font-size: 2rem; line-height: 1; margin-bottom: .6rem; display: block; }
+    .analogy-title { font-size: 1rem; font-weight: 800; color: #fff; margin-bottom: .5rem; letter-spacing: -.01em; }
+    .analogy-body { font-size: .78rem; color: rgba(255,255,255,.7); line-height: 1.7; }
+    .analogy-highlight {
+      display: flex; align-items: flex-start; gap: .6rem;
+      background: rgba(255,255,255,.06); border-radius: .5rem;
+      padding: .75rem; margin-top: .85rem; font-size: .72rem;
+      color: rgba(255,255,255,.85); line-height: 1.6;
+      border: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(8px);
+    }
+
+    /* ── Execution timeline ── */
+    .timeline { display: flex; align-items: flex-start; gap: 0; margin-bottom: 1.25rem; overflow-x: auto; padding-bottom: .5rem; }
+    .timeline-step {
+      display: flex; flex-direction: column; align-items: center;
+      flex: 1; min-width: 7.5rem; position: relative;
+    }
+    .timeline-step + .timeline-step::before {
+      content: ''; position: absolute;
+      top: 1.1rem; right: 50%; left: -50%;
+      height: 2px; background: var(--grid); z-index: 0;
+    }
+    .timeline-step.csr + .timeline-step.csr::before { background: linear-gradient(90deg, #fca5a5, #fca5a5); }
+    .tl-dot {
+      width: 2.2rem; height: 2.2rem; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 800; z-index: 1; flex-shrink: 0;
+      border: 2px solid transparent; position: relative;
+    }
+    .tl-dot-red  { background: #fef2f2; color: var(--red); border-color: #fecaca; }
+    .tl-dot-blue { background: #eff5ff; color: var(--blue); border-color: #bfdbfe; }
+    .tl-label { font-size: .7rem; font-weight: 700; color: var(--ink-1); text-align: center; margin-top: .5rem; line-height: 1.35; max-width: 6.5rem; }
+    .tl-sub   { font-size: .62rem; color: var(--ink-3); text-align: center; margin-top: .15rem; line-height: 1.4; max-width: 6.5rem; }
+    .tl-time  { font-size: .6rem; font-weight: 700; padding: .1rem .4rem; border-radius: 99px; margin-top: .35rem; }
+    .tl-time-slow { background: #fef2f2; color: var(--red); }
+    .tl-time-ok   { background: #f0fdf8; color: var(--teal); }
+
+    /* ── Code blocks ── */
+    .code-block {
+      background: var(--dark); border: 1px solid #252635;
+      border-radius: .65rem; padding: 1rem 1.25rem;
+      font-family: 'JetBrains Mono','Fira Code',monospace;
+      font-size: .72rem; line-height: 1.85; overflow-x: auto;
+      color: #d4d4d4;
+    }
+    .code-block .cm { color: #6b7280; font-style: italic; }
+    .code-block .ky { color: #93c5fd; }
+    .code-block .fn { color: #fde68a; }
+    .code-block .st { color: #fb923c; }
+    .code-block .vl { color: #c084fc; }
+    .code-block .ok { color: #6ee7b7; }
+    .code-block .hi { color: #fff; font-weight: 700; }
+    .code-block .rd { color: #f87171; }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--dark-2); border: 1px solid #252635;
+      border-bottom: none; border-radius: .65rem .65rem 0 0;
+      padding: .55rem 1.1rem;
+    }
+    .code-header + .code-block { border-top-left-radius: 0; border-top-right-radius: 0; }
+    .code-dots { display: flex; gap: .35rem; }
+    .code-dot  { width: .55rem; height: .55rem; border-radius: 50%; }
+    .code-filename { font-size: .65rem; font-weight: 700; color: #6060a0; font-family: monospace; }
+
+    /* ── Callout ── */
+    .callout { border-radius: .6rem; padding: 1rem 1.25rem; font-size: .8rem; line-height: 1.65; }
+    .callout-blue   { background: #eff5ff; border: 1px solid #bfdbfe; }
+    .callout-amber  { background: #fffbeb; border: 1px solid #fde68a; }
+    .callout-red    { background: #fff0f3; border: 1px solid var(--red-border); }
+    .callout-green  { background: #f0fdf8; border: 1px solid #99f6e4; }
+    .callout-teal   { background: #f0fdfa; border: 1px solid #99f6e4; }
+    .callout-title  { font-weight: 700; font-size: .8rem; margin-bottom: .4rem; }
+
+    /* ── Before/After ── */
+    .ba-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .ba-grid { grid-template-columns: 1fr; } }
+    .ba-panel { border-radius: .7rem; overflow: hidden; border: 1px solid var(--grid); }
+    .ba-head  { padding: .55rem 1rem; font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .ba-head-red { background: #fef2f2; color: var(--red); border-bottom: 1px solid #fecaca; }
+    .ba-head-grn { background: #f0fdf8; color: var(--green); border-bottom: 1px solid #bbf7d0; }
+    .ba-body     { background: var(--surface); padding: .9rem 1rem; font-size: .75rem; color: var(--ink-2); line-height: 1.75; }
+    .ba-bad  { color: var(--red); font-weight: 600; }
+    .ba-good { color: var(--green); font-weight: 600; }
+
+    /* ── Steps ── */
+    .steps    { display: flex; flex-direction: column; gap: .5rem; }
+    .step-row { display: flex; gap: .75rem; align-items: flex-start; font-size: .78rem; }
+    .step-num { width: 1.4rem; height: 1.4rem; border-radius: 50%; font-size: .62rem; font-weight: 700; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: .05rem; }
+    .step-gray{ background: #f1f0ec; color: var(--ink-3); }
+    .step-red { background: #fef2f2; color: var(--red); }
+    .step-grn { background: #f0fdf8; color: var(--green); }
+
+    /* ── Flow ── */
+    .flow      { display: flex; flex-direction: column; gap: 0; }
+    .flow-step { display: flex; align-items: stretch; }
+    .flow-line { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 2rem; }
+    .flow-dot  { width: .7rem; height: .7rem; border-radius: 50%; flex-shrink: 0; margin-top: .65rem; }
+    .flow-vln  { flex: 1; width: 2px; background: var(--grid); min-height: .6rem; }
+    .flow-cnt  { flex: 1; padding: .4rem 0 .4rem .75rem; }
+    .flow-lbl  { font-size: .78rem; font-weight: 600; color: var(--ink-1); }
+    .flow-sub  { font-size: .7rem; color: var(--ink-3); margin-top: .1rem; }
+
+    /* ── Route chips ── */
+    .route-card { background: var(--surface); border: 1px solid var(--grid); border-radius: .6rem; padding: .75rem 1rem; display: flex; flex-direction: column; gap: .3rem; transition: box-shadow .15s; }
+    .route-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,.07); }
+    .route-path { font-family: monospace; font-size: .72rem; font-weight: 700; color: var(--ink-1); }
+    .route-mode { font-size: .58rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; padding: .15rem .5rem; border-radius: 99px; }
+    .mode-pre  { background: #f0fdf8; color: #065f46; border: 1px solid #99f6e4; }
+    .mode-srv  { background: #eff5ff; color: #1e40af; border: 1px solid #bfdbfe; }
+    .mode-csr  { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+    .route-desc{ font-size: .7rem; color: var(--ink-2); line-height: 1.5; }
+
+    /* ── File list ── */
+    .file-row  { display: flex; align-items: flex-start; gap: .75rem; padding: .6rem 0; border-bottom: 1px solid var(--grid); }
+    .file-row:last-child { border-bottom: none; }
+    .file-chip { background: var(--page); border: 1px solid var(--grid); border-radius: .3rem; padding: .15rem .5rem; font-family: monospace; font-size: .67rem; font-weight: 700; color: var(--blue); flex-shrink: 0; white-space: nowrap; }
+    .file-desc { font-size: .75rem; color: var(--ink-2); line-height: 1.55; padding-top: .1rem; }
+
+    /* ── Verdict ── */
+    .verdict { background: var(--dark); border-radius: .65rem; padding: 1.1rem 1.5rem; text-align: center; }
+    .verdict p { font-size: .85rem; font-weight: 700; color: #f1f5f9; line-height: 1.7; margin: 0; }
+    .vbad  { color: #f87171; }
+    .vgood { color: #6ee7b7; }
+
+    /* ── Takeaway ── */
+    .tk-item { display: flex; gap: .75rem; align-items: flex-start; padding: .75rem 0; border-bottom: 1px solid var(--grid); }
+    .tk-item:last-child { border-bottom: none; }
+    .tk-dot  { width: .45rem; height: .45rem; border-radius: 50%; background: var(--red); flex-shrink: 0; margin-top: .45rem; }
+    .tk-text { font-size: .8rem; color: var(--ink-2); line-height: 1.65; }
+    .tk-text strong { color: var(--ink-1); }
+
+    /* ── What you'll learn ── */
+    .learn-list { list-style: none; padding: 0; margin: 0; }
+    .learn-list li { display: flex; align-items: flex-start; gap: .75rem; padding: .55rem 0; border-bottom: 1px solid var(--grid); font-size: .82rem; color: var(--ink-2); line-height: 1.6; }
+    .learn-list li:last-child { border-bottom: none; }
+    .learn-num { width: 1.25rem; height: 1.25rem; background: var(--red); color: white; border-radius: 50%; font-size: .6rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: .1rem; }
+
+    /* ── Section story cards ── */
+    .story-card { display: flex; gap: 1rem; align-items: flex-start; background: var(--surface); border: 1px solid var(--grid); border-radius: .75rem; padding: 1.1rem 1.25rem; transition: box-shadow .2s; }
+    .story-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.07); }
+    .story-icon { width: 2.25rem; height: 2.25rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+
+    /* ── Micro-interactions ── */
+    a { transition: color .15s, opacity .15s; }
+    button { transition: all .15s; cursor: pointer; }
+
+    @media (max-width: 1024px) { .left-nav { display: none; } }
+  </style>
+
+  <main id="main-content">
+  <div class="pt-14">
+
+    <!-- ══════════ HERO ══════════ -->
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="hero-badge">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+          Bonus Module · Angular SSR
+        </div>
+        <h1>Server-Side &amp; <span>Hybrid</span> Rendering</h1>
+        <p class="hero-lead">
+          By default Angular renders everything in the browser. SSR moves that work to the
+          server — faster first loads, better SEO, and a smarter user experience.
+        </p>
+        <div class="hero-pills">
+          <span class="hero-pill">⚡ Angular 17+</span>
+          <span class="hero-pill">🔀 Hybrid Rendering</span>
+          <span class="hero-pill">💧 Built-in Hydration</span>
+          <span class="hero-pill">🗄️ HTTP Transfer Cache</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ 3-COL LAYOUT ══════════ -->
+    <div class="page-shell">
+      <div class="page-cols">
+
+        <!-- ── LEFT NAV ── -->
+        <nav class="left-nav" aria-label="Module navigation">
+          <div class="left-nav-head">SSR MODULE</div>
+
+          <div class="left-nav-section">
+            <div class="left-nav-section-label">Foundation</div>
+            <a href="#csr-problem"     class="left-nav-item active"><span class="left-nav-num">01</span><span class="left-nav-dot"></span>The CSR Problem</a>
+            <a href="#rendering-modes" class="left-nav-item"><span class="left-nav-num">02</span><span class="left-nav-dot"></span>3 Rendering Modes</a>
+            <a href="#matrix"          class="left-nav-item"><span class="left-nav-num">03</span><span class="left-nav-dot"></span>Rendering Matrix</a>
+          </div>
+
+          <div class="left-nav-section">
+            <div class="left-nav-section-label">Deep Dive</div>
+            <a href="#analogies"       class="left-nav-item"><span class="left-nav-num">04</span><span class="left-nav-dot"></span>Mental Models</a>
+            <a href="#hydration"       class="left-nav-item"><span class="left-nav-num">05</span><span class="left-nav-dot"></span>Hydration</a>
+            <a href="#hybrid"          class="left-nav-item"><span class="left-nav-num">06</span><span class="left-nav-dot"></span>Hybrid Rendering</a>
+          </div>
+
+          <div class="left-nav-section">
+            <div class="left-nav-section-label">Advanced</div>
+            <a href="#server-routing"  class="left-nav-item"><span class="left-nav-num">07</span><span class="left-nav-dot"></span>Server Routing</a>
+            <a href="#http-cache"      class="left-nav-item"><span class="left-nav-num">08</span><span class="left-nav-dot"></span>HTTP Cache</a>
+            <a href="#server-compat"   class="left-nav-item"><span class="left-nav-num">09</span><span class="left-nav-dot"></span>Server-Safe Code</a>
+            <a href="#setup"           class="left-nav-item"><span class="left-nav-num">10</span><span class="left-nav-dot"></span>Setup</a>
+            <a href="#takeaways"       class="left-nav-item"><span class="left-nav-num">11</span><span class="left-nav-dot"></span>Key Takeaways</a>
+          </div>
+
+          <div class="left-nav-section">
+            <div class="left-nav-section-label">Code Lab</div>
+            <a href="#code-anatomy"    class="left-nav-item"><span class="left-nav-num">→</span><span class="left-nav-dot"></span>Code Anatomy</a>
+          </div>
+        </nav>
+
+        <!-- ── MAIN ── -->
+        <div>
+
+          <!-- ── 01 CSR Problem ── -->
+          <section id="csr-problem" class="section reveal">
+            <p class="eyebrow">01 · The Problem</p>
+            <h2 class="sec-title">Why did Angular need SSR at all?</h2>
+            <p class="sec-lead">
+              Angular started as a framework where <strong>the browser does all the work</strong>.
+              Fine in 2016 on fast desktops — but 3 billion people now browse on mobile phones, often on slow networks.
+            </p>
+
+            <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem;">
+              {[
+                { bg: '#fef2f2', border: '#fecaca', icon: '😩', title: 'Users on slow phones stared at a blank screen', body: 'A 500KB JS bundle downloads, Angular boots, builds every DOM node — only <em>then</em> shows content. <strong>4–6 seconds of blank white screen</strong>. 53% of mobile users abandon after 3 seconds.', iconBg: '#fef2f2' },
+                { bg: '#fffbeb', border: '#fde68a', icon: '🔍', title: "Google couldn't read Angular apps", body: "Google's crawler sees an empty HTML shell — no content, no metadata. Your pages are <strong>invisible to search engines</strong>. No SEO, no organic traffic.", iconBg: '#fffbeb' },
+                { bg: '#f0fdf8', border: '#bbf7d0', icon: '💡', title: 'The insight: move the work from browser → server', body: 'Server runs Angular, builds the full page, sends <strong>ready HTML</strong> to the browser in milliseconds. User sees content immediately. Google crawler sees full content too.', iconBg: '#f0fdf8' },
+              ].map(({ icon, title, body, iconBg, border }) => (
+                <div class="story-card">
+                  <div class="story-icon" style={`background:${iconBg}; border: 1px solid ${border};`}>{icon}</div>
+                  <div>
+                    <p style="font-size:.82rem;font-weight:700;color:var(--ink-1);margin-bottom:.3rem;">{title}</p>
+                    <p style="font-size:.8rem;color:var(--ink-2);line-height:1.7;" set:html={body}></p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <!-- CSR Timeline -->
+            <div class="card" style="margin-bottom:1.25rem;">
+              <p style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin-bottom:1.25rem;">
+                CSR Execution Timeline — What the user experiences
+              </p>
+              <div class="timeline">
+                {[
+                  { n:'1', label:'Browser requests page', sub:'Blank screen', time:'0ms', dotCls:'tl-dot-red', timeCls:'tl-time-slow' },
+                  { n:'2', label:'Server sends empty HTML', sub:'+ 500KB JS bundle', time:'~50ms', dotCls:'tl-dot-red', timeCls:'tl-time-slow' },
+                  { n:'3', label:'Browser downloads JS', sub:'Parsing & executing', time:'~400ms', dotCls:'tl-dot-red', timeCls:'tl-time-slow' },
+                  { n:'4', label:'Angular boots', sub:'Modules init', time:'~800ms', dotCls:'tl-dot-red', timeCls:'tl-time-slow' },
+                  { n:'5', label:'DOM renders', sub:'User sees content', time:'2–5s', dotCls:'tl-dot-blue', timeCls:'tl-time-ok' },
+                ].map(({ n, label, sub, time, dotCls, timeCls }) => (
+                  <div class="timeline-step csr">
+                    <div class={`tl-dot ${dotCls}`}>{n}</div>
+                    <div class="tl-label">{label}</div>
+                    <div class="tl-sub">{sub}</div>
+                    <span class={`tl-time ${timeCls}`}>{time}</span>
+                  </div>
+                ))}
+              </div>
+              <p style="font-size:.72rem;color:var(--red);font-style:italic;margin-top:.9rem;padding-top:.75rem;border-top:1px solid var(--grid);">
+                Google's crawler may give up before step 5. Your page never gets indexed.
+              </p>
+            </div>
+
+            <div class="card card-warn">
+              <p style="font-size:.81rem;font-weight:700;color:var(--ink-1);margin-bottom:.65rem;">🤔 But can't Google just execute JavaScript?</p>
+              <p style="font-size:.76rem;color:var(--ink-2);line-height:1.75;margin-bottom:.65rem;">
+                Google visits your page twice. The <strong style="color:var(--ink-1);">first visit</strong> happens immediately on crawl day —
+                Google reads the raw HTML your server sends. If that HTML is an empty shell, Google sees nothing.
+                The <strong style="color:var(--ink-1);">second visit</strong> (where Google runs your JavaScript to build the page)
+                may happen days or weeks later — or never, for low-traffic pages.
+                Your page ranking suffers until that second visit happens.
+              </p>
+              <p style="font-size:.76rem;color:var(--ink-2);line-height:1.75;">
+                Worse: <strong style="color:var(--ink-1);">LinkedIn, Twitter, and Facebook never run JavaScript at all</strong> when
+                generating link previews. Every link you share shows a blank card — no title, no image, no description.
+                SSR fixes both: the server sends complete HTML on the very first response, so every crawler and every
+                social media preview works immediately.
+              </p>
+            </div>
+          </section>
+
+          <hr class="divider" />
+
+          <!-- ── 02 3 Rendering Modes ── -->
+          <section id="rendering-modes" class="section reveal">
+            <p class="eyebrow">02 · The Solution</p>
+            <h2 class="sec-title">What Are the 3 Ways Angular Can Deliver a Page?</h2>
+            <p class="sec-lead">
+              The root problem with CSR is that the browser does <em>all</em> the work —
+              after a 500KB download, on slow phones, every time. The solution is to move that work
+              to a different time or place. Angular offers exactly three options for where and when the page gets built.
+            </p>
+
+            <div class="g3">
+              <!-- CSR -->
+              <div class="mode-card" style="border-top:3px solid var(--orange);">
+                <span style="font-size:2rem;line-height:1;">🧑‍🍳</span>
+                <span class="mode-badge mtag-csr">CSR — Client-Side Rendering</span>
+                <p class="mode-title">The DIY Kitchen</p>
+                <p class="mode-desc">Restaurant ships you <strong>raw ingredients + a recipe</strong>. <strong>You cook at home</strong> — food only arrives after you finish cooking.</p>
+                <div class="callout callout-amber" style="font-size:.7rem;line-height:1.65;padding:.65rem .9rem;">
+                  🥩 JS bundle = ingredients<br/>
+                  📋 Angular = recipe<br/>
+                  🍳 Browser = your kitchen
+                </div>
+                <div class="mode-pros-cons">
+                  <span><span class="pro">✓</span> Great for dashboards / auth-only</span>
+                  <span><span class="pro">✓</span> No server at runtime</span>
+                  <span><span class="con">✗</span> Slow first load</span>
+                  <span><span class="con">✗</span> Poor SEO</span>
+                </div>
+                <div class="mode-code">RenderMode.Client</div>
+              </div>
+
+              <!-- SSR -->
+              <div class="mode-card" style="border-top:3px solid var(--blue);">
+                <span style="font-size:2rem;line-height:1;">🍽️</span>
+                <span class="mode-badge mtag-ssr">SSR — Server-Side Rendering</span>
+                <p class="mode-title">Made-to-Order</p>
+                <p class="mode-desc">You sit at a restaurant, order. The <strong>chef (server) cooks it fresh</strong> and serves a <strong>ready plate</strong> — no cooking required by you.</p>
+                <div class="callout callout-blue" style="font-size:.7rem;line-height:1.65;padding:.65rem .9rem;">
+                  👨‍🍳 Server = chef running Angular<br/>
+                  🍳 Cooking = server builds HTML<br/>
+                  🍽️ Ready plate = full HTML sent
+                </div>
+                <div class="mode-pros-cons">
+                  <span><span class="pro">✓</span> Fast first paint</span>
+                  <span><span class="pro">✓</span> Great SEO</span>
+                  <span><span class="pro">✓</span> Personalised per user</span>
+                  <span><span class="con">✗</span> Server needed per request</span>
+                </div>
+                <div class="mode-code">RenderMode.Server</div>
+              </div>
+
+              <!-- SSG / Prerender -->
+              <div class="mode-card" style="border-top:3px solid var(--teal);">
+                <span style="font-size:2rem;line-height:1;">🥡</span>
+                <span class="mode-badge mtag-ssg">SSG / Prerender</span>
+                <p class="mode-title">The Meal-Prep Box</p>
+                <p class="mode-desc">Cook all meals on Sunday, pack in boxes. When hungry — open and eat instantly. <strong>Same meal for every visitor.</strong></p>
+                <div class="callout callout-teal" style="font-size:.7rem;line-height:1.65;padding:.65rem .9rem;">
+                  🏗️ Build time = cook all pages<br/>
+                  📦 Box = pre-built HTML files<br/>
+                  🚀 CDN delivers instantly
+                </div>
+                <div class="mode-pros-cons">
+                  <span><span class="pro">✓</span> Instant load, no server</span>
+                  <span><span class="pro">✓</span> Best for blogs, docs</span>
+                  <span><span class="con">✗</span> Same for all users</span>
+                  <span><span class="con">✗</span> Stale if data changes</span>
+                </div>
+                <div class="mode-code">RenderMode.Prerender</div>
+                <p style="font-size:.67rem;color:var(--ink-3);margin-top:.5rem;line-height:1.5;">
+                  💡 The rest of the web calls this <strong>SSG</strong>. Angular calls it <strong>Prerender</strong>. Same concept, different name.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <hr class="divider" />
+
+          <!-- ── 03 Rendering Matrix ── -->
+          <section id="matrix" class="section reveal">
+            <p class="eyebrow">03 · Technical Deep Dive</p>
+            <h2 class="sec-title">How Do the 3 Modes Compare Side by Side?</h2>
+            <p class="sec-lead">Same Angular app, three different delivery strategies. Each column is a complete technical profile — pick the mode based on your route's requirements.</p>
+
+            <div class="callout" style="background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.2);font-size:.76rem;margin-bottom:1.25rem;">
+              <p class="callout-title" style="color:#0e7490;">💡 SSG = Prerender — same thing, two names</p>
+              The web community calls it <strong>SSG (Static Site Generation)</strong>. Angular's API calls it <strong><code>RenderMode.Prerender</code></strong>.
+              Both mean the same thing: HTML is built at deploy time, not at request time, and served as a static file from a CDN.
+              You'll see both names — they are interchangeable.
+            </div>
+
+            <div class="matrix" style="margin-bottom:1.5rem;">
+              <!-- Header -->
+              <div class="matrix-header">
+                <div class="matrix-header-cell">Dimension</div>
+                <div class="matrix-header-cell mode">
+                  <div class="matrix-mode-head">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    <span style="color:#ff8080;font-size:.7rem;font-weight:800;">CSR</span>
+                    <span class="perf-tag perf-slow">Client</span>
+                  </div>
+                </div>
+                <div class="matrix-header-cell mode">
+                  <div class="matrix-mode-head">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    <span style="color:#93c5fd;font-size:.7rem;font-weight:800;">SSR</span>
+                    <span class="perf-tag perf-fast">Server</span>
+                  </div>
+                </div>
+                <div class="matrix-header-cell mode">
+                  <div class="matrix-mode-head">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h.01M7 20v-4"/><path d="M12 20V10"/><path d="M17 20V4"/><path d="M22 20h.01"/></svg>
+                    <span style="color:#6ee7b7;font-size:.7rem;font-weight:800;">SSG</span>
+                    <span class="perf-tag perf-instant">Prerender</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rows -->
+              {[
+                ['Where rendered',      '🌐 Browser',          '🖥️ Server (live)',     '🏗️ Build time'],
+                ['First page load',     '🐢 Slow (2–5s)',       '⚡ Fast (<1s)',        '🚀 Instant (<100ms)'],
+                ['SEO',                 '❌ Poor',              '✅ Excellent',         '✅ Excellent'],
+                ['Personalised?',       '✅ After JS loads',    '✅ Per request',        '❌ Same for all'],
+                ['Server required?',    '❌ No',               '✅ Yes',               '❌ No (CDN ok)'],
+                ['Data freshness',      '✅ Always fresh',      '✅ Always fresh',       '⚠️ Stale until rebuild'],
+                ['Best for',            'Auth apps, dashboards','Profiles, feeds',     'Blogs, docs, marketing'],
+                ['Angular config',      'RenderMode.Client',   'RenderMode.Server',   'RenderMode.Prerender'],
+              ].map(([aspect, csr, ssr, ssg]) => (
+                <div class="matrix-row">
+                  <div class="matrix-aspect">{aspect}</div>
+                  <div class="matrix-cell">{csr}</div>
+                  <div class="matrix-cell">{ssr}</div>
+                  <div class="matrix-cell">{ssg}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <hr class="divider" />
+
+          <!-- ── 04 Analogies ── -->
+          <section id="analogies" class="section reveal">
+            <p class="eyebrow">04 · Mental Models</p>
+            <h2 class="sec-title">How Do You Hold the Whole System in Your Head?</h2>
+            <p class="sec-lead">Angular SSR involves three separate worlds — a Node.js server, a network, and a browser tab. Each has different rules and different APIs. Two analogies lock the whole system in permanently.</p>
+
+            <!-- Three Worlds -->
+            <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">First: Every SSR Request Travels Through Three Worlds</p>
+
+            <div style="display:flex;gap:.75rem;align-items:stretch;margin-bottom:1.5rem;flex-wrap:wrap;">
+              <div class="card" style="flex:1;min-width:160px;border-top:3px solid #7c3aed;text-align:center;padding:1.1rem .75rem;">
+                <div style="font-size:1.5rem;margin-bottom:.4rem;">🖥️</div>
+                <p style="font-size:.75rem;font-weight:800;color:#5b21b6;margin-bottom:.35rem;">Node.js Server</p>
+                <p style="font-size:.68rem;color:var(--ink-2);line-height:1.6;">Runs your component code. Builds an HTML string. Has no <code>window</code>, no <code>document</code>, no browser APIs.</p>
+              </div>
+              <div style="display:flex;align-items:center;font-size:1.1rem;color:var(--ink-3);padding:0 .1rem;">→</div>
+              <div class="card" style="flex:1;min-width:160px;border-top:3px solid #0284c7;text-align:center;padding:1.1rem .75rem;">
+                <div style="font-size:1.5rem;margin-bottom:.4rem;">📡</div>
+                <p style="font-size:.75rem;font-weight:800;color:#075985;margin-bottom:.35rem;">Network (HTTP)</p>
+                <p style="font-size:.68rem;color:var(--ink-2);line-height:1.6;">Carries only plain text — the HTML string. No JavaScript objects, no component state, no functions can travel here.</p>
+              </div>
+              <div style="display:flex;align-items:center;font-size:1.1rem;color:var(--ink-3);padding:0 .1rem;">→</div>
+              <div class="card" style="flex:1;min-width:160px;border-top:3px solid #059669;text-align:center;padding:1.1rem .75rem;">
+                <div style="font-size:1.5rem;margin-bottom:.4rem;">🌐</div>
+                <p style="font-size:.75rem;font-weight:800;color:#065f46;margin-bottom:.35rem;">Browser Tab</p>
+                <p style="font-size:.68rem;color:var(--ink-2);line-height:1.6;">Receives the HTML string, renders it, downloads Angular JS, then wires Angular logic to the existing DOM.</p>
+              </div>
+            </div>
+
+            <!-- Two Analogies -->
+            <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">Two Analogies That Lock This In</p>
+
+            <div class="analogy-grid">
+              <!-- Restaurant -->
+              <div class="analogy-card analogy-card-restaurant">
+                <span class="analogy-tag">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2a9 9 0 1 0 0 18A9 9 0 0 0 11 2z"/></svg>
+                  Rendering Modes
+                </span>
+                <span class="analogy-icon">🍽️</span>
+                <p class="analogy-title">The Restaurant Analogy</p>
+                <p class="analogy-body" style="margin-bottom:.85rem;">You are running a food business. You choose how to serve your customers — the three options map exactly to CSR, SSR, and SSG:</p>
+
+                <div style="border:1px solid rgba(255,255,255,.12);border-radius:.5rem;overflow:hidden;margin-bottom:.85rem;font-size:.67rem;">
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:rgba(255,255,255,.1);">
+                    <div style="padding:.4rem .55rem;font-weight:700;color:#ff8fab;border-right:1px solid rgba(255,255,255,.1);">CSR</div>
+                    <div style="padding:.4rem .55rem;font-weight:700;color:#93c5fd;border-right:1px solid rgba(255,255,255,.1);">SSR</div>
+                    <div style="padding:.4rem .55rem;font-weight:700;color:#6ee7b7;">SSG</div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid rgba(255,255,255,.08);">
+                    <div style="padding:.35rem .55rem;color:rgba(255,255,255,.6);border-right:1px solid rgba(255,255,255,.08);">Ship raw ingredients — customer cooks at home</div>
+                    <div style="padding:.35rem .55rem;color:rgba(255,255,255,.6);border-right:1px solid rgba(255,255,255,.08);">Chef cooks fresh per order, sends a ready plate</div>
+                    <div style="padding:.35rem .55rem;color:rgba(255,255,255,.6);">Meal-prepped on Sunday — open and eat instantly</div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid rgba(255,255,255,.08);">
+                    <div style="padding:.35rem .55rem;color:#f87171;border-right:1px solid rgba(255,255,255,.08);">Slow first load</div>
+                    <div style="padding:.35rem .55rem;color:#6ee7b7;border-right:1px solid rgba(255,255,255,.08);">Fast first load</div>
+                    <div style="padding:.35rem .55rem;color:#6ee7b7;">Fastest of all</div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid rgba(255,255,255,.08);">
+                    <div style="padding:.35rem .55rem;color:#6ee7b7;border-right:1px solid rgba(255,255,255,.08);">✅ Personalised</div>
+                    <div style="padding:.35rem .55rem;color:#6ee7b7;border-right:1px solid rgba(255,255,255,.08);">✅ Personalised</div>
+                    <div style="padding:.35rem .55rem;color:#f87171;">❌ Same for everyone</div>
+                  </div>
+                </div>
+
+                <div class="analogy-highlight">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <span>Pick your mode like choosing how to serve food — it depends on how fresh, personalised, and fast the meal needs to be. Most apps mix all three.</span>
+                </div>
+              </div>
+
+              <!-- Furnished Apartment -->
+              <div class="analogy-card analogy-card-apartment">
+                <span class="analogy-tag">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
+                  Hydration
+                </span>
+                <span class="analogy-icon">🏠</span>
+                <p class="analogy-title">The Furnished Apartment</p>
+                <p class="analogy-body" style="margin-bottom:.85rem;">The server (landlord) furnishes the flat before you (Angular) arrive. What happens next depends on whether hydration is on:</p>
+
+                <div style="border:1px solid rgba(255,255,255,.12);border-radius:.5rem;overflow:hidden;margin-bottom:.85rem;font-size:.67rem;">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;background:rgba(255,255,255,.1);">
+                    <div style="padding:.4rem .55rem;font-weight:700;color:rgba(255,255,255,.9);border-right:1px solid rgba(255,255,255,.1);">Real world</div>
+                    <div style="padding:.4rem .55rem;font-weight:700;color:rgba(255,255,255,.9);">Angular world</div>
+                  </div>
+                  {[
+                    ['Landlord', 'Server', false],
+                    ['Furnished flat before you arrive', 'Server-rendered HTML in the browser', false],
+                    ['You (the tenant) moving in', 'Angular\'s JavaScript starts running in the browser — it creates component objects in memory and gets ready to respond to clicks', false],
+                    ['Furniture labels on each piece', 'ng-state map (Angular auto-generates this)', false],
+                    ['Plugging in appliances', 'Attaching event handlers to DOM nodes', false],
+                    ['❌ Throw out + rebuy identical furniture', 'No hydration — Angular recreates the DOM from scratch, page flickers', true],
+                    ['✅ Keep furniture, just plug in', 'With hydration — Angular reuses the DOM, no flicker', false],
+                  ].map(([real, angular, isRed]) => (
+                    <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(255,255,255,.08);">
+                      <div style={`padding:.35rem .55rem;color:${real.startsWith('❌') ? '#f87171' : real.startsWith('✅') ? '#6ee7b7' : 'rgba(255,255,255,.55)'};border-right:1px solid rgba(255,255,255,.08);line-height:1.45;`}>{real}</div>
+                      <div style={`padding:.35rem .55rem;color:${isRed ? '#f87171' : angular.startsWith('With hydration') ? '#6ee7b7' : 'rgba(255,255,255,.55)'};line-height:1.45;`}>{angular}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div class="analogy-highlight">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  <span>The constraint: Angular can only keep the furniture if the landlord labelled each piece (ng-state map). Without that map, Angular has no choice — it throws everything out and starts from scratch.</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <hr class="divider" />
+
+          <!-- ── 05 Hydration ── -->
+          <section id="hydration" class="section reveal">
+            <p class="eyebrow">05 · Hydration</p>
+            <h2 class="sec-title">Why Does Angular Wire Up the Page Instead of Rebuilding It?</h2>
+            <p class="sec-lead">
+              SSR sends a fully-rendered HTML page. By the time Angular's JavaScript loads,
+              that HTML is already visible on screen. This section explains why Angular doesn't
+              throw it away and rebuild from scratch — and what it needs from the server to reuse it instead.
+            </p>
+
+            <!-- Part A: Two things -->
+            <div style="margin-bottom:2rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                First: Two Things That Must Both Exist
+              </p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem;">
+                <div style="background:linear-gradient(135deg,rgba(234,179,8,.08),rgba(234,179,8,.02));border:1px solid rgba(234,179,8,.22);border-radius:.75rem;padding:1.1rem;">
+                  <div style="font-size:1.5rem;margin-bottom:.5rem;">🌳</div>
+                  <p style="font-size:.8rem;font-weight:800;color:#854d0e;margin-bottom:.4rem;">DOM Nodes</p>
+                  <p style="font-size:.74rem;color:var(--ink-2);line-height:1.7;">
+                    The browser builds these from the HTML string. They're already on screen — the user sees the content.
+                    But they have <strong style="color:var(--ink-1);">zero Angular logic attached</strong>.
+                    Click a button right now? Nothing happens. Visible but dead.
+                  </p>
+                </div>
+                <div style="background:linear-gradient(135deg,rgba(221,0,49,.08),rgba(221,0,49,.02));border:1px solid rgba(221,0,49,.22);border-radius:.75rem;padding:1.1rem;">
+                  <div style="font-size:1.5rem;margin-bottom:.5rem;">⚙️</div>
+                  <p style="font-size:.8rem;font-weight:800;color:#991b1b;margin-bottom:.4rem;">Component Objects</p>
+                  <p style="font-size:.74rem;color:var(--ink-2);line-height:1.7;">
+                    Angular creates these in the browser's RAM when its JS bundle loads.
+                    They hold all the logic: click handlers, <code>ngOnInit</code>, services.
+                    But on their own they have <strong style="color:var(--ink-1);">no DOM presence</strong> — just objects in memory.
+                  </p>
+                </div>
+              </div>
+              <div class="callout" style="background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);font-size:.76rem;">
+                <p class="callout-title" style="color:#818cf8;">💡 The connection problem</p>
+                The server's HTML became DOM nodes. Angular created component objects.
+                These two things need to be <strong>connected</strong> — each component object wired to the DOM node it controls.
+                That connection is what makes the dead HTML interactive. This process is called <strong>hydration</strong>.
+              </div>
+            </div>
+
+            <!-- Part B: 3 steps -->
+            <div style="margin-bottom:2rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                What Actually Happens — 3 Steps
+              </p>
+              <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;">
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#eff6ff;border:1px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:#1d4ed8;flex-shrink:0;">1</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">Browser parses HTML → DOM nodes appear on screen</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">Content is visible immediately — fast first paint. But nothing is clickable. Angular's JS hasn't loaded yet.</p>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#fff7ed;border:1px solid #fed7aa;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:#c2410c;flex-shrink:0;">2</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">Angular JS bundle loads — component objects created in browser RAM</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">Angular boots fresh. It creates component objects — but does <em>not</em> recreate the DOM. It needs to find the existing DOM nodes and connect to them. How does it know which node belongs to which component?</p>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#f0fdf4;border:1px solid #bbf7d0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:#166534;flex-shrink:0;">3</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">Angular reads the ng-state map → wires component objects to DOM nodes</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">The server embedded a map in the HTML: "node:3 = ProductListComponent." Angular reads it, finds that DOM node, connects its component object to it, attaches click handlers. The page is now interactive.</p>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="callout callout-amber" style="font-size:.76rem;">
+                <p class="callout-title" style="color:#92400e;">🔥 Why the ng-state map matters</p>
+                Without it, Angular would have to re-render every component from scratch to figure out which DOM nodes it produced —
+                re-running <code>ngOnInit</code>, re-fetching data, re-building everything. That defeats the entire purpose of SSR.
+                The map is the server saying: <em>"here's which node is which — don't redo my work."</em>
+              </div>
+            </div>
+
+            <!-- Before/After -->
+            <div class="ba-grid" style="margin-bottom:1.25rem;">
+              <div class="ba-panel">
+                <div class="ba-head ba-head-red">❌ SSR without Hydration</div>
+                <div class="ba-body">
+                  <div class="steps">
+                    {[
+                      ['1', false, '🖥️ Server builds full HTML'],
+                      ['2', false, '📡 Browser receives HTML — shows content'],
+                      ['3', false, '⬇️ Angular JS bundle downloads'],
+                      ['4', true,  '🗑️ Angular ignores DOM, starts from scratch'],
+                      ['5', true,  '🔨 Recreates every element in JavaScript'],
+                      ['6', true,  '😩 Page flickers, scroll resets'],
+                    ].map(([n, bad, t]) => (
+                      <div class="step-row">
+                        <span class={`step-num ${bad ? 'step-red' : 'step-gray'}`}>{n}</span>
+                        <span class={bad ? 'ba-bad' : ''} style="font-size:.75rem;line-height:1.6;">{t}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div class="ba-panel">
+                <div class="ba-head ba-head-grn">✅ SSR with Hydration</div>
+                <div class="ba-body">
+                  <div class="steps">
+                    {[
+                      ['1', false, '🖥️ Server builds full HTML + ng-state map'],
+                      ['2', false, '📡 Browser receives HTML — shows content'],
+                      ['3', false, '⬇️ Angular JS bundle downloads'],
+                      ['4', true,  '🔍 Angular reads map, claims DOM nodes'],
+                      ['5', true,  '🔌 Attaches click handlers only'],
+                      ['6', true,  '✅ No flicker, no DOM recreation'],
+                    ].map(([n, good, t]) => (
+                      <div class="step-row">
+                        <span class={`step-num ${good ? 'step-grn' : 'step-gray'}`}>{n}</span>
+                        <span class={good ? 'ba-good' : ''} style="font-size:.75rem;line-height:1.6;">{t}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="code-header">
+              <div class="code-dots">
+                <div class="code-dot" style="background:#ff5f57;"></div>
+                <div class="code-dot" style="background:#febc2e;"></div>
+                <div class="code-dot" style="background:#28c840;"></div>
+              </div>
+              <span class="code-filename">ng-state (auto-generated by Angular)</span>
+            </div>
+            <div class="code-block">
+              <span class="cm">// Angular auto-generates this on the server — you never write it</span><br/>
+              <span class="ok">&lt;<span class="ky">script</span> id=<span class="st">"ng-state"</span> type=<span class="st">"application/json"</span>&gt;</span><br/>
+              &nbsp;&nbsp;&#123; <span class="st">"node:0"</span>: <span class="st">"HeaderComponent"</span>,<br/>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"node:3"</span>: <span class="st">"ProductListComponent"</span>,<br/>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"node:7"</span>: <span class="st">"FooterComponent"</span> &#125;<br/>
+              <span class="ok">&lt;/<span class="ky">script</span>&gt;</span>
+            </div>
+
+            <div class="verdict" style="margin-top:1.25rem;">
+              <p>Without hydration: server builds a house → Angular <span class="vbad">demolishes it</span> → rebuilds the same house</p>
+              <p style="margin-top:.4rem;">With hydration: server builds a house → Angular <span class="vgood">moves in and installs the electricity</span></p>
+            </div>
+          </section>
+
+          <hr class="divider" />
+
+          <!-- ── 06 Hybrid ── -->
+          <section id="hybrid" class="section reveal">
+            <p class="eyebrow">06 · Hybrid Rendering</p>
+            <h2 class="sec-title">Why Would One App Use Different Rendering Modes for Different Pages?</h2>
+            <p class="sec-lead">
+              Not all pages are the same. A homepage identical for every visitor has completely different
+              needs than a dashboard showing your personal data. Using one rendering strategy for everything
+              wastes either server resources or user experience — or both.
+            </p>
+
+            <!-- Part A: 3 modes, 3 questions -->
+            <div style="margin-bottom:2rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                Each Mode Answers a Different Question
+              </p>
+              <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.25rem;">
+
+                <div style="display:grid;grid-template-columns:1.8rem 1fr 1fr;gap:.75rem;align-items:start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <span style="font-size:1.1rem;padding-top:.1rem;">🏠</span>
+                  <div>
+                    <p style="font-size:.77rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">Prerender — build once, serve forever</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.6;">Is this page <strong>identical for every user, every time?</strong> Build it once at deploy time. Serve from CDN. Zero server work per request.</p>
+                  </div>
+                  <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:.5rem;padding:.6rem .75rem;">
+                    <p style="font-size:.7rem;font-weight:700;color:#065f46;margin-bottom:.2rem;">Best for</p>
+                    <p style="font-size:.7rem;color:var(--ink-2);line-height:1.55;">/home, /about, /blog/post-123 — static content, same for everyone</p>
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1.8rem 1fr 1fr;gap:.75rem;align-items:start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <span style="font-size:1.1rem;padding-top:.1rem;">⚡</span>
+                  <div>
+                    <p style="font-size:.77rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">SSR — fresh per request</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.6;">Does it need <strong>live data</strong> but is still the same for all users asking right now? Build on the server per request — or cache it for a time window.</p>
+                  </div>
+                  <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:.5rem;padding:.6rem .75rem;">
+                    <p style="font-size:.7rem;font-weight:700;color:#1e40af;margin-bottom:.2rem;">Best for</p>
+                    <p style="font-size:.7rem;color:var(--ink-2);line-height:1.55;">/products/123, /feed — live data, no login required</p>
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1.8rem 1fr 1fr;gap:.75rem;align-items:start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <span style="font-size:1.1rem;padding-top:.1rem;">🔒</span>
+                  <div>
+                    <p style="font-size:.77rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">CSR — runs entirely in browser</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.6;">Does it need the <strong>user's session or auth token</strong> — something the server can't know before login? Skip server rendering entirely.</p>
+                  </div>
+                  <div style="background:rgba(221,0,49,.08);border:1px solid rgba(221,0,49,.2);border-radius:.5rem;padding:.6rem .75rem;">
+                    <p style="font-size:.7rem;font-weight:700;color:#991b1b;margin-bottom:.2rem;">Best for</p>
+                    <p style="font-size:.7rem;color:var(--ink-2);line-height:1.55;">/dashboard, /settings — personalised, login required</p>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Why not SSR everything -->
+              <div class="card card-warn">
+                <p style="font-size:.81rem;font-weight:700;color:var(--ink-1);margin-bottom:.65rem;">🤔 Why not just SSR everything? It works, right?</p>
+                <p style="font-size:.76rem;color:var(--ink-2);line-height:1.75;margin-bottom:.65rem;">
+                  It works — but at a cost. Every SSR request means Angular runs on your server,
+                  data gets fetched, HTML gets built from scratch. That's CPU time, memory, and latency on <em>every</em> request.
+                </p>
+                <p style="font-size:.76rem;color:var(--ink-2);line-height:1.75;">
+                  A prerendered <code>/about</code> page is a file on a CDN disk — served in microseconds, no server involved.
+                  SSRing it for every user is like hiring a chef to pour bottled water. Same result. Enormous waste.
+                  <strong style="color:var(--ink-1);">Hybrid rendering means each page gets the strategy it actually needs — nothing more.</strong>
+                </p>
+              </div>
+            </div>
+
+            <!-- Hotel analogy — expanded -->
+            <div class="callout callout-teal" style="margin-bottom:1.25rem;">
+              <p class="callout-title" style="color:#065f46;">🏨 The Hotel Analogy</p>
+              <p style="font-size:.75rem;color:var(--ink-2);line-height:1.75;margin-bottom:.75rem;">
+                Same hotel. Three completely different ways of serving guests — because different things have different needs:
+              </p>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;">
+                <div style="background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.25);border-radius:.5rem;padding:.65rem .75rem;">
+                  <p style="font-size:.72rem;font-weight:700;color:#065f46;margin-bottom:.3rem;">🍽️ Buffet → Prerender</p>
+                  <p style="font-size:.7rem;color:var(--ink-2);line-height:1.6;">Prepared once in the morning. Same plate for every guest. Instant. No chef needed per person.</p>
+                </div>
+                <div style="background:rgba(59,130,246,.10);border:1px solid rgba(59,130,246,.25);border-radius:.5rem;padding:.65rem .75rem;">
+                  <p style="font-size:.72rem;font-weight:700;color:#1e40af;margin-bottom:.3rem;">🛎️ Room Service → SSR</p>
+                  <p style="font-size:.7rem;color:var(--ink-2);line-height:1.6;">Cooked fresh per order. Delivered to your door. Takes a few minutes — worth it for a hot personalised meal.</p>
+                </div>
+                <div style="background:rgba(236,72,153,.10);border:1px solid rgba(236,72,153,.25);border-radius:.5rem;padding:.65rem .75rem;">
+                  <p style="font-size:.72rem;font-weight:700;color:#9d174d;margin-bottom:.3rem;">🧃 Minibar → CSR</p>
+                  <p style="font-size:.7rem;color:var(--ink-2);line-height:1.6;">You open it yourself. No staff involved. You know what you want. The hotel just stocked it — you serve yourself.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Route cards -->
+            <div class="g2" style="margin-bottom:1.25rem;">
+              {[
+                { route: '/',          mode: 'Prerender', cls: 'mode-pre', icon: '🏠', reason: 'Identical for all users → pre-build once, serve from CDN instantly.' },
+                { route: '/about',     mode: 'Prerender', cls: 'mode-pre', icon: '📄', reason: 'Never changes → pre-build once, cache forever.' },
+                { route: '/profile',   mode: 'Server',    cls: 'mode-srv', icon: '👤', reason: 'Unique per user → render fresh on every request.' },
+                { route: '/dashboard', mode: 'Client',    cls: 'mode-csr', icon: '📊', reason: 'Needs auth & real-time data → run fully in the browser.' },
+                { route: '/blog/:id',  mode: 'Prerender', cls: 'mode-pre', icon: '📝', reason: 'Static content → pre-build all post IDs at build time.' },
+                { route: '/feed',      mode: 'Server',    cls: 'mode-srv', icon: '🔄', reason: 'Personalised & changing → server render per request.' },
+              ].map(({ route, mode, cls, icon, reason }) => (
+                <div class="route-card">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span class="route-path">{icon} {route}</span>
+                    <span class={`route-mode ${cls}`}>{mode}</span>
+                  </div>
+                  <p class="route-desc">{reason}</p>
+                </div>
+              ))}
+            </div>
+
+            <div class="code-header">
+              <div class="code-dots">
+                <div class="code-dot" style="background:#ff5f57;"></div>
+                <div class="code-dot" style="background:#febc2e;"></div>
+                <div class="code-dot" style="background:#28c840;"></div>
+              </div>
+              <span class="code-filename">app.routes.server.ts</span>
+            </div>
+            <div class="code-block">
+              <span class="cm">// One file controls all rendering modes</span><br/>
+              <span class="ky">export const</span> <span class="hi">serverRoutes</span>: <span class="fn">ServerRoute</span>[] = [<br/>
+              &nbsp;&nbsp;&#123; path: <span class="st">''</span>,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; renderMode: RenderMode.<span class="ok">Prerender</span> &#125;,<br/>
+              &nbsp;&nbsp;&#123; path: <span class="st">'about'</span>,&nbsp;&nbsp;&nbsp; renderMode: RenderMode.<span class="ok">Prerender</span> &#125;,<br/>
+              &nbsp;&nbsp;&#123; path: <span class="st">'profile'</span>,&nbsp; renderMode: RenderMode.<span class="ky">Server</span>    &#125;,<br/>
+              &nbsp;&nbsp;&#123; path: <span class="st">'dashboard'</span>, renderMode: RenderMode.<span class="st">Client</span>    &#125;,<br/>
+              ];
+            </div>
+          </section>
+
+          <hr class="divider" />
+
+          <!-- ── Code Anatomy ── -->
+          <section id="code-anatomy" class="section reveal">
+            <p class="eyebrow">⚗ · Code Lab</p>
+            <h2 class="sec-title">What Does a "Component Object" Look Like in Real Code?</h2>
+            <p class="sec-lead">
+              The words "component object," "HTML string," and "DOM node" appear in every SSR explanation —
+              but what do they look like in actual Angular code? This section traces a single
+              <strong>HelloWorld component</strong> through every transformation it goes through,
+              from a class definition to a live pixel on screen.
+            </p>
+
+            <!-- ── Part A: Three Things ── -->
+            <div style="margin-bottom:2rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">Three Things, Three Completely Different Natures</p>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;">
+
+                <div style="background:rgba(234,88,12,.05);border:1px solid rgba(234,88,12,.25);border-top:3px solid var(--orange);border-radius:.75rem;padding:1.1rem;">
+                  <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem;">
+                    <span style="font-size:1rem;">🧩</span>
+                    <p style="font-size:.75rem;font-weight:800;color:var(--orange);">Component Object</p>
+                  </div>
+                  <p style="font-size:.72rem;color:var(--ink-2);line-height:1.75;margin-bottom:.65rem;">
+                    A <strong style="color:var(--ink-1);">class instance</strong> living in JavaScript memory.
+                    Has properties (<code>name</code>), methods (<code>ngOnInit</code>), and lifecycle hooks.
+                    Angular creates one whenever it renders a component — on server AND in browser.
+                  </p>
+                  <div style="background:rgba(234,88,12,.1);border-radius:.4rem;padding:.5rem .65rem;">
+                    <code style="font-size:.67rem;color:#9a3412;font-family:monospace;">new HelloComponent()</code>
+                    <p style="font-size:.65rem;color:var(--ink-2);margin-top:.25rem;line-height:1.45;">An object in heap memory. Lives and dies with Angular's lifecycle.</p>
+                  </div>
+                </div>
+
+                <div style="background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.25);border-top:3px solid var(--blue);border-radius:.75rem;padding:1.1rem;">
+                  <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem;">
+                    <span style="font-size:1rem;">📄</span>
+                    <p style="font-size:.75rem;font-weight:800;color:var(--blue);">HTML String</p>
+                  </div>
+                  <p style="font-size:.72rem;color:var(--ink-2);line-height:1.75;margin-bottom:.65rem;">
+                    Plain <strong style="color:var(--ink-1);">text bytes</strong> — nothing more.
+                    No Angular. No click handlers. No change detection.
+                    Produced by evaluating the template, then sent over HTTP to the browser.
+                  </p>
+                  <div style="background:rgba(37,99,235,.1);border-radius:.4rem;padding:.5rem .65rem;">
+                    <code style="font-size:.67rem;color:#1e40af;font-family:monospace;">"&lt;h1&gt;Hello, World!&lt;/h1&gt;"</code>
+                    <p style="font-size:.65rem;color:var(--ink-2);margin-top:.25rem;line-height:1.45;">Just characters in the HTTP response body. The browser hasn't parsed it yet.</p>
+                  </div>
+                </div>
+
+                <div style="background:rgba(22,163,74,.05);border:1px solid rgba(22,163,74,.25);border-top:3px solid var(--green);border-radius:.75rem;padding:1.1rem;">
+                  <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem;">
+                    <span style="font-size:1rem;">🌳</span>
+                    <p style="font-size:.75rem;font-weight:800;color:var(--green);">DOM Node</p>
+                  </div>
+                  <p style="font-size:.72rem;color:var(--ink-2);line-height:1.75;margin-bottom:.65rem;">
+                    A <strong style="color:var(--ink-1);">live browser object</strong> created when the browser parses the HTML string.
+                    Has a memory address, a position in the tree, and can receive event listeners.
+                  </p>
+                  <div style="background:rgba(22,163,74,.1);border-radius:.4rem;padding:.5rem .65rem;">
+                    <code style="font-size:.67rem;color:#14532d;font-family:monospace;">document.querySelector('h1')</code>
+                    <p style="font-size:.65rem;color:var(--ink-2);margin-top:.25rem;line-height:1.45;">A live object you can style, move, and click. Angular's hydration wires to this.</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- ── Part B: HelloComponent Annotated ── -->
+            <div style="margin-bottom:2rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">The Code: One File, All Three Concepts</p>
+              <p style="font-size:.78rem;color:var(--ink-2);line-height:1.75;margin-bottom:.5rem;">
+                This file is the <strong style="color:var(--ink-1);">blueprint</strong> — the source code Angular reads.
+                The grey italic comments explain what each part does at runtime. Two things to spot in the template:
+              </p>
+              <div style="display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;padding:.75rem 1rem;background:rgba(0,0,0,.03);border:1px solid var(--grid);border-radius:.55rem;font-size:.74rem;">
+                <p><strong style="color:var(--blue);">📄 template block</strong> — Angular evaluates this against the component's properties to produce the HTML String</p>
+                <p><strong style="color:var(--green);">🌳 HTML tags inside the template</strong> — each tag becomes a DOM Node in the browser after parsing</p>
+              </div>
+              <div class="callout callout-amber" style="margin-bottom:1rem;font-size:.73rem;">
+                <strong style="color:#92400e;">⚠️ Important:</strong> You cannot see the Component Object in this file.
+                What you see here is the class definition — the recipe.
+                The Component Object only exists at runtime, in memory, after Angular calls <code>new HelloComponent()</code>.
+              </div>
+              <div class="code-header">
+                <div class="code-dots">
+                  <div class="code-dot" style="background:#ff5f57;"></div>
+                  <div class="code-dot" style="background:#febc2e;"></div>
+                  <div class="code-dot" style="background:#28c840;"></div>
+                </div>
+                <span class="code-filename">hello.component.ts — the blueprint (not the runtime object)</span>
+              </div>
+              <div class="code-block" style="line-height:2;">
+                <span class="cm">// ── 🧩 CLASS BLUEPRINT: Angular reads this file and creates a Component Object from it ──</span><br/>
+                <span class="cm">// ── The Component Object only exists in memory at runtime — you cannot see it here ──</span><br/>
+                <span class="ky">@Component</span>(&#123;<br/>
+                &nbsp;&nbsp;<span class="hi">selector</span>: <span class="st">'app-hello'</span>,<span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 🌳 Angular matches this tag to a DOM Node</span><br/>
+                <br/>
+                &nbsp;&nbsp;<span class="cm">// ── 📄 TEMPLATE: Angular evaluates this → produces the HTML String ──</span><br/>
+                &nbsp;&nbsp;<span class="hi">template</span>: <span class="st">`</span><br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">&lt;<span class="ky">h1</span>&gt;</span><span class="st">Hello, &#123;&#123; name &#125;&#125;!</span><span class="ok">&lt;/<span class="ky">h1</span>&gt;</span><span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 🌳 → &lt;h1&gt; DOM Node in browser</span><br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">&lt;<span class="ky">p</span>&gt;</span><span class="st">Running on: &#123;&#123; platform &#125;&#125;</span><span class="ok">&lt;/<span class="ky">p</span>&gt;</span><span class="cm">&nbsp;&nbsp;&nbsp;// 🌳 → &lt;p&gt; DOM Node in browser</span><br/>
+                &nbsp;&nbsp;<span class="st">`</span>,<br/>
+                &#125;)<br/>
+                <span class="ky">export class</span> <span class="fn">HelloComponent</span> &#123;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 🧩 blueprint — Angular calls new HelloComponent() from this</span><br/>
+                <br/>
+                &nbsp;&nbsp;<span class="cm">// 🧩 These define WHAT the Component Object will contain when Angular creates it:</span><br/>
+                &nbsp;&nbsp;<span class="hi">name</span>     = <span class="st">'World'</span>;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// → fills &#123;&#123; name &#125;&#125; in the template</span><br/>
+                &nbsp;&nbsp;<span class="hi">platform</span> = <span class="st">''</span>;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// → set to 'Server' or 'Browser'</span><br/>
+                <br/>
+                &nbsp;&nbsp;<span class="ky">constructor</span>(<span class="ky">private</span> <span class="hi">platformId</span> = <span class="fn">inject</span>(<span class="hi">PLATFORM_ID</span>)) &#123;&#125;<br/>
+                <br/>
+                &nbsp;&nbsp;<span class="cm">// 🧩 Lifecycle hook — runs when the component object is created:</span><br/>
+                &nbsp;&nbsp;<span class="fn">ngOnInit</span>() &#123;<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="hi">this</span>.<span class="hi">platform</span> = <span class="fn">isPlatformBrowser</span>(<span class="hi">this</span>.<span class="hi">platformId</span>)<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;? <span class="st">'Browser'</span>&nbsp;&nbsp;<span class="cm">// ← browser component object runs THIS branch</span><br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="st">'Server'</span>;&nbsp;&nbsp;<span class="cm">// ← server component object runs THIS branch</span><br/>
+                &nbsp;&nbsp;&#125;<br/>
+                &#125;
+              </div>
+            </div>
+
+            <!-- ── Part C: Three-Phase Lifecycle ── -->
+            <div style="margin-bottom:2rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">The Three-Phase Journey</p>
+              <div style="display:flex;flex-direction:column;gap:1rem;">
+
+                <!-- Phase 1 -->
+                <div style="background:var(--dark-2);border:1px solid #2a2b3d;border-left:3px solid var(--orange);border-radius:.75rem;overflow:hidden;">
+                  <div style="padding:1rem 1.25rem 0.2rem;background:var(--surface);">
+                    <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.85rem;">
+                      <span style="background:var(--orange);color:white;font-size:.62rem;font-weight:900;padding:.2rem .6rem;border-radius:99px;letter-spacing:.06em;white-space:nowrap;">PHASE 1</span>
+                      <span style="font-size:.85rem;">🖥️</span>
+                      <p style="font-size:.78rem;font-weight:800;color:var(--ink-1);">Server — Component Object born, HTML String produced</p>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;">
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:#ea580c;flex-shrink:0;margin-top:.05rem;">1</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;">Angular calls <code style="color:#9a3412;font-size:.67rem;font-family:monospace;background:rgba(234,88,12,.08);padding:.1rem .3rem;border-radius:.25rem;">new HelloComponent()</code> on the server — a <strong style="color:var(--ink-1);">Component Object</strong> is created in Node.js heap memory</p>
+                      </div>
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:#ea580c;flex-shrink:0;margin-top:.05rem;">2</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;"><code style="color:#9a3412;font-size:.67rem;font-family:monospace;background:rgba(234,88,12,.08);padding:.1rem .3rem;border-radius:.25rem;">ngOnInit()</code> runs on the component object — sets <code style="color:#9a3412;font-size:.67rem;font-family:monospace;background:rgba(234,88,12,.08);padding:.1rem .3rem;border-radius:.25rem;">platform = "Server"</code></p>
+                      </div>
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.3);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:var(--blue);flex-shrink:0;margin-top:.05rem;">3</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;">Angular evaluates the template: <code style="color:#1e40af;font-size:.67rem;font-family:monospace;background:rgba(37,99,235,.08);padding:.1rem .3rem;border-radius:.25rem;">&#123;&#123; name &#125;&#125;</code> → <code style="color:#1e40af;font-size:.67rem;font-family:monospace;background:rgba(37,99,235,.08);padding:.1rem .3rem;border-radius:.25rem;">"World"</code>, <code style="color:#1e40af;font-size:.67rem;font-family:monospace;background:rgba(37,99,235,.08);padding:.1rem .3rem;border-radius:.25rem;">&#123;&#123; platform &#125;&#125;</code> → <code style="color:#1e40af;font-size:.67rem;font-family:monospace;background:rgba(37,99,235,.08);padding:.1rem .3rem;border-radius:.25rem;">"Server"</code></p>
+                      </div>
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.3);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:var(--blue);flex-shrink:0;margin-top:.05rem;">4</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;">Template result is serialised into an <strong style="color:var(--ink-1);">HTML String</strong> and sent to the browser inside the HTTP response body</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="code-header" style="border-radius:0;border-left:none;border-right:none;">
+                    <div class="code-dots">
+                      <div class="code-dot" style="background:#ff5f57;"></div>
+                      <div class="code-dot" style="background:#febc2e;"></div>
+                      <div class="code-dot" style="background:#28c840;"></div>
+                    </div>
+                    <span class="code-filename">HTTP response body — what the server sends</span>
+                  </div>
+                  <div class="code-block" style="border-radius:0 0 .75rem .75rem;font-size:.68rem;border-top:none;">
+                    <span class="cm">// Angular ran HelloComponent on the server and produced this HTML string:</span><br/>
+                    <span class="ok">&lt;<span class="ky">app-hello</span>&gt;</span><br/>
+                    &nbsp;&nbsp;<span class="ok">&lt;<span class="ky">h1</span>&gt;</span><span class="st">Hello, World!</span><span class="ok">&lt;/<span class="ky">h1</span>&gt;</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// ← HTML string, just text</span><br/>
+                    &nbsp;&nbsp;<span class="ok">&lt;<span class="ky">p</span>&gt;</span><span class="st">Running on: Server</span><span class="ok">&lt;/<span class="ky">p</span>&gt;</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// ← HTML string, just text</span><br/>
+                    <span class="ok">&lt;/<span class="ky">app-hello</span>&gt;</span><br/>
+                    <span class="ok">&lt;<span class="ky">script</span> id=<span class="st">"ng-state"</span>&gt;</span>&#123;<span class="st">"node:0"</span>:<span class="st">"HelloComponent"</span>&#125;<span class="ok">&lt;/<span class="ky">script</span>&gt;</span>&nbsp;<span class="cm">// ← map for hydration</span>
+                  </div>
+                </div>
+
+                <!-- Phase 2 -->
+                <div style="background:var(--surface);border:1px solid rgba(37,99,235,.2);border-left:3px solid var(--blue);border-radius:.75rem;overflow:hidden;">
+                  <div style="padding:1rem 1.25rem 0;">
+                    <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.85rem;">
+                      <span style="background:var(--blue);color:white;font-size:.62rem;font-weight:900;padding:.2rem .6rem;border-radius:99px;letter-spacing:.06em;white-space:nowrap;">PHASE 2</span>
+                      <span style="font-size:.85rem;">🌐</span>
+                      <p style="font-size:.78rem;font-weight:800;color:var(--ink-1);">Browser — HTML String parsed into DOM Nodes</p>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;">
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.3);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:var(--blue);flex-shrink:0;margin-top:.05rem;">1</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;">Browser receives the raw HTML String from the server — it is <strong style="color:var(--ink-1);">just text bytes</strong>, no Angular logic inside</p>
+                      </div>
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.3);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:var(--blue);flex-shrink:0;margin-top:.05rem;">2</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;">The browser HTML parser reads the string character-by-character and builds a tree of <strong style="color:var(--ink-1);">DOM Nodes</strong> in memory — one live object per element</p>
+                      </div>
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:#d97706;flex-shrink:0;margin-top:.05rem;">3</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;"><strong style="color:var(--ink-1);">Content is immediately visible on screen</strong> — but Angular hasn't started yet. Zero event listeners. Zero change detection. A beautiful, completely static snapshot.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="code-header" style="border-radius:0;border-left:none;border-right:none;">
+                    <div class="code-dots">
+                      <div class="code-dot" style="background:#ff5f57;"></div>
+                      <div class="code-dot" style="background:#febc2e;"></div>
+                      <div class="code-dot" style="background:#28c840;"></div>
+                    </div>
+                    <span class="code-filename">What exists in the browser at this moment (DevTools console)</span>
+                  </div>
+                  <div class="code-block" style="border-radius:0 0 .75rem .75rem;font-size:.68rem;border-top:none;">
+                    <span class="cm">// HTML String → DOM Node objects created by the browser parser:</span><br/>
+                    <span class="fn">document</span>.<span class="hi">querySelector</span>(<span class="st">'h1'</span>).<span class="hi">textContent</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// → "Hello, World!"   ✅ visible on screen</span><br/>
+                    <span class="fn">document</span>.<span class="hi">querySelector</span>(<span class="st">'h1'</span>).<span class="hi">onclick</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// → null              ❌ no Angular yet</span><br/>
+                    <span class="fn">document</span>.<span class="hi">querySelector</span>(<span class="st">'h1'</span>).<span class="hi">__ngContext__</span>&nbsp;&nbsp;&nbsp;<span class="cm">// → undefined         ❌ no Angular yet</span>
+                  </div>
+                </div>
+
+                <!-- Phase 3 -->
+                <div style="background:rgba(13,148,136,.04);border:1px solid rgba(13,148,136,.25);border-left:3px solid var(--teal);border-radius:.75rem;overflow:hidden;">
+                  <div style="padding:1rem 1.25rem 0;">
+                    <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.85rem;">
+                      <span style="background:var(--teal);color:white;font-size:.62rem;font-weight:900;padding:.2rem .6rem;border-radius:99px;letter-spacing:.06em;white-space:nowrap;">PHASE 3</span>
+                      <span style="font-size:.85rem;">⚡</span>
+                      <p style="font-size:.78rem;font-weight:800;color:var(--ink-1);">Angular Boots — Component Object meets DOM Node</p>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;">
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(13,148,136,.12);border:1px solid rgba(13,148,136,.3);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:var(--teal);flex-shrink:0;margin-top:.05rem;">1</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;">Angular's JavaScript bundle finishes downloading and starts executing in the browser</p>
+                      </div>
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(234,88,12,.12);border:1px solid rgba(234,88,12,.3);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:var(--orange);flex-shrink:0;margin-top:.05rem;">2</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;">Angular creates a <strong style="color:var(--ink-1);">new HelloComponent instance</strong> — a brand new Component Object, this time in browser heap memory</p>
+                      </div>
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(234,88,12,.12);border:1px solid rgba(234,88,12,.3);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:var(--orange);flex-shrink:0;margin-top:.05rem;">3</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;"><code style="font-size:.67rem;font-family:monospace;background:rgba(0,0,0,.05);padding:.1rem .3rem;border-radius:.25rem;">ngOnInit()</code> runs again — now in the browser, so <code style="font-size:.67rem;font-family:monospace;background:rgba(0,0,0,.05);padding:.1rem .3rem;border-radius:.25rem;">platform = "Browser"</code> is set</p>
+                      </div>
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(13,148,136,.12);border:1px solid rgba(13,148,136,.3);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:var(--teal);flex-shrink:0;margin-top:.05rem;">4</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;">Hydration: Angular reads the <code style="font-size:.67rem;font-family:monospace;background:rgba(0,0,0,.05);padding:.1rem .3rem;border-radius:.25rem;">ng-state</code> map and <strong style="color:var(--ink-1);">connects</strong> the Component Object to the existing <code style="font-size:.67rem;font-family:monospace;background:rgba(0,0,0,.05);padding:.1rem .3rem;border-radius:.25rem;">&lt;h1&gt;</code> DOM Node — no DOM recreation, no flicker</p>
+                      </div>
+                      <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                        <span style="min-width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.3);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:var(--green);flex-shrink:0;margin-top:.05rem;">5</span>
+                        <p style="font-size:.71rem;color:var(--ink-2);line-height:1.65;">Event handlers are attached to the DOM Nodes. Change detection is wired up. The static page is now a <strong style="color:var(--ink-1);">live Angular app</strong></p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="code-header" style="border-radius:0;border-left:none;border-right:none;">
+                    <div class="code-dots">
+                      <div class="code-dot" style="background:#ff5f57;"></div>
+                      <div class="code-dot" style="background:#febc2e;"></div>
+                      <div class="code-dot" style="background:#28c840;"></div>
+                    </div>
+                    <span class="code-filename">After hydration completes (DevTools console)</span>
+                  </div>
+                  <div class="code-block" style="border-radius:0 0 .75rem .75rem;font-size:.68rem;border-top:none;">
+                    <span class="cm">// Same DOM Node — not recreated, no flicker:</span><br/>
+                    <span class="fn">document</span>.<span class="hi">querySelector</span>(<span class="st">'h1'</span>).<span class="hi">textContent</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// → "Hello, World!"   ✅ still visible</span><br/>
+                    <span class="fn">document</span>.<span class="hi">querySelector</span>(<span class="st">'h1'</span>).<span class="hi">onclick</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// → [handler]         ✅ Angular wired it</span><br/>
+                    <span class="fn">document</span>.<span class="hi">querySelector</span>(<span class="st">'h1'</span>).<span class="hi">__ngContext__</span>&nbsp;&nbsp;&nbsp;<span class="cm">// → HelloComponent     ✅ component attached</span><br/>
+                    <br/>
+                    <span class="cm">// Component Object is a separate thing in Angular's memory:</span><br/>
+                    <span class="cm">// comp.name     → "World"    (property on the class instance)</span><br/>
+                    <span class="cm">// comp.platform → "Browser"  (ngOnInit ran again, this time in the browser)</span><br/>
+                    <br/>
+                    <span class="cm">// Change detection is live. Mutate the property → DOM updates instantly:</span><br/>
+                    <span class="hi">comp</span>.name = <span class="st">'Angular'</span>;&nbsp;&nbsp;&nbsp;<span class="cm">// → &lt;h1&gt; DOM Node updates: "Hello, Angular!" ✅</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- ── Part D: Full Pipeline ── -->
+            <div style="margin-bottom:1.5rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">The Full Journey — One Component, Three Transformations</p>
+              <div style="background:var(--dark);border:1px solid #2a2b3d;border-radius:.85rem;padding:1.5rem 1.25rem;overflow-x:auto;">
+                <div style="display:flex;align-items:stretch;min-width:38rem;">
+
+                  <div style="display:flex;flex-direction:column;align-items:center;flex:1;text-align:center;">
+                    <div style="background:rgba(234,88,12,.15);border:1px solid rgba(234,88,12,.4);border-radius:.6rem;padding:.75rem .5rem;width:100%;margin-bottom:.4rem;">
+                      <div style="font-size:1rem;margin-bottom:.3rem;">📝</div>
+                      <p style="font-size:.62rem;font-weight:800;color:#fdba74;margin-bottom:.2rem;">TS Class</p>
+                      <p style="font-size:.55rem;color:rgba(255,255,255,.45);line-height:1.4;">HelloComponent<br/>class definition</p>
+                    </div>
+                    <p style="font-size:.55rem;color:rgba(255,255,255,.3);">The blueprint</p>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 .5rem;flex-shrink:0;padding-bottom:1.2rem;">
+                    <p style="font-size:.52rem;color:rgba(255,255,255,.3);margin-bottom:.15rem;">Server</p>
+                    <p style="font-size:1.2rem;color:var(--orange);line-height:1;">→</p>
+                    <p style="font-size:.52rem;color:rgba(255,255,255,.3);margin-top:.15rem;">instantiates</p>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;align-items:center;flex:1;text-align:center;">
+                    <div style="background:rgba(234,88,12,.15);border:1px solid rgba(234,88,12,.4);border-radius:.6rem;padding:.75rem .5rem;width:100%;margin-bottom:.4rem;">
+                      <div style="font-size:1rem;margin-bottom:.3rem;">🧩</div>
+                      <p style="font-size:.62rem;font-weight:800;color:#fdba74;margin-bottom:.2rem;">Comp Object</p>
+                      <p style="font-size:.55rem;color:rgba(255,255,255,.45);line-height:1.4;">name="World"<br/>platform="Server"</p>
+                    </div>
+                    <p style="font-size:.55rem;color:rgba(255,255,255,.3);">Server memory</p>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 .5rem;flex-shrink:0;padding-bottom:1.2rem;">
+                    <p style="font-size:.52rem;color:rgba(255,255,255,.3);margin-bottom:.15rem;">template</p>
+                    <p style="font-size:1.2rem;color:var(--blue);line-height:1;">→</p>
+                    <p style="font-size:.52rem;color:rgba(255,255,255,.3);margin-top:.15rem;">evaluated</p>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;align-items:center;flex:1;text-align:center;">
+                    <div style="background:rgba(37,99,235,.15);border:1px solid rgba(37,99,235,.4);border-radius:.6rem;padding:.75rem .5rem;width:100%;margin-bottom:.4rem;">
+                      <div style="font-size:1rem;margin-bottom:.3rem;">📄</div>
+                      <p style="font-size:.62rem;font-weight:800;color:#93c5fd;margin-bottom:.2rem;">HTML String</p>
+                      <p style="font-size:.55rem;color:rgba(255,255,255,.45);line-height:1.4;">&lt;h1&gt;Hello!&lt;/h1&gt;<br/>(text bytes)</p>
+                    </div>
+                    <p style="font-size:.55rem;color:rgba(255,255,255,.3);">HTTP response</p>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 .5rem;flex-shrink:0;padding-bottom:1.2rem;">
+                    <p style="font-size:.52rem;color:rgba(255,255,255,.3);margin-bottom:.15rem;">browser</p>
+                    <p style="font-size:1.2rem;color:var(--blue);line-height:1;">→</p>
+                    <p style="font-size:.52rem;color:rgba(255,255,255,.3);margin-top:.15rem;">parses</p>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;align-items:center;flex:1;text-align:center;">
+                    <div style="background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.4);border-radius:.6rem;padding:.75rem .5rem;width:100%;margin-bottom:.4rem;">
+                      <div style="font-size:1rem;margin-bottom:.3rem;">🌳</div>
+                      <p style="font-size:.62rem;font-weight:800;color:#86efac;margin-bottom:.2rem;">DOM Nodes</p>
+                      <p style="font-size:.55rem;color:rgba(255,255,255,.45);line-height:1.4;">HTMLHeadingElement<br/>(visible, static)</p>
+                    </div>
+                    <p style="font-size:.55rem;color:rgba(255,255,255,.3);">Visible, no Angular</p>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 .5rem;flex-shrink:0;padding-bottom:1.2rem;">
+                    <p style="font-size:.52rem;color:rgba(255,255,255,.3);margin-bottom:.15rem;">Angular</p>
+                    <p style="font-size:1.2rem;color:#5eead4;line-height:1;">→</p>
+                    <p style="font-size:.52rem;color:rgba(255,255,255,.3);margin-top:.15rem;">hydrates</p>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;align-items:center;flex:1.2;text-align:center;">
+                    <div style="background:rgba(13,148,136,.2);border:2px solid rgba(13,148,136,.55);border-radius:.6rem;padding:.75rem .5rem;width:100%;margin-bottom:.4rem;">
+                      <div style="font-size:1rem;margin-bottom:.3rem;">⚡</div>
+                      <p style="font-size:.62rem;font-weight:800;color:#5eead4;margin-bottom:.2rem;">Wired Up</p>
+                      <p style="font-size:.55rem;color:rgba(255,255,255,.55);line-height:1.4;">Comp Object +<br/>DOM Node linked</p>
+                    </div>
+                    <p style="font-size:.55rem;color:#5eead4;font-weight:700;">Visible + Interactive</p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Closing callout ── -->
+            <div class="callout callout-teal">
+              <p class="callout-title" style="color:#0f766e;">The key insight: Component Object and DOM Node are always two separate things</p>
+              <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;">
+                Angular always maintains two separate things: a <strong style="color:var(--ink-1);">component object</strong> in JavaScript memory
+                (your <code>HelloComponent</code> instance with <code>name</code> and <code>ngOnInit</code>)
+                and a <strong style="color:var(--ink-1);">DOM node</strong> in the browser's tree
+                (the actual <code>&lt;h1&gt;</code> element the user sees).
+                <strong style="color:var(--ink-1);">Hydration is the act of connecting those two things</strong> —
+                so that when the component object's property changes, the DOM node updates.
+                Without that connection, you have a class instance that does nothing, and a DOM node that never changes.
+              </p>
+            </div>
+          </section>
+
+          <hr class="divider" />
+
+          <!-- ── 07 Server Routing ── -->
+          <section id="server-routing" class="section reveal">
+            <p class="eyebrow">07 · Server Routing</p>
+            <h2 class="sec-title">The Problem with Treating Every Route the Same</h2>
+            <p class="sec-lead">
+              When Angular SSR is on, the server runs Angular and builds HTML for every request —
+              no matter which page is being asked for. That sounds fine until you realise
+              your app has pages that are fundamentally different from each other.
+            </p>
+
+            <!-- ── THE PROBLEM — Restaurant analogy ── -->
+            <div style="margin-bottom:1.75rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                The Problem — A Restaurant Analogy
+              </p>
+
+              <div class="card card-warn" style="margin-bottom:1rem;">
+                <p style="font-size:.8rem;font-weight:800;color:var(--ink-1);margin-bottom:.75rem;">🍽️ Imagine your restaurant has 3 items on the menu</p>
+                <div style="display:flex;flex-direction:column;gap:.6rem;">
+                  <div style="display:flex;gap:.75rem;align-items:flex-start;">
+                    <span style="font-size:.8rem;flex-shrink:0;">💧</span>
+                    <p style="font-size:.75rem;color:var(--ink-2);line-height:1.65;">
+                      <strong style="color:var(--ink-1);">Packaged water</strong> — same for every customer, never changes.
+                      You can stock 1000 bottles in the morning and hand them out all day.
+                      There is zero reason to "prepare" a new bottle for each customer.
+                    </p>
+                  </div>
+                  <div style="display:flex;gap:.75rem;align-items:flex-start;">
+                    <span style="font-size:.8rem;flex-shrink:0;">🍲</span>
+                    <p style="font-size:.75rem;color:var(--ink-2);line-height:1.65;">
+                      <strong style="color:var(--ink-1);">Today's special</strong> — same for all customers today, but changes daily.
+                      Cook a big batch in the morning, keep it warm, serve all day. Throw away at night.
+                    </p>
+                  </div>
+                  <div style="display:flex;gap:.75rem;align-items:flex-start;">
+                    <span style="font-size:.8rem;flex-shrink:0;">🎂</span>
+                    <p style="font-size:.75rem;color:var(--ink-2);line-height:1.65;">
+                      <strong style="color:var(--ink-1);">Custom birthday cake</strong> — completely unique per customer, made fresh only when ordered.
+                      You cannot prepare this in advance. It must be made on-demand.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="callout callout-red" style="margin-bottom:1rem;">
+                <p class="callout-title" style="color:#9b1c1c;">Now imagine your kitchen has ONE rule for everything:</p>
+                <p style="font-size:.78rem;color:var(--ink-2);line-height:1.7;">
+                  <strong style="color:var(--ink-1);">"Cook everything fresh, to order, for every customer, every time."</strong><br/>
+                  The water? You open a new bottle for every person — wasted effort.
+                  The special? You cook it fresh each time — also wasted.
+                  The cake? Correct — but only by accident.
+                  <strong style="color:var(--red);">One kitchen rule applied to everything = two out of three are wrong.</strong>
+                </p>
+              </div>
+
+              <div class="callout callout-teal">
+                <p class="callout-title" style="color:#0f766e;">This is exactly what Angular SSR does by default</p>
+                <p style="font-size:.78rem;color:var(--ink-2);line-height:1.7;">
+                  <strong style="color:var(--ink-1);">/home</strong> = packaged water. Same HTML for every user. But SSR rebuilds it fresh on every request anyway — wasted.<br/>
+                  <strong style="color:var(--ink-1);">/products/123</strong> = today's special. Changes daily but same for all users. Could be cached, but SSR rebuilds it every time.<br/>
+                  <strong style="color:var(--ink-1);">/dashboard</strong> = birthday cake. Unique per user. Must be fresh. SSR handles this correctly — but only by accident.
+                </p>
+              </div>
+            </div>
+
+            <!-- ── WHAT IS SERVER ROUTING ── -->
+            <div style="margin-bottom:1.75rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                The Solution — Give Each Route Its Own Rule
+              </p>
+
+              <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;">
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#fef2f2;border:1px solid #fecaca;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--red);flex-shrink:0;">1</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">Before SSR — the server was completely blind to routes</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">
+                      In a normal Angular app there is no real server. Every URL — <code>/home</code>, <code>/dashboard</code>,
+                      <code>/products/123</code> — returns the exact same empty <code>index.html</code> + JS bundle.
+                      Angular boots in the browser and figures out which page to show.
+                      The server has no idea what route was requested.
+                    </p>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#fff7ed;border:1px solid #fed7aa;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--orange);flex-shrink:0;">2</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">With SSR — the server finally understands which route is being requested</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">
+                      Now Angular runs on the server. The server knows whether you hit <code>/home</code>
+                      or <code>/dashboard</code>. It runs the right component, fetches the right data,
+                      and sends back a fully-built HTML page. But by default, it does this the same way
+                      for every route — fresh render, every time, no exceptions.
+                    </p>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#f0fdf8;border:1px solid #bbf7d0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--green);flex-shrink:0;">3</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">Server Routing — a new file where you write per-route instructions</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">
+                      Angular 17+ introduced <code>app.routes.server.ts</code> — a separate file that sits
+                      alongside your existing <code>app.routes.ts</code>.
+                      Your existing routes are untouched. This file only adds server-side behaviour on top:
+                      <em>"for <code>/home</code>, build it once at deploy — never touch it again."</em>
+                      <em>"for <code>/dashboard</code>, render fresh every time, never cache."</em>
+                      <em>"for <code>/old-page</code>, send a 301 redirect."</em>
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- ── 3 Route Types ── -->
+            <div style="margin-bottom:1.75rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                Your App's Routes Fall Into 3 Types
+              </p>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-bottom:1rem;">
+                <div style="background:var(--surface);border:1px solid var(--grid);border-left:3px solid var(--green);border-radius:.75rem;padding:1.1rem;">
+                  <div style="font-size:1.4rem;margin-bottom:.45rem;">💧</div>
+                  <p style="font-size:.78rem;font-weight:800;color:var(--ink-1);margin-bottom:.2rem;">/home, /about</p>
+                  <p style="font-size:.65rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem;">Prerender — build once</p>
+                  <p style="font-size:.72rem;color:var(--ink-2);line-height:1.65;">
+                    Never changes. Same HTML for every user. Build at deploy time, serve as a static file forever. Zero server cost per request.
+                  </p>
+                </div>
+                <div style="background:var(--surface);border:1px solid var(--grid);border-left:3px solid var(--blue);border-radius:.75rem;padding:1.1rem;">
+                  <div style="font-size:1.4rem;margin-bottom:.45rem;">🛍️</div>
+                  <p style="font-size:.78rem;font-weight:800;color:var(--ink-1);margin-bottom:.2rem;">/products/:id</p>
+                  <p style="font-size:.65rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem;">Server + Cache</p>
+                  <p style="font-size:.72rem;color:var(--ink-2);line-height:1.65;">
+                    Changes when stock or price changes — same for all users. Server-render once, cache for an hour, serve many users from that cache.
+                  </p>
+                </div>
+                <div style="background:var(--surface);border:1px solid var(--grid);border-left:3px solid var(--red);border-radius:.75rem;padding:1.1rem;">
+                  <div style="font-size:1.4rem;margin-bottom:.45rem;">👤</div>
+                  <p style="font-size:.78rem;font-weight:800;color:var(--ink-1);margin-bottom:.2rem;">/dashboard</p>
+                  <p style="font-size:.65rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem;">Server — never cache</p>
+                  <p style="font-size:.72rem;color:var(--ink-2);line-height:1.65;">
+                    Unique per user, changes in real time. Must render fresh on the server for every single request. Caching would show User A's data to User B.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Prerender vs Server+Cache ── -->
+            <div style="margin-bottom:1.75rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                Prerender vs Server + Cache — What Actually Happens
+              </p>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+
+                <div style="background:var(--surface);border:1px solid var(--grid);border-left:3px solid var(--green);border-radius:.75rem;padding:1.1rem;">
+                  <p style="font-size:.72rem;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem;">💧 Prerender — /home, /about</p>
+                  <div style="display:flex;flex-direction:column;gap:.4rem;">
+                    <div style="display:flex;gap:.5rem;font-size:.72rem;color:var(--ink-2);line-height:1.5;">
+                      <span style="color:var(--green);font-weight:700;flex-shrink:0;">①</span>
+                      <span>At <strong style="color:var(--ink-1);">deploy time</strong>, Angular builds the HTML once for this page</span>
+                    </div>
+                    <div style="display:flex;gap:.5rem;font-size:.72rem;color:var(--ink-2);line-height:1.5;">
+                      <span style="color:var(--green);font-weight:700;flex-shrink:0;">②</span>
+                      <span>That HTML is saved as a <strong style="color:var(--ink-1);">static file</strong> on the server</span>
+                    </div>
+                    <div style="display:flex;gap:.5rem;font-size:.72rem;color:var(--ink-2);line-height:1.5;">
+                      <span style="color:var(--green);font-weight:700;flex-shrink:0;">③</span>
+                      <span>User 1, User 50, User 100 — all get <strong style="color:var(--ink-1);">that exact same file</strong>. Server never runs Angular again</span>
+                    </div>
+                    <div style="display:flex;gap:.5rem;font-size:.72rem;color:var(--ink-2);line-height:1.5;">
+                      <span style="color:var(--green);font-weight:700;flex-shrink:0;">④</span>
+                      <span>Page only changes when you <strong style="color:var(--ink-1);">deploy again</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="background:var(--surface);border:1px solid var(--grid);border-left:3px solid var(--blue);border-radius:.75rem;padding:1.1rem;">
+                  <p style="font-size:.72rem;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem;">🛍️ Server + Cache — /products/:id</p>
+                  <div style="display:flex;flex-direction:column;gap:.4rem;">
+                    <div style="display:flex;gap:.5rem;font-size:.72rem;color:var(--ink-2);line-height:1.5;">
+                      <span style="color:var(--blue);font-weight:700;flex-shrink:0;">①</span>
+                      <span><strong style="color:var(--ink-1);">User 1</strong> requests the page → server runs Angular, fetches data, builds HTML, sends it</span>
+                    </div>
+                    <div style="display:flex;gap:.5rem;font-size:.72rem;color:var(--ink-2);line-height:1.5;">
+                      <span style="color:var(--blue);font-weight:700;flex-shrink:0;">②</span>
+                      <span>Server also tells the browser/CDN: <strong style="color:var(--ink-1);">"keep this for 1 hour"</strong> (via <code>Cache-Control</code>)</span>
+                    </div>
+                    <div style="display:flex;gap:.5rem;font-size:.72rem;color:var(--ink-2);line-height:1.5;">
+                      <span style="color:var(--blue);font-weight:700;flex-shrink:0;">③</span>
+                      <span><strong style="color:var(--ink-1);">Users 2–100</strong> within that hour → get the cached copy. Server is never touched</span>
+                    </div>
+                    <div style="display:flex;gap:.5rem;font-size:.72rem;color:var(--ink-2);line-height:1.5;">
+                      <span style="color:var(--blue);font-weight:700;flex-shrink:0;">④</span>
+                      <span>After 1 hour, cache expires → <strong style="color:var(--ink-1);">next request triggers a fresh build</strong> and the cycle repeats</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="callout callout-blue">
+                <p class="callout-title" style="color:#1e40af;">The key difference</p>
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.7;">
+                  <strong style="color:var(--ink-1);">Prerender</strong> is built at deploy time — never rebuilds unless you redeploy. Perfect for pages that never change.<br/>
+                  <strong style="color:var(--ink-1);">Server + Cache</strong> is built on the first request after the cache expires — perfect for pages that change (stock, price)
+                  but are the same for all users within that window.
+                </p>
+              </div>
+            </div>
+
+            <!-- ── The File ── -->
+            <div style="margin-bottom:1.75rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                The File: <code style="font-size:.7rem;text-transform:none;">app.routes.server.ts</code>
+              </p>
+              <div class="code-header">
+                <div class="code-dots">
+                  <div class="code-dot" style="background:#ff5f57;"></div>
+                  <div class="code-dot" style="background:#febc2e;"></div>
+                  <div class="code-dot" style="background:#28c840;"></div>
+                </div>
+                <span class="code-filename">app.routes.server.ts</span>
+              </div>
+              <div class="code-block" style="border-top-left-radius:0;border-top-right-radius:0;">
+                <span class="ky">import</span> &#123; RenderMode, ServerRoute &#125; <span class="ky">from</span> <span class="vl">&#39;@angular/ssr&#39;</span>;<br/>
+                <br/>
+                <span class="ky">export const</span> <span class="fn">serverRoutes</span>: <span class="fn">ServerRoute</span>[] = [<br/>
+                <br/>
+                &nbsp;&nbsp;<span class="cm">// 💧 Packaged water — build once at deploy, serve forever</span><br/>
+                &nbsp;&nbsp;&#123; <span class="st">path</span>: <span class="vl">&#39;&#39;</span>, <span class="st">renderMode</span>: RenderMode.<span class="ok">Prerender</span> &#125;,<br/>
+                <br/>
+                &nbsp;&nbsp;<span class="cm">// 🍲 Today's special — render fresh, cache for 1 hour</span><br/>
+                &nbsp;&nbsp;&#123;<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">path</span>: <span class="vl">&#39;products/:id&#39;</span>,<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">renderMode</span>: RenderMode.<span class="ok">Server</span>,<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">headers</span>: &#123; <span class="vl">&#39;Cache-Control&#39;</span>: <span class="vl">&#39;max-age=3600&#39;</span> &#125;<br/>
+                &nbsp;&nbsp;&#125;,<br/>
+                <br/>
+                &nbsp;&nbsp;<span class="cm">// 🎂 Birthday cake — render fresh every time, never cache</span><br/>
+                &nbsp;&nbsp;&#123;<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">path</span>: <span class="vl">&#39;dashboard&#39;</span>,<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">renderMode</span>: RenderMode.<span class="ok">Server</span>,<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">headers</span>: &#123; <span class="vl">&#39;Cache-Control&#39;</span>: <span class="vl">&#39;no-store&#39;</span> &#125;<br/>
+                &nbsp;&nbsp;&#125;,<br/>
+                <br/>
+                &nbsp;&nbsp;<span class="cm">// Old URL — send browser + search engines to the new one</span><br/>
+                &nbsp;&nbsp;&#123; <span class="st">path</span>: <span class="vl">&#39;old-products&#39;</span>, <span class="st">redirectTo</span>: <span class="vl">&#39;/products&#39;</span>, <span class="st">status</span>: <span class="vl">301</span> &#125;,<br/>
+                <br/>
+                &nbsp;&nbsp;<span class="cm">// Catch-all — anything unknown gets a real 404</span><br/>
+                &nbsp;&nbsp;&#123; <span class="st">path</span>: <span class="vl">&#39;**&#39;</span>, <span class="st">renderMode</span>: RenderMode.<span class="ok">Server</span>, <span class="st">status</span>: <span class="vl">404</span> &#125;<br/>
+                ];<br/>
+              </div>
+            </div>
+
+            <!-- ── How the Two Files Work Together ── -->
+            <div style="margin-bottom:1.75rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                How <code style="font-size:.7rem;text-transform:none;">app.routes.ts</code> and <code style="font-size:.7rem;text-transform:none;">app.routes.server.ts</code> Work Together
+              </p>
+
+              <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;margin-bottom:1rem;">
+                You do not change your existing <code>app.routes.ts</code> at all. These two files answer
+                <em>different questions</em> about the same URL.
+              </p>
+
+              <!-- Two-file side by side -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                <div>
+                  <div class="code-header">
+                    <div class="code-dots">
+                      <div class="code-dot" style="background:#ff5f57;"></div>
+                      <div class="code-dot" style="background:#febc2e;"></div>
+                      <div class="code-dot" style="background:#28c840;"></div>
+                    </div>
+                    <span class="code-filename">app.routes.ts — "which component?"</span>
+                  </div>
+                  <div class="code-block" style="border-top-left-radius:0;border-top-right-radius:0;font-size:.67rem;">
+                    <span class="ky">export const</span> routes = [<br/>
+                    &nbsp;&nbsp;&#123;<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">path</span>: <span class="vl">&#39;&#39;</span>,<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">component</span>: <span class="fn">HomeComponent</span><br/>
+                    &nbsp;&nbsp;&#125;,<br/>
+                    &nbsp;&nbsp;&#123;<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">path</span>: <span class="vl">&#39;products/:id&#39;</span>,<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">component</span>: <span class="fn">ProductDetailComponent</span><br/>
+                    &nbsp;&nbsp;&#125;,<br/>
+                    &nbsp;&nbsp;&#123;<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">path</span>: <span class="vl">&#39;dashboard&#39;</span>,<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">component</span>: <span class="fn">DashboardComponent</span><br/>
+                    &nbsp;&nbsp;&#125;<br/>
+                    ];
+                  </div>
+                </div>
+                <div>
+                  <div class="code-header">
+                    <div class="code-dots">
+                      <div class="code-dot" style="background:#ff5f57;"></div>
+                      <div class="code-dot" style="background:#febc2e;"></div>
+                      <div class="code-dot" style="background:#28c840;"></div>
+                    </div>
+                    <span class="code-filename">app.routes.server.ts — "how to serve it?"</span>
+                  </div>
+                  <div class="code-block" style="border-top-left-radius:0;border-top-right-radius:0;font-size:.67rem;">
+                    <span class="ky">export const</span> serverRoutes = [<br/>
+                    &nbsp;&nbsp;&#123;<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">path</span>: <span class="vl">&#39;&#39;</span>,<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">renderMode</span>: RenderMode.<span class="ok">Prerender</span><br/>
+                    &nbsp;&nbsp;&#125;,<br/>
+                    &nbsp;&nbsp;&#123;<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">path</span>: <span class="vl">&#39;products/:id&#39;</span>,<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">renderMode</span>: RenderMode.<span class="ok">Server</span>,<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">headers</span>: &#123; <span class="vl">&#39;Cache-Control&#39;</span>: <span class="vl">&#39;max-age=3600&#39;</span> &#125;<br/>
+                    &nbsp;&nbsp;&#125;,<br/>
+                    &nbsp;&nbsp;&#123;<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">path</span>: <span class="vl">&#39;dashboard&#39;</span>,<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">renderMode</span>: RenderMode.<span class="ok">Server</span>,<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">headers</span>: &#123; <span class="vl">&#39;Cache-Control&#39;</span>: <span class="vl">&#39;no-store&#39;</span> &#125;<br/>
+                    &nbsp;&nbsp;&#125;<br/>
+                    ];
+                  </div>
+                </div>
+              </div>
+
+              <!-- What each file answers -->
+              <div style="display:flex;flex-direction:column;gap:.45rem;margin-bottom:1rem;">
+                <div style="display:flex;gap:.75rem;align-items:flex-start;font-size:.73rem;color:var(--ink-2);line-height:1.6;">
+                  <span style="font-size:.8rem;flex-shrink:0;">📋</span>
+                  <span><code>app.routes.ts</code> answers: <strong style="color:var(--ink-1);">"When the user visits <code>/products/123</code>, show <code>ProductDetailComponent</code>."</strong>
+                  — This is pure Angular, runs in the browser.</span>
+                </div>
+                <div style="display:flex;gap:.75rem;align-items:flex-start;font-size:.73rem;color:var(--ink-2);line-height:1.6;">
+                  <span style="font-size:.8rem;flex-shrink:0;">🖥️</span>
+                  <span><code>app.routes.server.ts</code> answers: <strong style="color:var(--ink-1);">"When the server receives a request for <code>/products/123</code>, run Angular and cache the result for 1 hour."</strong>
+                  — This is read only by the server, never by the browser.</span>
+                </div>
+                <div style="display:flex;gap:.75rem;align-items:flex-start;font-size:.73rem;color:var(--ink-2);line-height:1.6;">
+                  <span style="font-size:.8rem;flex-shrink:0;">🔗</span>
+                  <span>Angular matches them by <strong style="color:var(--ink-1);">the same path string</strong>. For <code>products/:id</code>: use <code>ProductDetailComponent</code> (from routes) AND render on server with cache (from server routes).</span>
+                </div>
+              </div>
+
+              <div class="callout callout-amber">
+                <p class="callout-title" style="color:#92400e;">Hotel analogy</p>
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.7;">
+                  <code>app.routes.ts</code> is the <strong style="color:var(--ink-1);">room directory</strong> — "Room 101 is a standard room, Room 201 is a suite."<br/>
+                  <code>app.routes.server.ts</code> is the <strong style="color:var(--ink-1);">housekeeping schedule</strong> — "Standard rooms cleaned daily, suites every 12 hours."<br/>
+                  Two separate lists about the same rooms. One answers <em>what</em> the room is. The other answers <em>how</em> to service it.
+                </p>
+              </div>
+            </div>
+
+            <!-- ── 3 Things You Can Control ── -->
+            <div>
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                3 Things You Can Set Per Route
+              </p>
+              <div style="display:flex;flex-direction:column;gap:.5rem;">
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#fef2f2;border:1px solid #fecaca;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--red);flex-shrink:0;">1</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;"><code>renderMode</code> — how the HTML is produced</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">
+                      <code>RenderMode.Prerender</code> — built once at deploy time, served as a static file. Zero server cost per visit.<br/>
+                      <code>RenderMode.Server</code> — Angular runs on the server for every request and builds fresh HTML.<br/>
+                      <code>RenderMode.Client</code> — no SSR, Angular boots entirely in the browser (same as default Angular).
+                    </p>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#fff7ed;border:1px solid #fed7aa;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--orange);flex-shrink:0;">2</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;"><code>headers</code> — how long the browser and CDN should keep a copy</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">
+                      <code>Cache-Control: max-age=3600</code> means "keep this response for 1 hour — don't ask the server again."
+                      <code>no-store</code> means "throw it away immediately — always ask the server."
+                      Without this, your dashboard could get cached by a CDN and served to the wrong user.
+                    </p>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#eff5ff;border:1px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--blue);flex-shrink:0;">3</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;"><code>status</code> / <code>redirectTo</code> — real HTTP codes, not fake browser ones</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">
+                      Without SSR, Angular handles 404s inside the browser — but the server still returns HTTP 200 to everyone.
+                      Google sees a 200 for a page that doesn't exist and thinks it's fine.
+                      With Server Routing, <code>status: 404</code> sends a genuine 404 HTTP response.
+                      <code>redirectTo + status: 301</code> sends a permanent redirect that browsers and search engines both honour.
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          <hr class="divider" />
+
+          <!-- ── 08 HTTP Cache ── -->
+          <section id="http-cache" class="section reveal">
+            <p class="eyebrow">08 · HTTP Transfer Cache</p>
+            <h2 class="sec-title">Why Your API Gets Called Twice — The Full Story</h2>
+            <p class="sec-lead">
+              To fully understand the double-fetch problem and what Transfer Cache actually solves,
+              you need to first separate <strong>three things</strong> that live at completely different layers of Angular SSR.
+              Most explanations skip this step — which is exactly why it stays confusing.
+              Let's build this understanding from the ground up.
+            </p>
+
+            <!-- ── STEP 0: The 3 Concepts ── -->
+            <div style="margin-bottom:2rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                First: Separate These 3 Things in Your Head
+              </p>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;">
+                <div style="background:linear-gradient(135deg,rgba(6,182,212,.08),rgba(6,182,212,.02));border:1px solid rgba(6,182,212,.22);border-radius:.75rem;padding:1.1rem;">
+                  <div style="font-size:1.5rem;margin-bottom:.5rem;">🧾</div>
+                  <p style="font-size:.8rem;font-weight:800;color:#0e7490;margin-bottom:.4rem;">HTML String</p>
+                  <p style="font-size:.74rem;color:var(--ink-2);line-height:1.7;">
+                    Plain text characters — <code>&lt;div&gt;Shoes&lt;/div&gt;</code>.
+                    Can be sent over HTTP. Stored in a file. Logged to console.
+                    <strong style="color:var(--ink-1);">No memory. No logic. No behaviour.</strong>
+                    Just characters.
+                  </p>
+                </div>
+                <div style="background:linear-gradient(135deg,rgba(234,179,8,.08),rgba(234,179,8,.02));border:1px solid rgba(234,179,8,.22);border-radius:.75rem;padding:1.1rem;">
+                  <div style="font-size:1.5rem;margin-bottom:.5rem;">🌳</div>
+                  <p style="font-size:.8rem;font-weight:800;color:#854d0e;margin-bottom:.4rem;">DOM Nodes</p>
+                  <p style="font-size:.74rem;color:var(--ink-2);line-height:1.7;">
+                    Live objects the <strong style="color:var(--ink-1);">browser's rendering engine</strong> builds when it reads the HTML string.
+                    Exist only inside the browser — you can click them, style them, observe them.
+                    <strong style="color:var(--ink-1);">The server never has DOM nodes.</strong>
+                  </p>
+                </div>
+                <div style="background:linear-gradient(135deg,rgba(221,0,49,.08),rgba(221,0,49,.02));border:1px solid rgba(221,0,49,.22);border-radius:.75rem;padding:1.1rem;">
+                  <div style="font-size:1.5rem;margin-bottom:.5rem;">⚙️</div>
+                  <p style="font-size:.8rem;font-weight:800;color:#991b1b;margin-bottom:.4rem;">Component Objects</p>
+                  <p style="font-size:.74rem;color:var(--ink-2);line-height:1.7;">
+                    Live JS class instances — <code>new ProductListComponent()</code> — sitting in RAM.
+                    Hold your <code>ngOnInit</code>, click handlers, injected services.
+                    <strong style="color:var(--ink-1);">Exist on both server and browser, but never cross between them.</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── PHASES ── -->
+            <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:1rem;">
+              Now Watch What Happens: The 3 Phases of Angular SSR
+            </p>
+
+            <!-- Phase 1 -->
+            <div style="position:relative;padding-left:3rem;margin-bottom:1.5rem;">
+              <div style="position:absolute;left:0;top:0;width:2rem;height:2rem;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:900;color:#fff;flex-shrink:0;">1</div>
+              <div style="position:absolute;left:.95rem;top:2rem;bottom:-1.5rem;width:1px;background:rgba(221,0,49,.18);"></div>
+              <div class="card" style="margin-bottom:0;">
+                <p style="font-size:.84rem;font-weight:800;color:var(--red);margin-bottom:.65rem;">🖥️ Phase 1 — On the Server (Node.js Process)</p>
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;margin-bottom:.65rem;">
+                  A browser requests your page. The SSR server boots Angular — exactly like a browser would —
+                  and runs the full component tree. Your <code>ProductListComponent</code> is created —
+                  <code>new ProductListComponent()</code>. This component object lives in the server's RAM (V8 heap).
+                </p>
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;margin-bottom:.65rem;">
+                  Angular calls <code>ngOnInit()</code> automatically — it's part of Angular's component lifecycle
+                  and fires every time a component is mounted. Inside it, your
+                  <code>this.http.get(&#39;/api/products&#39;)</code> fires.
+                  Data arrives from your backend. The component object now has <code>this.products = [...]</code> filled.
+                </p>
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;margin-bottom:.75rem;">
+                  Angular reads the component object + its template and produces an
+                  <strong style="color:var(--ink-1);">HTML string</strong> — a wall of text like
+                  <code>&lt;li&gt;Shoes ₹1,299&lt;/li&gt;&lt;li&gt;Hat ₹799&lt;/li&gt;</code>.
+                  This string is sent to the browser over HTTP.
+                </p>
+                <div class="callout callout-amber" style="font-size:.76rem;">
+                  <p class="callout-title" style="color:#92400e;">🔥 Critical moment</p>
+                  The component object's job is done. The server discards it from RAM.
+                  <strong>The browser receives only the HTML string — not the component object. That object is gone forever.</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Phase 2 -->
+            <div style="position:relative;padding-left:3rem;margin-bottom:1.5rem;">
+              <div style="position:absolute;left:0;top:0;width:2rem;height:2rem;border-radius:50%;background:#2563eb;display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:900;color:#fff;flex-shrink:0;">2</div>
+              <div style="position:absolute;left:.95rem;top:2rem;bottom:-1.5rem;width:1px;background:rgba(37,99,235,.18);"></div>
+              <div class="card" style="margin-bottom:0;">
+                <p style="font-size:.84rem;font-weight:800;color:#60a5fa;margin-bottom:.65rem;">🌐 Phase 2 — Browser Parses the HTML (The "Dead" Phase)</p>
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;margin-bottom:.65rem;">
+                  The browser receives the HTML string and parses it into real DOM nodes —
+                  live objects in the browser's rendering engine. The product list appears on screen immediately.
+                  Fast first paint. Looks great.
+                </p>
+                <div class="callout" style="background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.2);font-size:.76rem;">
+                  <p class="callout-title" style="color:#93c5fd;">But there's a catch</p>
+                  These DOM nodes are <strong>DEAD</strong>. No Angular logic is wired to them yet.
+                  If you click a "Buy" button right now — nothing happens. The data is visible
+                  but the page has zero behaviour. Angular's JS bundle hasn't even loaded in the browser yet.
+                </div>
+              </div>
+            </div>
+
+            <!-- Phase 3 -->
+            <div style="position:relative;padding-left:3rem;margin-bottom:2rem;">
+              <div style="position:absolute;left:0;top:0;width:2rem;height:2rem;border-radius:50%;background:#059669;display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:900;color:#fff;flex-shrink:0;">3</div>
+              <div class="card" style="margin-bottom:0;">
+                <p style="font-size:.84rem;font-weight:800;color:#34d399;margin-bottom:.65rem;">⚡ Phase 3 — Angular Boots in the Browser (Hydration)</p>
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;margin-bottom:.65rem;">
+                  Angular's JS bundle downloads and boots. Angular starts creating component objects
+                  in the <strong style="color:var(--ink-1);">browser's</strong> RAM — completely fresh.
+                  It has zero memory of what ran on the server. It does not know a
+                  <code>ProductListComponent</code> was created 200ms ago on the server.
+                  It creates a brand new one: <code>new ProductListComponent()</code>.
+                </p>
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;margin-bottom:.65rem;">
+                  Then Angular <strong style="color:var(--ink-1);">wires</strong> these new component objects
+                  to the existing DOM nodes (the ones the browser already rendered from the HTML string).
+                  This wiring process is called <strong style="color:var(--ink-1);">hydration</strong> —
+                  Angular doesn't re-create the DOM from scratch, it attaches its logic to what's already there,
+                  making the dead HTML interactive.
+                </p>
+                <div class="callout" style="background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);font-size:.76rem;margin-bottom:.75rem;">
+                  <p class="callout-title" style="color:#818cf8;">💡 Same class — two completely separate objects</p>
+                  The server created a <code>ProductListComponent</code> object and the browser just created another one.
+                  Same class, but these are two strangers — they share no memory, no state, no data.
+                  The server's object was destroyed the moment the HTML was sent. The browser's object is brand new, starting from zero.
+                  It has no idea what happened on the server 200ms ago.
+                </div>
+                <div class="callout callout-red" style="font-size:.76rem;margin-bottom:.75rem;">
+                  <p class="callout-title" style="color:#fca5a5;">💥 Here's where the double-fetch happens</p>
+                  Creating a new component object means Angular's lifecycle runs — and that includes
+                  <code>ngOnInit()</code>. Your <code>this.http.get(&#39;/api/products&#39;)</code> fires again.
+                  A real network request goes to your backend — for the same data the server fetched 200ms ago,
+                  data that is already rendered in the DOM right in front of the user.
+                </div>
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;">
+                  This is <em>not a bug in your code</em>. Angular is doing exactly what it's designed to do.
+                  The component lifecycle always runs <code>ngOnInit</code> when a component is mounted.
+                  The problem is there's no built-in mechanism to say:
+                  <em>"the server already fetched this — skip the network call in the browser."</em>
+                  That is exactly what Transfer Cache adds.
+                </p>
+              </div>
+            </div>
+
+            <!-- ── WHY CAN'T OBJECTS TRAVEL ── -->
+            <div style="margin-bottom:2rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                The Question You're Probably Asking: Why Can't the Server Just Send the Component Object?
+              </p>
+              <div class="card card-warn" style="margin-bottom:1rem;">
+                <p style="font-size:.81rem;font-weight:700;color:var(--ink-1);margin-bottom:.75rem;">
+                  If the server already has a fully-loaded component object (with the products filled in),
+                  why not just send that object to the browser? Then Angular could reuse it,
+                  skip creating it again, skip <code>ngOnInit</code>, skip the second http.get — problem solved.
+                </p>
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;margin-bottom:.9rem;">
+                  It sounds perfect. Here's why it's impossible:
+                  <strong style="color:var(--ink-1);">a component object is not just data — it's a living machine.</strong>
+                  It contains things that are alive right now in a specific block of RAM,
+                  and have no text form whatsoever.
+                </p>
+
+                <!-- CAN vs CANNOT table -->
+                <div class="ba-grid" style="margin-bottom:1rem;">
+                  <div class="ba-panel">
+                    <div class="ba-head ba-head-grn">✅ CAN travel over HTTP — it's just data</div>
+                    <div class="ba-body">
+                      <p><code>this.products = [&#123;"name":"Shoes"&#125;]</code></p>
+                      <p>Plain JS array — can be written as JSON text</p>
+                      <p>Numbers, strings, booleans — all just text</p>
+                      <p>Any value that JSON.stringify() can handle</p>
+                    </div>
+                  </div>
+                  <div class="ba-panel">
+                    <div class="ba-head ba-head-red">❌ CANNOT travel over HTTP — it's live RAM</div>
+                    <div class="ba-body">
+                      <p><code>ngOnInit() &#123; this.http.get(...) &#125;</code> — live executable instructions</p>
+                      <p>Click handlers — live functions in a specific V8 memory address</p>
+                      <p><code>HttpClient</code> instance — holds open connections, internal state</p>
+                      <p>Injected services (<code>Router</code>, <code>Store</code>, custom providers)</p>
+                    </div>
+                  </div>
+                </div>
+
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;margin-bottom:.65rem;">
+                  Functions like <code>ngOnInit</code> and <code>onClick</code> are not data — they are
+                  <strong style="color:var(--ink-1);">live instructions executing inside a specific V8 engine,
+                  at a specific memory address, right now</strong>.
+                  When the server's Node.js process finishes its job, those instructions cease to exist.
+                  There is no way to write a function as text and "resume" it inside
+                  a completely different V8 engine (the browser's). The instruction set is gone the moment
+                  the server moves on.
+                </p>
+                <p style="font-size:.77rem;color:var(--ink-2);line-height:1.75;margin-bottom:.9rem;">
+                  The <code>HttpClient</code> instance is even harder — it holds open socket connections,
+                  internal interceptor chains, pending observable subscriptions. None of that can be
+                  described as text. You cannot freeze a live socket, write it to a string, and
+                  unfreeze it in a different process on a different machine.
+                </p>
+
+                <!-- Chef analogy -->
+                <div style="background:linear-gradient(135deg,rgba(120,53,15,.35),rgba(92,38,10,.2));border:1px solid rgba(217,119,6,.3);border-radius:.75rem;padding:1.05rem;">
+                  <p style="font-size:.77rem;font-weight:800;color:var(--ink-1);margin-bottom:.5rem;">👨‍🍳 Chef Analogy — The Clearest Way to Think About This</p>
+                  <p style="font-size:.75rem;color:var(--ink-2);line-height:1.75;margin-bottom:.5rem;">
+                    The server is a chef who prepares a dish (builds the HTML) and sends it to your table.
+                    You receive the finished dish — <strong style="color:var(--ink-1);">the HTML string</strong>.
+                    You can also receive the ingredient list — <strong style="color:var(--ink-1);">the JSON data</strong>.
+                    Both are things that can be written down and handed over.
+                  </p>
+                  <p style="font-size:.75rem;color:var(--ink-2);line-height:1.75;">
+                    But you <em>cannot</em> receive the chef. The chef's muscle memory of flipping a pan.
+                    The chef's knowledge of when the butter is about to burn. The chef's hands.
+                    Those are <strong style="color:var(--ink-1);">live capabilities that exist only in the chef's body</strong> —
+                    they have no text form. The browser must grow its own chef (component objects) from scratch.
+                    That is why Angular boots fresh and creates component objects again in the browser.
+                    There is no other way.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── THE CODE ── -->
+            <div style="margin-bottom:1.25rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.7rem;">
+                The Component That Causes the Double-Fetch
+              </p>
+              <div class="code-header">
+                <div class="code-dots">
+                  <div class="code-dot" style="background:#ff5f57;"></div>
+                  <div class="code-dot" style="background:#febc2e;"></div>
+                  <div class="code-dot" style="background:#28c840;"></div>
+                </div>
+                <span class="code-filename">product-list.component.ts</span>
+              </div>
+              <div class="code-block" style="border-top-left-radius:0;border-top-right-radius:0;">
+                <span class="ky">@Component</span>(&#123; <span class="st">selector</span>: <span class="vl">&#39;app-product-list&#39;</span> &#125;)<br/>
+                <span class="ky">export class</span> <span class="fn">ProductListComponent</span> <span class="ky">implements</span> <span class="fn">OnInit</span> &#123;<br/>
+                &nbsp;&nbsp;<span class="ky">constructor</span>(<span class="ky">private</span> http: <span class="fn">HttpClient</span>) &#123;&#125;<br/>
+                <br/>
+                &nbsp;&nbsp;<span class="cm">// Angular calls this when a component is mounted</span><br/>
+                &nbsp;&nbsp;<span class="cm">// "mounted" happens TWICE: once on server (Phase 1), once in browser (Phase 3)</span><br/>
+                &nbsp;&nbsp;<span class="fn">ngOnInit</span>() &#123;<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="ky">this</span>.http.<span class="fn">get</span>(<span class="st">&#39;/api/products&#39;</span>).<span class="fn">subscribe</span>(data =&gt; &#123;<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ky">this</span>.products = data;&nbsp;&nbsp;<span class="cm">// ← fires on server ✓ AND fires again in browser ✓</span><br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;&#125;);<br/>
+                &nbsp;&nbsp;&#125;<br/>
+                &#125;
+              </div>
+            </div>
+
+            <!-- ── BEFORE / AFTER ── -->
+            <div class="ba-grid" style="margin-bottom:1.5rem;">
+              <div class="ba-panel">
+                <div class="ba-head ba-head-red">❌ Without Transfer Cache</div>
+                <div class="ba-body">
+                  <p>🖥️ Server: ngOnInit → GET /api/products → data arrives</p>
+                  <p>⚙️ Server builds HTML string with products in it</p>
+                  <p>📤 HTML string sent to browser</p>
+                  <p>🌐 Browser renders DOM nodes — user sees the list</p>
+                  <p>⬇️ Angular JS bundle downloads, boots, creates fresh component objects</p>
+                  <p class="ba-bad">🔁 ngOnInit fires again in the browser (new component, new lifecycle)</p>
+                  <p class="ba-bad">📡 GET /api/products — real network request, same data all over again</p>
+                  <p class="ba-bad">⏳ UI flickers / shows spinner for data already in the DOM</p>
+                </div>
+              </div>
+              <div class="ba-panel">
+                <div class="ba-head ba-head-grn">✅ With Transfer Cache</div>
+                <div class="ba-body">
+                  <p>🖥️ Server: ngOnInit → GET /api/products → data arrives</p>
+                  <p>⚙️ Server builds HTML + <strong>embeds JSON in a &lt;script&gt; tag</strong></p>
+                  <p>📤 HTML string + embedded JSON sent together (one HTTP response)</p>
+                  <p>🌐 Browser renders DOM nodes — user sees the list</p>
+                  <p>⬇️ Angular JS bundle downloads, boots, creates fresh component objects</p>
+                  <p class="ba-good">🔁 ngOnInit fires — http.get(&#39;/api/products&#39;) is called</p>
+                  <p class="ba-good">📦 Transfer Cache intercepts: "I have this in the embedded &lt;script&gt;"</p>
+                  <p class="ba-good">⚡ Returns cached JSON instantly — zero network request, zero flicker</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── HOW TRANSFER CACHE WORKS ── -->
+            <div style="margin-bottom:1.25rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
+                How Transfer Cache Solves It — Step by Step
+              </p>
+
+              <!-- step strip -->
+              <div style="display:flex;flex-direction:column;gap:.5rem;">
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#fef2f2;border:1px solid #fecaca;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--red);flex-shrink:0;">1</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">Server: <code>ngOnInit</code> runs and fetches data normally</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">
+                      The component calls <code>http.get(&#39;/api/products&#39;)</code> on the server.
+                      The API responds with the products list. The component gets its data and Angular builds the HTML.
+                      Transfer Cache is watching in the background — it quietly makes a copy of that API response.
+                      Your component is not affected. Everything works as normal.
+                    </p>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#fff7ed;border:1px solid #fed7aa;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--orange);flex-shrink:0;">2</div>
+                  <div style="flex:1;">
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">Server: that copy gets written into the HTML as text</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;margin-bottom:.75rem;">
+                      Transfer Cache takes that copied products array and writes it out as plain text
+                      and drops it into a <code>&lt;script&gt;</code> tag right inside the HTML.
+                      So the HTML the browser receives contains both: your rendered product list <em>and</em>
+                      the raw data that produced it, sitting side by side.
+                    </p>
+                    <div class="code-header">
+                      <div class="code-dots">
+                        <div class="code-dot" style="background:#ff5f57;"></div>
+                        <div class="code-dot" style="background:#febc2e;"></div>
+                        <div class="code-dot" style="background:#28c840;"></div>
+                      </div>
+                      <span class="code-filename">HTML sent to browser (simplified)</span>
+                    </div>
+                    <div class="code-block" style="border-top-left-radius:0;border-top-right-radius:0;font-size:.67rem;">
+                      <span class="cm">&lt;!-- your rendered product list --&gt;</span><br/>
+                      <span class="ky">&lt;ul&gt;</span><br/>
+                      &nbsp;&nbsp;<span class="ky">&lt;li&gt;</span>Shoes — ₹1,299<span class="ky">&lt;/li&gt;</span><br/>
+                      &nbsp;&nbsp;<span class="ky">&lt;li&gt;</span>Hat — ₹799<span class="ky">&lt;/li&gt;</span><br/>
+                      <span class="ky">&lt;/ul&gt;</span><br/>
+                      <br/>
+                      <span class="cm">&lt;!-- Transfer Cache drops the raw data right here --&gt;</span><br/>
+                      <span class="ky">&lt;script</span> <span class="st">type</span>=<span class="vl">"application/json"</span> <span class="st">id</span>=<span class="vl">"ng-transfer-state"</span><span class="ky">&gt;</span><br/>
+                      &nbsp;&nbsp;&#123;<br/>
+                      &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"ZnBhcGkvcHJvZHVjdHM="</span>: &#123;<br/>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"body"</span>: [<br/>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#123; <span class="st">"name"</span>: <span class="vl">"Shoes"</span>, <span class="st">"price"</span>: <span class="vl">1299</span> &#125;,<br/>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#123; <span class="st">"name"</span>: <span class="vl">"Hat"</span>,   <span class="st">"price"</span>: <span class="vl">799</span>  &#125;<br/>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],<br/>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"status"</span>: <span class="vl">200</span><br/>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&#125;<br/>
+                      &nbsp;&nbsp;&#125;<br/>
+                      <span class="ky">&lt;/script&gt;</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#eff5ff;border:1px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--blue);flex-shrink:0;">3</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">One HTTP response carries both: HTML + data</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">
+                      The browser receives a single response — the rendered HTML and the embedded JSON travel together.
+                      No extra round-trip. The data is already there before Angular even boots.
+                    </p>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                  <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#f0fdf8;border:1px solid #bbf7d0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--green);flex-shrink:0;">4</div>
+                  <div>
+                    <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">Browser: <code>ngOnInit</code> fires again — intercepted instantly</p>
+                    <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">
+                      Angular boots, creates the component object, <code>ngOnInit</code> calls
+                      <code>http.get(&#39;/api/products&#39;)</code> — Transfer Cache intercepts it,
+                      reads the JSON from the <code>&lt;script&gt;</code> tag, and returns it instantly.
+                      <strong style="color:var(--ink-1);">Zero network request. Zero spinner. Zero flicker.</strong>
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Config -->
+            <div class="code-header">
+              <div class="code-dots">
+                <div class="code-dot" style="background:#ff5f57;"></div>
+                <div class="code-dot" style="background:#febc2e;"></div>
+                <div class="code-dot" style="background:#28c840;"></div>
+              </div>
+              <span class="code-filename">app.config.ts — enable Transfer Cache</span>
+            </div>
+            <div class="code-block" style="margin-bottom:1.5rem;">
+              <span class="fn">provideHttpClient</span>(<span class="fn">withHttpTransferCache</span>(&#123;<br/>
+              &nbsp;&nbsp;includePostRequests: <span class="vl">false</span>,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// only GET by default — safe for idempotent reads</span><br/>
+              &nbsp;&nbsp;includeRequestsWithAuthHeaders: <span class="vl">false</span>,&nbsp;<span class="cm">// never cache user-specific authenticated calls</span><br/>
+              &#125;))
+            </div>
+
+          </section>
+
+          <hr class="divider" />
+
+          <!-- ── 09 Server-Safe ── -->
+          <section id="server-compat" class="section reveal">
+            <p class="eyebrow">09 · Server-Safe Code</p>
+            <h2 class="sec-title">Why Does My Code Crash When SSR Is On?</h2>
+            <p class="sec-lead">When SSR is enabled, your component runs in two places — the browser <em>and</em> a Node.js server. <code style="background:var(--page);padding:.1rem .4rem;border-radius:.25rem;">window</code>, <code style="background:var(--page);padding:.1rem .4rem;border-radius:.25rem;">document</code>, and <code style="background:var(--page);padding:.1rem .4rem;border-radius:.25rem;">localStorage</code> are browser inventions. Node.js has never heard of them — calling them server-side crashes the entire request.</p>
+
+            <!-- PART A: Two environments -->
+            <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">Part A — Two Environments, Two Completely Different API Surfaces</p>
+
+            <div class="g2" style="margin-bottom:1.5rem;">
+              <div class="card" style="border-top:3px solid #22c55e;padding:1rem;">
+                <p style="font-size:.72rem;font-weight:800;color:#166534;margin-bottom:.7rem;letter-spacing:.05em;">🌐 Browser (Chrome / Firefox / Safari)</p>
+                <div style="font-size:.72rem;display:flex;flex-direction:column;">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;border-bottom:1px solid var(--grid);gap:.75rem;">
+                    <code style="color:#166534;font-weight:700;white-space:nowrap;">window</code>
+                    <span style="color:var(--ink-2);text-align:right;">global scope, scroll, history, location</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;border-bottom:1px solid var(--grid);gap:.75rem;">
+                    <code style="color:#166534;font-weight:700;white-space:nowrap;">document</code>
+                    <span style="color:var(--ink-2);text-align:right;">DOM tree, querySelector, title</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;border-bottom:1px solid var(--grid);gap:.75rem;">
+                    <code style="color:#166534;font-weight:700;white-space:nowrap;">localStorage</code>
+                    <span style="color:var(--ink-2);text-align:right;">client-side key/value storage</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;border-bottom:1px solid var(--grid);gap:.75rem;">
+                    <code style="color:#166534;font-weight:700;white-space:nowrap;">navigator</code>
+                    <span style="color:var(--ink-2);text-align:right;">user agent, geolocation, clipboard</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;gap:.75rem;">
+                    <code style="color:#166534;font-weight:700;white-space:nowrap;">sessionStorage</code>
+                    <span style="color:var(--ink-2);text-align:right;">tab-scoped key/value storage</span>
+                  </div>
+                </div>
+                <p style="font-size:.68rem;margin-top:.65rem;color:#166534;font-weight:700;padding-top:.5rem;border-top:1px solid var(--grid);">✅ All of these exist in every browser</p>
+              </div>
+
+              <div class="card" style="border-top:3px solid #ef4444;padding:1rem;">
+                <p style="font-size:.72rem;font-weight:800;color:#991b1b;margin-bottom:.7rem;letter-spacing:.05em;">🖥️ Node.js Server (where SSR runs)</p>
+                <div style="font-size:.72rem;display:flex;flex-direction:column;">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;border-bottom:1px solid var(--grid);gap:.75rem;">
+                    <code style="color:#1e40af;font-weight:700;white-space:nowrap;">process</code>
+                    <span style="color:var(--ink-2);text-align:right;">env variables, exit, pid</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;border-bottom:1px solid var(--grid);gap:.75rem;">
+                    <code style="color:#1e40af;font-weight:700;white-space:nowrap;">fs / path</code>
+                    <span style="color:var(--ink-2);text-align:right;">file system, path utilities</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;border-bottom:1px solid var(--grid);gap:.75rem;">
+                    <code style="color:#dc2626;font-weight:700;white-space:nowrap;">❌ window</code>
+                    <span style="color:#dc2626;font-weight:600;text-align:right;">undefined — throws ReferenceError</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;border-bottom:1px solid var(--grid);gap:.75rem;">
+                    <code style="color:#dc2626;font-weight:700;white-space:nowrap;">❌ document</code>
+                    <span style="color:#dc2626;font-weight:600;text-align:right;">undefined — throws ReferenceError</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;gap:.75rem;">
+                    <code style="color:#dc2626;font-weight:700;white-space:nowrap;">❌ localStorage</code>
+                    <span style="color:#dc2626;font-weight:600;text-align:right;">undefined — throws ReferenceError</span>
+                  </div>
+                </div>
+                <p style="font-size:.68rem;margin-top:.65rem;color:#991b1b;font-weight:700;padding-top:.5rem;border-top:1px solid var(--grid);">❌ Node.js has never had browser globals — they simply do not exist</p>
+              </div>
+            </div>
+
+            <!-- PART B: Crash sequence -->
+            <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">Part B — What Actually Happens When Your Component Calls <code style="text-transform:none;letter-spacing:0;font-size:.72rem;">window</code> on the Server</p>
+
+            <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;">
+
+              <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#eff6ff;border:1px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:#1d4ed8;flex-shrink:0;">1</div>
+                <div>
+                  <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">You enable SSR — Angular now runs your component on the Node.js server</p>
+                  <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">Every time a user hits your URL, Node.js boots an Angular component, calls its lifecycle hooks (including <code>ngOnInit</code>), builds the HTML string, and sends it to the browser. Your component code now runs server-side on every request.</p>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#fff7ed;border:1px solid #fed7aa;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--orange);flex-shrink:0;">2</div>
+                <div>
+                  <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;"><code>ngOnInit</code> fires on the server — and calls <code>window.scrollTo(0, 0)</code></p>
+                  <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;">Your component's <code>ngOnInit</code> runs normally. It executes <code>window.scrollTo(0, 0)</code>. Node.js starts looking up <code>window</code> in the JavaScript scope chain — global scope, module scope, function scope...</p>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:1rem;align-items:flex-start;background:#fef2f2;border:1px solid #fecaca;border-radius:.65rem;padding:.85rem 1rem;">
+                <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#fee2e2;border:1px solid #fca5a5;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--red);flex-shrink:0;">3</div>
+                <div>
+                  <p style="font-size:.76rem;font-weight:700;color:#991b1b;margin-bottom:.2rem;"><code>window</code> is not in any scope — Node.js throws <code>ReferenceError: window is not defined</code></p>
+                  <p style="font-size:.73rem;color:#7f1d1d;line-height:1.65;">Node.js can't find <code>window</code> anywhere. JavaScript throws immediately — this happens at the JS engine level, before Angular can react. Angular never gets a chance to catch it or skip it. It's the same as calling any variable that was never declared.</p>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:1rem;align-items:flex-start;background:#fef2f2;border:1px solid #fecaca;border-radius:.65rem;padding:.85rem 1rem;">
+                <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#fee2e2;border:1px solid #fca5a5;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--red);flex-shrink:0;">4</div>
+                <div>
+                  <p style="font-size:.76rem;font-weight:700;color:#991b1b;margin-bottom:.2rem;">The entire HTTP request crashes — the user gets a blank page or 500 error</p>
+                  <p style="font-size:.73rem;color:#7f1d1d;line-height:1.65;">The unhandled error bubbles up through Angular's server renderer, through the Express/Node HTTP server, and kills the request. The browser never receives any HTML. The user sees a blank page or a generic server error — with no indication of what went wrong.</p>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- PART C: Why can't Angular just skip it? -->
+            <div class="callout" style="margin-bottom:1.5rem;">
+              <p style="font-size:.76rem;font-weight:800;color:var(--ink-1);margin-bottom:.5rem;">The question you're probably asking: "Why can't Angular just skip browser API calls when running on the server?"</p>
+              <p style="font-size:.73rem;color:var(--ink-2);line-height:1.7;margin-bottom:.6rem;">Angular doesn't inspect or intercept your code before running it — it just calls your function. When JavaScript hits <code>window.scrollTo(0, 0)</code>, it looks up <code>window</code> in scope. That lookup fails at the JS engine level, before Angular can do anything. It's not a runtime logic error Angular can catch — it's a missing variable, same as calling <code>foo()</code> when <code>foo</code> was never declared.</p>
+              <p style="font-size:.73rem;color:var(--ink-2);line-height:1.7;"><strong style="color:var(--ink-1);">Think of it like a recipe:</strong> You write a recipe that says "microwave for 2 minutes." That recipe works perfectly at home (browser). When a catering team tries to cook it in a kitchen with no microwave (Node.js server), the entire preparation halts — you can't skip a required step, you can only rewrite the recipe. The fix is to add: "skip this step if there is no microwave." That's exactly what <code>afterNextRender()</code> does.</p>
+            </div>
+
+            <!-- PART D: Three solutions -->
+            <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">Part C — Three Ways to Write Server-Safe Code</p>
+
+            <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;">
+
+              <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#f0fdf4;border:1px solid #bbf7d0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:#166534;flex-shrink:0;">1</div>
+                <div style="flex:1;">
+                  <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;"><code>afterNextRender()</code> — Angular's "browser only" hook <span style="font-weight:400;color:var(--ink-2);">(Angular 16+, simplest)</span></p>
+                  <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;margin-bottom:.6rem;">Register browser-only code inside this callback. Angular guarantees it will <strong>only ever fire in the browser</strong>, after the first DOM render. The server never calls it. Use this for scroll position, animations, and any third-party library that needs the DOM.</p>
+                  <div class="code-block" style="font-size:.68rem;">
+                    <span class="ky">constructor</span>() &#123;<br/>
+                    &nbsp;&nbsp;<span class="fn">afterNextRender</span>(() =&gt; &#123;<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">window</span>.scrollTo(<span class="vl">0</span>, <span class="vl">0</span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// ✅ browser only</span><br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">localStorage</span>.setItem(<span class="st">'k'</span>, <span class="st">'v'</span>);<span class="cm">// ✅ browser only</span><br/>
+                    &nbsp;&nbsp;&#125;);<br/>
+                    &#125;
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#eff6ff;border:1px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:#1d4ed8;flex-shrink:0;">2</div>
+                <div style="flex:1;">
+                  <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;"><code>isPlatformBrowser(PLATFORM_ID)</code> — check which environment you're in at runtime</p>
+                  <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;margin-bottom:.6rem;">Ask Angular which environment you're in — browser or server. Wrap browser-only code in an <code>if</code> block: the server always gets <code>false</code> and skips it, the browser gets <code>true</code> and runs it. Use this when you need completely different logic on each side.</p>
+                  <div class="code-block" style="font-size:.68rem;">
+                    <span class="ky">private</span> platformId = <span class="fn">inject</span>(<span class="fn">PLATFORM_ID</span>);<br/>
+                    <br/>
+                    <span class="fn">ngOnInit</span>() &#123;<br/>
+                    &nbsp;&nbsp;<span class="ky">if</span> (<span class="fn">isPlatformBrowser</span>(<span class="ky">this</span>.platformId)) &#123;<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">window</span>.scrollTo(<span class="vl">0</span>, <span class="vl">0</span>);&nbsp;<span class="cm">// ✅ server skips this entire block</span><br/>
+                    &nbsp;&nbsp;&#125;<br/>
+                    &#125;
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.85rem 1rem;">
+                <div style="min-width:1.7rem;height:1.7rem;border-radius:50%;background:#fdf4ff;border:1px solid #e9d5ff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:#7e22ce;flex-shrink:0;">3</div>
+                <div style="flex:1;">
+                  <p style="font-size:.76rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;"><code>inject(DOCUMENT)</code> — Angular's safe document token</p>
+                  <p style="font-size:.73rem;color:var(--ink-2);line-height:1.65;margin-bottom:.6rem;">Instead of calling <code>document</code> directly (which crashes on the server), ask Angular for it using <code>inject(DOCUMENT)</code>. In the browser Angular gives you the real <code>document</code>. On the server it gives you a safe dummy version (a placeholder that silently does nothing instead of crashing). Use this for <code>document.title</code>, <code>document.cookie</code>, or setting page title and description tags that search engines read.</p>
+                  <div class="code-block" style="font-size:.68rem;">
+                    <span class="ky">private</span> doc = <span class="fn">inject</span>(<span class="fn">DOCUMENT</span>);<br/>
+                    <br/>
+                    <span class="fn">ngOnInit</span>() &#123;<br/>
+                    &nbsp;&nbsp;<span class="ky">this</span>.doc.title = <span class="st">'My Page'</span>;&nbsp;<span class="cm">// ✅ safe on server AND browser</span><br/>
+                    &#125;
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Before / After -->
+            <div class="ba-grid">
+              <div class="ba-panel">
+                <div class="ba-head ba-head-red">❌ Crashes on the server</div>
+                <div class="code-block" style="border-radius:0;border:none;border-top:1px solid #252635;font-size:.7rem;">
+                  <span class="cm">// ngOnInit runs on SERVER too — no browser!</span><br/>
+                  <span class="ok">ngOnInit</span>() &#123;<br/>
+                  &nbsp;&nbsp;<span class="rd">window</span>.scrollTo(<span class="vl">0</span>, <span class="vl">0</span>);&nbsp;<span class="cm">// 💥 ReferenceError</span><br/>
+                  &nbsp;&nbsp;<span class="rd">localStorage</span>.getItem(<span class="st">'x'</span>);&nbsp;<span class="cm">// 💥 ReferenceError</span><br/>
+                  &nbsp;&nbsp;<span class="rd">document</span>.title = <span class="st">'X'</span>;&nbsp;<span class="cm">// 💥 ReferenceError</span><br/>
+                  &#125;
+                </div>
+              </div>
+              <div class="ba-panel">
+                <div class="ba-head ba-head-grn">✅ Safe — runs only in browser</div>
+                <div class="code-block" style="border-radius:0;border:none;border-top:1px solid #252635;font-size:.7rem;">
+                  <span class="cm">// afterNextRender = browser only, guaranteed</span><br/>
+                  <span class="fn">afterNextRender</span>(() =&gt; &#123;<br/>
+                  &nbsp;&nbsp;<span class="ok">window</span>.scrollTo(<span class="vl">0</span>, <span class="vl">0</span>);&nbsp;<span class="cm">// ✅ browser only</span><br/>
+                  &nbsp;&nbsp;<span class="ok">localStorage</span>.getItem(<span class="st">'x'</span>);&nbsp;<span class="cm">// ✅ browser only</span><br/>
+                  &nbsp;&nbsp;<span class="ok">document</span>.title = <span class="st">'X'</span>;&nbsp;<span class="cm">// ✅ browser only</span><br/>
+                  &#125;);
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <hr class="divider" />
+
+          <!-- ── 10 Setup ── -->
+          <section id="setup" class="section reveal">
+            <p class="eyebrow">10 · Setup</p>
+            <h2 class="sec-title">Two Commands</h2>
+
+            <div class="g2" style="margin-bottom:1.5rem;">
+              <div class="code-block" style="display:flex;flex-direction:column;gap:.5rem;">
+                <span class="cm">// New project with SSR</span>
+                <span><span style="color:#898781;">$</span> <span class="ok" style="font-weight:700;">ng new my-app --ssr</span></span>
+                <span class="cm" style="font-size:.65rem;">SSR + hydration + server routing out of the box</span>
+              </div>
+              <div class="code-block" style="display:flex;flex-direction:column;gap:.5rem;">
+                <span class="cm">// Add SSR to existing project</span>
+                <span><span style="color:#898781;">$</span> <span class="ok" style="font-weight:700;">ng add @angular/ssr</span></span>
+                <span class="cm" style="font-size:.65rem;">Generates server files, updates app.config.ts</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <p style="font-size:.8rem;font-weight:700;color:var(--ink-1);margin-bottom:.75rem;">📁 Key files Angular SSR adds</p>
+              {[
+                { file: 'app.routes.server.ts', desc: 'Define renderMode per route — the main SSR config file' },
+                { file: 'server.ts',             desc: 'Express/Node server entry point that boots Angular SSR' },
+                { file: 'app.config.server.ts',  desc: 'Server-only providers (override browser providers)' },
+                { file: 'app.config.ts',         desc: 'Updated to include provideClientHydration()' },
+              ].map(({ file, desc }) => (
+                <div class="file-row">
+                  <span class="file-chip">{file}</span>
+                  <span class="file-desc">{desc}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <hr class="divider" />
+
+          <!-- ── 11 Takeaways ── -->
+          <section id="takeaways" class="section reveal">
+            <p class="eyebrow">Key Takeaways</p>
+            <h2 class="sec-title">What to Remember</h2>
+            <div class="card">
+              {[
+                '<strong>CSR = slow first load + bad SEO.</strong> Browser does all the work. Use only for pages behind login.',
+                '<strong>SSR = fast first paint + great SEO.</strong> Server sends ready HTML. Use for public, per-user pages.',
+                '<strong>SSG = instant + cheapest to host.</strong> HTML built at deploy time. Use for blogs, docs, marketing.',
+                '<strong>Hybrid rendering</strong> mixes all three per route — Home = Prerender, Profile = Server, Dashboard = Client.',
+                '<strong>Hydration</strong> stops Angular discarding server HTML — it claims existing DOM nodes and attaches interactivity.',
+                '<strong>HTTP Transfer Cache</strong> stops double-fetching — the server\'s API response rides in the HTML.',
+                '<strong>Browser APIs</strong> (window, document, localStorage) crash on the server — guard with <code style="background:var(--page);padding:.05rem .3rem;border-radius:.2rem;">afterNextRender()</code>.',
+              ].map(text => (
+                <div class="tk-item">
+                  <div class="tk-dot"></div>
+                  <p class="tk-text" set:html={text} />
+                </div>
+              ))}
+            </div>
+          </section>
+
+        </div><!-- end main -->
+
+
+      </div><!-- end cols -->
+    </div><!-- end shell -->
+  </div>
+  </main>
+  <Footer />
+</MainLayout>
+
+<script is:inline>
+  (function () {
+    var navItems = document.querySelectorAll('.left-nav-item');
+    var sections  = document.querySelectorAll('section[id]');
+    var dividers  = document.querySelectorAll('hr.divider');
+
+    // Reveal all elements immediately (no scroll-fade with tab nav)
+    document.querySelectorAll('.reveal').forEach(function (el) {
+      el.classList.add('visible');
+    });
+
+    function showSection(targetId) {
+      // Hide every section and every divider between them
+      sections.forEach(function (s) { s.style.display = 'none'; });
+      dividers.forEach(function (d) { d.style.display = 'none'; });
+
+      // Show only the target
+      var target = document.getElementById(targetId);
+      if (target) { target.style.display = ''; }
+
+      // Update nav active highlight
+      navItems.forEach(function (item) {
+        item.classList.toggle('active', item.getAttribute('href') === '#' + targetId);
+      });
+
+      // Scroll to top of content
+      window.scrollTo({ top: 412, behavior: 'smooth' });
+    }
+
+    // Boot: show section 01
+    showSection('csr-problem');
+
+    // Wire up nav clicks
+    navItems.forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        e.preventDefault();
+        showSection(this.getAttribute('href').replace('#', ''));
+      });
+    });
+  })();
+</script>

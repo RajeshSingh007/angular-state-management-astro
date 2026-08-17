@@ -1,0 +1,30 @@
+---
+interface Props {
+  variant?: 'gradient' | 'dark';
+}
+const { variant = 'dark' } = Astro.props;
+---
+{variant === 'gradient' ? (
+  <footer class="text-[#1a1a2e] text-center py-10 px-4"
+    style="background: linear-gradient(90deg, rgba(42,123,155,1) 0%, rgba(87,199,133,1) 50%, rgba(237,221,83,1) 100%)">
+    <div class="max-w-4xl mx-auto">
+      <p class="font-bold text-sm mb-1">🎯 Quick Reference</p>
+      <div class="flex justify-center gap-6 text-xs font-semibold opacity-60">
+        <a href="https://ngrx.io/docs" target="_blank" class="hover:opacity-100 transition-opacity">NgRx Docs ↗</a>
+        <a href="https://rxjs.dev" target="_blank" class="hover:opacity-100 transition-opacity">RxJS Docs ↗</a>
+        <a href="https://angular.dev" target="_blank" class="hover:opacity-100 transition-opacity">Angular Docs ↗</a>
+      </div>
+      <p class="mt-4 text-xs opacity-40">Built with Astro · React · Tailwind</p>
+    </div>
+  </footer>
+) : (
+  <footer class="bg-[#1a1a2e] text-white text-center py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex justify-center gap-6 text-xs text-gray-500">
+        <a href="https://ngrx.io/docs" target="_blank" class="hover:text-white transition-colors">NgRx Docs ↗</a>
+        <a href="https://rxjs.dev" target="_blank" class="hover:text-white transition-colors">RxJS Docs ↗</a>
+        <a href="https://angular.dev" target="_blank" class="hover:text-white transition-colors">Angular Docs ↗</a>
+      </div>
+    </div>
+  </footer>
+)}

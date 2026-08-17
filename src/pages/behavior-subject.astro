@@ -1,0 +1,96 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import BSPlayground from '../components/BSPlayground.tsx';
+import ExcitementBanner from '../components/ExcitementBanner.astro';
+import WhatYouWillLearn from '../components/WhatYouWillLearn.astro';
+import KeyTakeaways from '../components/KeyTakeaways.astro';
+---
+<MainLayout title="BehaviorSubject — Angular State Management Visualizer"
+  description="Learn the Service + BehaviorSubject pattern in Angular. See how 5 components share state through a single service with live interactive demo.">
+  <Navbar active="/behavior-subject" step="Step 2 of 4" />
+  <main id="main-content">
+
+  <div class="pt-14">
+    <div class="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-14 text-center">
+      <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mb-3">Step 2 of 4 · BehaviorSubject</p>
+      <h1 class="text-3xl md:text-5xl font-extrabold mb-4">📱 BehaviorSubject Playground</h1>
+      <p class="text-blue-100 max-w-2xl mx-auto text-base">
+        The simpler approach — a shared Angular service + BehaviorSubject updates multiple components with zero Actions, zero Reducers, zero boilerplate.
+      </p>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 py-10 space-y-8">
+
+      <WhatYouWillLearn color="blue" items={[
+        'What a <strong>BehaviorSubject</strong> is and why it always holds the latest value.',
+        'How a shared <strong>Angular Service</strong> acts as a lightweight store for multiple components.',
+        'Why a <em>late subscriber</em> immediately gets the current value — even if they missed all previous updates.',
+      ]} />
+
+      <!-- Single clean analogy box -->
+      <div class="grid md:grid-cols-2 gap-6 reveal">
+        <div class="bg-amber-50 border-2 border-amber-400 rounded-2xl p-6">
+          <h3 class="font-bold text-amber-800 text-base mb-3">📺 Think of a TV News Channel</h3>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li>📺 It <strong>always</strong> has a current headline (the current value)</li>
+            <li>📺 When you tune in, you <em>immediately</em> see the latest — no waiting</li>
+            <li>📺 When news updates, <strong>all viewers</strong> see it at once</li>
+            <li>📺 You can switch off anytime (unsubscribe)</li>
+          </ul>
+          <p class="mt-4 text-xs text-amber-700 font-semibold">That is exactly what BehaviorSubject does in code.</p>
+        </div>
+        <div class="bg-green-50 border-2 border-green-400 rounded-2xl p-6">
+          <h3 class="font-bold text-green-800 text-base mb-3">📱 WhatsApp Group = Angular Service</h3>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li><strong>The Group</strong> = The Service (shared by all components)</li>
+            <li><strong>Pinned Message</strong> = BehaviorSubject current value</li>
+            <li><strong>Posting a message</strong> = Calling <code class="bg-green-100 px-1 rounded">.next()</code></li>
+            <li><strong>Being in the group</strong> = Subscribing</li>
+            <li><strong>Leaving the group</strong> = Unsubscribing (ngOnDestroy)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Step by step -->
+      <div class="bg-blue-50 border-2 border-blue-300 rounded-2xl p-6 reveal">
+        <h3 class="font-bold text-blue-800 mb-4">🔄 How it works — step by step</h3>
+        <ol class="space-y-3">
+          {[
+            'Service creates: <code class="bg-blue-100 px-1 rounded text-xs">user$ = new BehaviorSubject(null)</code>',
+            'Components A, B, C all <em>subscribe</em> — they join the group',
+            'They ALL immediately see the current value — even if subscribed late',
+            'User clicks a button → Component A calls <code class="bg-blue-100 px-1 rounded text-xs">service.login()</code>',
+            'Service does <code class="bg-blue-100 px-1 rounded text-xs">this.user$.next(newUser)</code>',
+            'Components B and C <strong>automatically see the update</strong> — no manual refresh!',
+          ].map((step, i) => (
+            <li class="flex items-start gap-3 text-sm text-gray-700">
+              <span class="bg-blue-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">{i+1}</span>
+              <span set:html={step} />
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <ExcitementBanner
+        gradient="linear-gradient(90deg, #2563eb, #0891b2)"
+        title="Now watch it all come alive 🚀"
+        subtitle="5 real components sharing one service. Click buttons and watch <strong>only subscribed components</strong> flash green."
+        pills={['📡 user$ stream','🎨 theme$ stream','🔔 notifications$ stream','⚡ 5 components, 1 service']}
+      />
+
+      <BSPlayground client:load />
+
+      <KeyTakeaways color="blue" points={[
+        '<strong>BehaviorSubject</strong> always holds the latest value — a new subscriber instantly gets it without waiting for the next emission.',
+        'The service pattern has <strong>no Actions, no Reducers, no Store object</strong> — components call service methods directly. Simpler, but no audit trail.',
+        'Use BehaviorSubject for small–medium apps where you need shared state without NgRx complexity. For large-scale apps or teams, consider NgRx.',
+      ]} />
+
+
+    </div>
+  </div>
+  </main>
+  <Footer />
+</MainLayout>

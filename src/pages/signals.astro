@@ -1,0 +1,416 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import SignalsPlayground from '../components/SignalsPlayground.tsx';
+import ExcitementBanner from '../components/ExcitementBanner.astro';
+import WhatYouWillLearn from '../components/WhatYouWillLearn.astro';
+import KeyTakeaways from '../components/KeyTakeaways.astro';
+---
+<MainLayout title="Angular Signals — Angular State Management Visualizer"
+  description="Learn Angular Signals — the modern Angular 17+ reactivity primitive. Understand signal(), computed(), and effect() with an interactive playground.">
+  <Navbar active="/signals" step="Step 3 of 4" />
+  <main id="main-content">
+
+  <div class="pt-14">
+    <div class="bg-gradient-to-r from-green-600 to-emerald-700 text-white px-4 py-14 text-center">
+      <p class="text-green-200 text-xs font-bold uppercase tracking-widest mb-3">Step 3 of 4 · Angular Signals</p>
+      <h1 class="text-3xl md:text-5xl font-extrabold mb-4">⚡ Angular Signals Playground</h1>
+      <p class="text-green-100 max-w-2xl mx-auto text-base">
+        Angular 17+ introduces Signals — a fine-grained, synchronous reactivity primitive. No subscriptions, no async pipe, no Zone.js needed.
+      </p>
+      <div class="mt-4 inline-block bg-white/20 text-white text-xs font-bold px-4 py-2 rounded-full">
+        🆕 New in Angular 17 · Recommended for new projects
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-10">
+      <div class="flex gap-8 items-start">
+
+        <!-- ── Left Timeline Sidebar ── -->
+        <aside class="hidden lg:block w-52 flex-shrink-0 sticky top-20 self-start">
+          <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 px-1">On this page</p>
+          <nav class="relative">
+            <!-- vertical line -->
+            <div class="absolute left-[11px] top-2 bottom-2 w-px bg-gray-200"></div>
+            <ul class="space-y-1">
+              {[
+                { id: 'what-is-signal',  dot: 'bg-green-500',  label: '⚡ What is a Signal?' },
+                { id: 'three-concepts',  dot: 'bg-green-400',  label: '🧩 3 Concepts' },
+                { id: 'linked-signal',   dot: 'bg-violet-500', label: '🔗 linkedSignal()' },
+                { id: 'comparison',      dot: 'bg-amber-400',  label: '📊 Comparison Table' },
+                { id: 'playground',      dot: 'bg-blue-400',   label: '🎮 Live Playground' },
+                { id: 'key-takeaways',   dot: 'bg-gray-400',   label: '🎯 Key Takeaways' },
+              ].map(({ id, dot, label }) => (
+                <li>
+                  <a
+                    href={`#${id}`}
+                    class="flex items-center gap-3 group py-1.5 pl-1 pr-2 rounded-lg hover:bg-gray-50 transition-colors text-xs text-gray-500 hover:text-gray-900"
+                  >
+                    <span class={`w-[10px] h-[10px] rounded-full flex-shrink-0 z-10 ring-2 ring-white ${dot} group-hover:scale-125 transition-transform`}></span>
+                    <span class="leading-tight">{label}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
+
+        <!-- ── Main Content ── -->
+        <div class="flex-1 min-w-0 space-y-8">
+
+          <WhatYouWillLearn color="green" items={[
+            'What <code class="bg-green-100 px-1 rounded text-xs">signal()</code> is and how setting it automatically notifies all readers.',
+            'How <code class="bg-green-100 px-1 rounded text-xs">computed()</code> creates derived values that re-evaluate when their dependencies change.',
+            'How <code class="bg-green-100 px-1 rounded text-xs">effect()</code> runs side effects whenever signal dependencies change — the replacement for ngOnInit subscriptions.',
+            'How <code class="bg-green-100 px-1 rounded text-xs">linkedSignal()</code> keeps a user choice valid when the underlying options list changes.',
+          ]} />
+
+          <!-- ── Section: What is a Signal? ── -->
+          <div id="what-is-signal" class="bg-white rounded-2xl p-6 shadow-sm border border-green-200 reveal scroll-mt-24">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-3xl">🏟️</span>
+              <h2 class="text-xl font-extrabold text-gray-800">What on earth is a Signal? (The Simple Version)</h2>
+            </div>
+
+            <p class="text-gray-600 text-sm leading-relaxed mb-4">
+              Forget the tech jargon for a moment. Think about a <strong>live football match scoreboard</strong>.
+            </p>
+
+            <div class="bg-green-50 border border-green-200 rounded-xl p-5 mb-5">
+              <p class="text-sm text-gray-700 leading-relaxed mb-3">
+                🏟️ There's one giant scoreboard at the stadium showing <strong>"Home: 2 — Away: 1"</strong>.
+                Every TV in every home, every phone app, every display in the stadium — they all show the same score.
+              </p>
+              <p class="text-sm text-gray-700 leading-relaxed mb-3">
+                The moment the referee whistles and the scoreboard updates to <strong>"Home: 3 — Away: 1"</strong>,
+                <em>every single screen updates automatically</em>. Nobody calls each TV individually.
+                Nobody has to keep refreshing. The scoreboard is the single source of truth, and watchers just… react.
+              </p>
+              <p class="text-sm font-semibold text-green-800">
+                👆 That scoreboard is a <code class="bg-green-100 px-1 rounded">signal()</code>.
+              </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 mb-5">
+              <div class="bg-green-50 rounded-xl p-4 border border-green-100">
+                <p class="font-bold text-green-800 text-sm mb-1">⚡ signal() — The Scoreboard</p>
+                <p class="text-xs text-gray-600 leading-relaxed">
+                  Holds a value. When it changes (<code>.set()</code>), every part of your app that reads it
+                  re-renders automatically — just like every screen updating when the score changes.
+                </p>
+              </div>
+              <div class="bg-amber-50 rounded-xl p-4 border border-amber-100">
+                <p class="font-bold text-amber-800 text-sm mb-1">🔢 computed() — The Stats Banner</p>
+                <p class="text-xs text-gray-600 leading-relaxed">
+                  The "Home leads by 2 goals" banner <em>automatically recalculates</em> from the live scores.
+                  You never manually update the banner — it derives its value from signals and stays in sync.
+                </p>
+              </div>
+              <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                <p class="font-bold text-blue-800 text-sm mb-1">🔁 effect() — The Commentator</p>
+                <p class="text-xs text-gray-600 leading-relaxed">
+                  The commentator who <em>reacts every time</em> the score changes — shouting "GOAL!" and logging
+                  the time. They don't ask for updates; they watch the signal and respond automatically.
+                </p>
+              </div>
+            </div>
+
+            <div class="bg-gray-900 rounded-xl p-5 font-mono text-sm overflow-x-auto">
+              <p class="text-gray-400 text-xs mb-3">// Real-world example: Shopping cart</p>
+              <p class="text-green-400"><span class="text-blue-300">const</span> cartItems = <span class="text-yellow-300">signal</span>([]);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-gray-500">// 🛒 the cart itself</span></p>
+              <p class="text-green-400"><span class="text-blue-300">const</span> totalPrice = <span class="text-yellow-300">computed</span>(() =&gt; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-gray-500">// 💰 auto-totals from cart</span></p>
+              <p class="text-green-400">&nbsp;&nbsp;cartItems().<span class="text-yellow-300">reduce</span>((sum, item) =&gt; sum + item.price, <span class="text-purple-300">0</span>)</p>
+              <p class="text-green-400">);</p>
+              <br />
+              <p class="text-green-400"><span class="text-yellow-300">effect</span>(() =&gt; &#123;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-gray-500">// 💾 auto-saves on every change</span></p>
+              <p class="text-green-400">&nbsp;&nbsp;localStorage.<span class="text-yellow-300">setItem</span>(<span class="text-orange-300">'cart'</span>, <span class="text-yellow-300">JSON.stringify</span>(cartItems()));</p>
+              <p class="text-green-400">&#125;);</p>
+              <br />
+              <p class="text-green-400">cartItems.<span class="text-yellow-300">update</span>(items =&gt; [...items, newItem]);&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-gray-500">// add item → everything above reacts</span></p>
+            </div>
+
+            <p class="text-xs text-gray-500 italic mt-4">
+              💡 One line changes the cart signal → the total price <em>auto-recalculates</em>, the localStorage <em>auto-saves</em>.
+              No manual "please update the total now". No subscriptions to manage. No forgetting to unsubscribe.
+              That's the magic of Signals.
+            </p>
+          </div>
+
+          <!-- ── Section: 3 Concepts Grid ── -->
+          <div id="three-concepts" class="grid md:grid-cols-3 gap-5 reveal scroll-mt-24">
+            {[
+              {
+                icon: '⚡',
+                name: 'signal()',
+                color: 'border-green-400 bg-green-50',
+                titleColor: 'text-green-800',
+                desc: 'A writable reactive container. When you call <code class="bg-green-100 px-1 rounded">.set()</code> or <code class="bg-green-100 px-1 rounded">.update()</code>, Angular knows exactly which templates and computed values depend on it.',
+                analogy: '🏟️ Like a live scoreboard — the moment the score changes, every TV showing the match updates automatically. No one calls each screen individually.',
+                code: 'const count = signal(0);\ncount.set(5); // notifies all watchers\ncount.update(v => v + 1);',
+              },
+              {
+                icon: '🔢',
+                name: 'computed()',
+                color: 'border-amber-400 bg-amber-50',
+                titleColor: 'text-amber-800',
+                desc: 'A read-only signal derived from other signals. Re-evaluates lazily — only when one of its signal dependencies changes. Always up to date, never stale.',
+                analogy: '📊 Like a "Home leads by X goals" banner — it auto-calculates from the live score signals and never gets out of sync.',
+                code: 'const doubled = computed(() => count() * 2);\n// Auto-recalculates when count() changes',
+              },
+              {
+                icon: '🔁',
+                name: 'effect()',
+                color: 'border-blue-400 bg-blue-50',
+                titleColor: 'text-blue-800',
+                desc: 'Runs a side effect whenever the signals it reads change. Perfect for logging, localStorage sync, or triggering analytics — without manual subscriptions.',
+                analogy: '🎙️ Like a match commentator — they watch the scoreboard and automatically react ("GOAL!") every time the signal changes, without being asked.',
+                code: 'effect(() => {\n  console.log("Count is:", count());\n  // Runs automatically on every change\n});',
+              },
+            ].map(({ icon, name, color, titleColor, desc, analogy, code }) => (
+              <div class={`${color} border-2 rounded-2xl p-5`}>
+                <div class="text-3xl mb-2">{icon}</div>
+                <h3 class={`font-extrabold text-lg mb-2 ${titleColor}`}>{name}</h3>
+                <p class="text-sm text-gray-600 mb-3" set:html={desc} />
+                <p class="text-xs text-gray-500 italic mb-3">{analogy}</p>
+                <pre class="bg-[#1a1a2e] text-green-400 text-[11px] p-3 rounded-lg font-mono leading-relaxed overflow-x-auto">{code}</pre>
+              </div>
+            ))}
+          </div>
+
+          <!-- ── Section: linkedSignal ── -->
+          <div id="linked-signal" class="bg-white rounded-2xl p-6 shadow-sm border border-violet-200 reveal scroll-mt-24">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="text-3xl">🔗</span>
+              <div>
+                <h2 class="text-xl font-extrabold text-gray-800">linkedSignal() — The Smart Default</h2>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-violet-600 bg-violet-100 px-2 py-0.5 rounded-full">Angular 19+</span>
+              </div>
+            </div>
+
+            <p class="text-gray-500 text-xs italic mb-5">
+              Before diving in — you need to understand <em>why</em> this exists. The problem it solves is subtle but very real.
+            </p>
+
+            <!-- The Problem -->
+            <div class="bg-red-50 border border-red-200 rounded-xl p-5 mb-5">
+              <p class="font-bold text-red-800 text-sm mb-2">😤 The problem <code class="bg-red-100 px-1 rounded">linkedSignal()</code> solves</p>
+              <p class="text-sm text-gray-700 leading-relaxed mb-3">
+                Imagine you're booking a flight. You choose a <strong>country</strong> — say, <strong>India</strong>.
+                The app loads a list of Indian cities: Mumbai, Delhi, Bangalore.
+                You pick <strong>Mumbai</strong> as your departure city.
+              </p>
+              <p class="text-sm text-gray-700 leading-relaxed mb-3">
+                Then you change the country to <strong>France</strong>.
+                The cities list updates to: Paris, Lyon, Nice.
+              </p>
+              <p class="text-sm font-semibold text-red-700">
+                🚨 But your selected city is still "Mumbai" — which doesn't exist in France! The selection is now invalid.
+              </p>
+            </div>
+
+            <!-- The analogy -->
+            <div class="bg-violet-50 border border-violet-200 rounded-xl p-5 mb-5">
+              <p class="font-bold text-violet-800 text-sm mb-3">✈️ Real-world analogy: The Flight Booking Form</p>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Without linkedSignal</p>
+                  <div class="bg-white rounded-lg p-3 border border-red-200 text-xs space-y-1">
+                    <p>🌍 Country: <strong class="text-green-700">France</strong> (just changed)</p>
+                    <p>🏙️ Cities available: Paris, Lyon, Nice</p>
+                    <p>✈️ Your selection: <strong class="text-red-600">Mumbai ❌</strong></p>
+                    <p class="text-red-600 italic text-[11px] mt-2">Selection is stale — Mumbai isn't in France's city list. App might crash or show a blank.</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">With linkedSignal</p>
+                  <div class="bg-white rounded-lg p-3 border border-green-200 text-xs space-y-1">
+                    <p>🌍 Country: <strong class="text-green-700">France</strong> (just changed)</p>
+                    <p>🏙️ Cities available: Paris, Lyon, Nice</p>
+                    <p>✈️ Your selection: <strong class="text-green-700">Paris ✅</strong> (auto-reset to first valid option)</p>
+                    <p class="text-green-600 italic text-[11px] mt-2">But you can still manually pick Lyon or Nice — it's writable!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- The key insight -->
+            <div class="grid md:grid-cols-3 gap-4 mb-5">
+              <div class="bg-amber-50 rounded-xl p-4 border border-amber-200 text-center">
+                <p class="text-2xl mb-1">📖</p>
+                <p class="font-bold text-amber-800 text-xs mb-1">computed()</p>
+                <p class="text-xs text-gray-600">Read-only. Auto-derives from source. <strong>You cannot override it.</strong></p>
+                <p class="text-[11px] text-gray-400 mt-2 italic">Like a formula in a spreadsheet — you can't type into it</p>
+              </div>
+              <div class="bg-green-50 rounded-xl p-4 border border-green-200 text-center">
+                <p class="text-2xl mb-1">✏️</p>
+                <p class="font-bold text-green-800 text-xs mb-1">signal()</p>
+                <p class="text-xs text-gray-600">Writable. But <strong>no smart reset</strong> when related data changes.</p>
+                <p class="text-[11px] text-gray-400 mt-2 italic">Like a sticky note — you write it, it stays until you change it manually</p>
+              </div>
+              <div class="bg-violet-50 rounded-xl p-4 border border-violet-200 text-center">
+                <p class="text-2xl mb-1">🔗</p>
+                <p class="font-bold text-violet-800 text-xs mb-1">linkedSignal()</p>
+                <p class="text-xs text-gray-600"><strong>Writable + smart default.</strong> Resets automatically when source changes, but user can still override.</p>
+                <p class="text-[11px] text-gray-400 mt-2 italic">Best of both worlds</p>
+              </div>
+            </div>
+
+            <!-- GPS analogy summary -->
+            <div class="bg-gray-50 rounded-xl p-4 mb-5 border border-gray-200">
+              <p class="text-sm text-gray-700 leading-relaxed">
+                🧭 Think of it like a <strong>GPS navigator</strong>. It always suggests the best route (auto-computed default).
+                But you can type in a custom destination at any time (writable).
+                However — the moment you change your <em>starting city</em> (the source signal),
+                the GPS re-calculates and resets to the new best route.
+                Your old custom destination from the previous city is automatically discarded.
+              </p>
+            </div>
+
+            <!-- Code -->
+            <div class="bg-gray-900 rounded-xl p-5 font-mono text-sm overflow-x-auto mb-4">
+              <p class="text-gray-400 text-xs mb-3">// Flight booking: country → city picker</p>
+              <p class="text-green-400"><span class="text-blue-300">const</span> country = <span class="text-yellow-300">signal</span>(<span class="text-orange-300">'India'</span>);</p>
+              <p class="text-green-400"><span class="text-blue-300">const</span> cityOptions = <span class="text-yellow-300">computed</span>(() =&gt; getCitiesFor(country()));&nbsp;&nbsp;<span class="text-gray-500">// ['Mumbai','Delhi','Bangalore']</span></p>
+              <br />
+              <p class="text-gray-400 text-xs">// 🔗 linkedSignal: auto-defaults to first city, but user can still pick manually</p>
+              <p class="text-green-400"><span class="text-blue-300">const</span> selectedCity = <span class="text-yellow-300">linkedSignal</span>(() =&gt; cityOptions()[<span class="text-purple-300">0</span>]);</p>
+              <br />
+              <p class="text-gray-400 text-xs">// User manually picks a city → works fine</p>
+              <p class="text-green-400">selectedCity.<span class="text-yellow-300">set</span>(<span class="text-orange-300">'Delhi'</span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-gray-500">// ✅ Delhi</span></p>
+              <br />
+              <p class="text-gray-400 text-xs">// Country changes → selectedCity AUTO-RESETS to first French city</p>
+              <p class="text-green-400">country.<span class="text-yellow-300">set</span>(<span class="text-orange-300">'France'</span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-gray-500">// selectedCity → 'Paris' ✅ (not 'Delhi' ❌)</span></p>
+              <br />
+              <p class="text-gray-400 text-xs">// User can still pick another French city</p>
+              <p class="text-green-400">selectedCity.<span class="text-yellow-300">set</span>(<span class="text-orange-300">'Lyon'</span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-gray-500">// ✅ Lyon</span></p>
+            </div>
+
+            <!-- ❓ FAQ: how does Paris get auto-selected? -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-4">
+              <p class="font-bold text-blue-800 text-sm mb-3">❓ Wait — how does <code class="bg-blue-100 px-1 rounded">selectedCity</code> know to pick "Paris" when country changes to France?</p>
+              <p class="text-xs text-gray-700 leading-relaxed mb-3">
+                Angular tracks <em>every signal you read</em> inside an arrow function — just like it does for <code class="bg-gray-100 px-1 rounded">computed()</code>.
+                So <code class="bg-gray-100 px-1 rounded">linkedSignal(() =&gt; cityOptions()[0])</code> secretly watches <code class="bg-gray-100 px-1 rounded">cityOptions</code>.
+              </p>
+              <div class="bg-white rounded-lg p-4 border border-blue-100 text-xs space-y-2 font-mono mb-3">
+                <p class="text-gray-400">// Step-by-step what happens when country.set('France'):</p>
+                <p class="text-blue-600">1️⃣  country signal changes  →  <span class="text-gray-500">"France"</span></p>
+                <p class="text-blue-600">2️⃣  cityOptions (computed) re-runs  →  <span class="text-gray-500">['Paris', 'Lyon', 'Nice']</span></p>
+                <p class="text-violet-600">3️⃣  linkedSignal sees cityOptions changed  →  re-runs its own fn</p>
+                <p class="text-violet-600">4️⃣  cityOptions()[0]  →  <span class="text-green-600">'Paris'  ✅</span></p>
+              </div>
+              <p class="text-xs text-gray-600 italic">
+                It's a domino chain through Angular's dependency graph. Each signal notifies the next one downstream — automatically.
+              </p>
+            </div>
+
+            <!-- ❓ FAQ: do you always need computed() in between? -->
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-4">
+              <p class="font-bold text-amber-800 text-sm mb-3">❓ Do you always need <code class="bg-amber-100 px-1 rounded">computed()</code> in between? Can you skip it?</p>
+              <p class="text-xs text-gray-700 leading-relaxed mb-3">
+                <strong>No — computed() is optional.</strong> You can read any signal directly inside <code class="bg-gray-100 px-1 rounded">linkedSignal()</code>.
+                The <code class="bg-gray-100 px-1 rounded">computed()</code> in this example only exists because we also need <code class="bg-gray-100 px-1 rounded">cityOptions</code>
+                to <em>render the dropdown list</em> in the template. If you only needed the default selection, you could write:
+              </p>
+              <div class="grid md:grid-cols-2 gap-3 mb-3">
+                <div class="bg-gray-900 rounded-lg p-3 text-xs font-mono">
+                  <p class="text-gray-400 mb-2">// ✅ Shorter — skip computed() entirely</p>
+                  <p class="text-green-400"><span class="text-blue-300">const</span> selectedCity = <span class="text-yellow-300">linkedSignal</span>(</p>
+                  <p class="text-green-400">&nbsp;&nbsp;() =&gt; getCitiesFor(country())[<span class="text-purple-300">0</span>]</p>
+                  <p class="text-green-400">);</p>
+                  <p class="text-gray-500 text-[10px] mt-2">Works identically — country() is the direct dependency</p>
+                </div>
+                <div class="bg-gray-900 rounded-lg p-3 text-xs font-mono">
+                  <p class="text-gray-400 mb-2">// ✅ With computed() — use when you need the list too</p>
+                  <p class="text-green-400"><span class="text-blue-300">const</span> cityOptions = <span class="text-yellow-300">computed</span>(</p>
+                  <p class="text-green-400">&nbsp;&nbsp;() =&gt; getCitiesFor(country())</p>
+                  <p class="text-green-400">);&nbsp;&nbsp;<span class="text-gray-500">// reuse this in the dropdown</span></p>
+                  <p class="text-green-400"><span class="text-blue-300">const</span> selectedCity = <span class="text-yellow-300">linkedSignal</span>(</p>
+                  <p class="text-green-400">&nbsp;&nbsp;() =&gt; cityOptions()[<span class="text-purple-300">0</span>]</p>
+                  <p class="text-green-400">);</p>
+                </div>
+              </div>
+              <div class="bg-amber-100 rounded-lg p-3 text-xs text-amber-900">
+                <strong>Rule of thumb:</strong> Whatever signals you read inside the <code class="bg-amber-200 px-1 rounded">linkedSignal(() =&gt; ...)</code> arrow
+                become its dependencies. Plain signal, computed signal — doesn't matter. Angular tracks them all the same way.
+              </div>
+            </div>
+
+            <div class="bg-violet-50 rounded-lg p-4 border border-violet-100">
+              <p class="text-xs text-violet-800 font-semibold mb-1">🎯 When should you use <code class="bg-violet-100 px-1 rounded">linkedSignal()</code>?</p>
+              <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                <li>A <strong>selection/choice</strong> that depends on a list — and the list can change (e.g. country → city, category → product, team → member)</li>
+                <li>A <strong>default value</strong> that should auto-reset when its source data changes, but the user can still override it</li>
+                <li>Any "smart pre-fill" pattern: pre-fill a form field from loaded data, but let the user edit it freely</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- ── Section: Comparison Table ── -->
+          <div id="comparison" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 reveal scroll-mt-24">
+            <h3 class="font-bold text-lg mb-4">📊 Signals vs BehaviorSubject vs NgRx</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs border-collapse">
+                <thead>
+                  <tr class="bg-gray-100">
+                    <th class="p-2 text-left border-b border-gray-200">Aspect</th>
+                    <th class="p-2 text-left border-b border-gray-200">signal()</th>
+                    <th class="p-2 text-left border-b border-gray-200">BehaviorSubject</th>
+                    <th class="p-2 text-left border-b border-gray-200">NgRx Store</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ['Syntax',         'signal(0)',               'new BehaviorSubject(0)', 'createReducer + actions'],
+                    ['Update',         '.set() / .update()',      '.next(value)',           'store.dispatch(action)'],
+                    ['Read in template','count()',                '{{ count$ | async }}',   '{{ count$ | async }}'],
+                    ['Derived values', 'computed()',              'pipe(map(...))',          'createSelector'],
+                    ['Side effects',   'effect()',                'subscribe()',            'createEffect + ofType'],
+                    ['Smart defaults', 'linkedSignal()',          '❌ Manual',              '❌ Manual'],
+                    ['History/DevTools','❌ No',                  '❌ No',                  '✅ Yes'],
+                    ['Angular version','17+',                    'Any',                    'Any'],
+                  ].map(([aspect, sig, bs, ngrx]) => (
+                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                      <td class="p-2 font-semibold bg-gray-50">{aspect}</td>
+                      <td class="p-2 text-green-700 font-mono">{sig}</td>
+                      <td class="p-2 text-blue-700 font-mono">{bs}</td>
+                      <td class="p-2 text-purple-700 font-mono">{ngrx}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ── Section: Playground ── -->
+          <div id="playground" class="scroll-mt-24">
+            <ExcitementBanner
+              gradient="linear-gradient(90deg, #16a34a, #059669)"
+              title="Now watch it all come alive 🚀"
+              subtitle="Interact with live signals — change count, step, or name and watch <strong>computed values and effect() re-fire automatically</strong>."
+              pills={['⚡ signal(count)', '🔢 computed(doubled)', '🔁 effect() log', '✏️ signal(name)']}
+            />
+            <div class="mt-6">
+              <SignalsPlayground client:load />
+            </div>
+          </div>
+
+          <!-- ── Section: Key Takeaways ── -->
+          <div id="key-takeaways" class="scroll-mt-24">
+            <KeyTakeaways color="green" points={[
+              '<strong>Signals are synchronous and fine-grained</strong> — only the exact component or computed value that reads a signal re-evaluates when it changes. No unnecessary renders.',
+              '<code class="bg-green-100 px-1 rounded text-xs">computed()</code> values are <strong>lazy and memoized</strong> — they only recompute when their signal dependencies actually change.',
+              '<code class="bg-green-100 px-1 rounded text-xs">linkedSignal()</code> fills the gap between <em>read-only computed</em> and <em>fully manual signal</em> — use it when a user selection must stay valid as options change.',
+              'Use Signals for new Angular 17+ projects. Signals and BehaviorSubject/NgRx can <strong>coexist</strong> in the same app — Angular provides interop utilities like <code class="bg-green-100 px-1 rounded text-xs">toSignal()</code> and <code class="bg-green-100 px-1 rounded text-xs">toObservable()</code>.',
+            ]} />
+          </div>
+
+
+        </div><!-- end main content -->
+      </div><!-- end flex -->
+    </div><!-- end outer wrapper -->
+  </div>
+  </main>
+  <Footer />
+</MainLayout>

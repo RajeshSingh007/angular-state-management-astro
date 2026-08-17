@@ -1,0 +1,75 @@
+---
+interface Props {
+  active?: string;
+  step?: string;
+}
+const { active = '', step } = Astro.props;
+
+const links = [
+  { href: '/ssr', label: '🌐 SSR' },
+];
+---
+<nav class="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-sm z-50 border-b border-gray-100" id="navbar">
+  <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="/" class="font-extrabold text-base tracking-tight text-[#1a1a2e]">
+        ⚡ Angular State
+      </a>
+      {step && (
+        <span class="hidden sm:inline-block text-xs font-bold px-2.5 py-1 rounded-full text-white"
+          style="background: linear-gradient(90deg, rgba(42,123,155,1), rgba(87,199,133,1))">
+          {step}
+        </span>
+      )}
+    </div>
+
+    <!-- Desktop links -->
+    <ul class="hidden md:flex gap-1">
+      {links.map(l => (
+        <li>
+          <a
+            href={l.href}
+            class={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              active === l.href
+                ? 'text-white bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 shadow-lg shadow-fuchsia-500/30'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-[#1a1a2e]'
+            }`}
+          >
+            {l.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div class="flex items-center gap-2">
+      <!-- Hamburger (mobile) -->
+      <button id="hamburger" aria-label="Open menu" class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
+        <svg id="burger-icon" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu">
+    {links.map(l => (
+      <a href={l.href}
+        class={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+          active === l.href
+            ? 'text-white bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500'
+            : 'text-gray-600 hover:bg-gray-100'
+        }`}
+      >
+        {l.label}
+      </a>
+    ))}
+  </div>
+</nav>
+
+<script is:inline>
+  // Hamburger
+  const ham = document.getElementById('hamburger');
+  const menu = document.getElementById('mobile-menu');
+  ham && ham.addEventListener('click', () => menu && menu.classList.toggle('open'));
+</script>

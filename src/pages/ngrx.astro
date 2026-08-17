@@ -1,0 +1,113 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import NgRxPlayground from '../components/NgRxPlayground.tsx';
+import ExcitementBanner from '../components/ExcitementBanner.astro';
+import WhatYouWillLearn from '../components/WhatYouWillLearn.astro';
+import KeyTakeaways from '../components/KeyTakeaways.astro';
+---
+<MainLayout title="NgRx Store — Angular State Management Visualizer"
+  description="Learn NgRx Store interactively — dispatch actions, watch the reducer compute new state, and see selectors update components in real time.">
+  <Navbar active="/ngrx" step="Step 1 of 4" />
+  <main id="main-content">
+
+  <div class="pt-14">
+    <div class="bg-gradient-to-r from-purple-700 to-indigo-800 text-white px-4 py-14 text-center">
+      <p class="text-purple-300 text-xs font-bold uppercase tracking-widest mb-3">Step 1 of 4 · NgRx Store</p>
+      <h1 class="text-3xl md:text-5xl font-extrabold mb-4">🏢 NgRx Store Playground</h1>
+      <p class="text-purple-200 max-w-2xl mx-auto text-base">
+        A Redux-inspired library for Angular. One store holds all app state — components dispatch actions, the reducer processes them, selectors extract slices.
+      </p>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 py-10 space-y-8">
+
+      <WhatYouWillLearn color="purple" items={[
+        'What an <strong>Action</strong>, <strong>Reducer</strong>, <strong>Store</strong>, and <strong>Selector</strong> are — and how they connect.',
+        'Why NgRx enforces a strict unidirectional data flow and why that matters for large teams.',
+        'How route-based components mount and read the latest store state automatically.',
+      ]} />
+
+      <!-- Corporate analogy -->
+      <div class="bg-amber-50 border-2 border-amber-400 rounded-2xl p-6 reveal">
+        <h3 class="font-bold text-amber-800 text-lg mb-4">🏢 The Corporate Ticketing Analogy</h3>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <p class="font-semibold text-red-700 mb-3">❌ Without NgRx (Slack with 500 people):</p>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li>❌ Anyone can post and change anything — chaos!</li>
+              <li>❌ No history — who changed what and when?</li>
+              <li>❌ No rules — someone can delete important data</li>
+              <li>❌ Cannot undo — changes are gone forever</li>
+            </ul>
+          </div>
+          <div>
+            <p class="font-semibold text-green-700 mb-3">✅ With NgRx (Company Jira/Ticketing):</p>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li>✅ Must submit a <strong>TICKET (Action)</strong> to change anything</li>
+              <li>✅ A <strong>MANAGER (Reducer)</strong> reviews and processes it</li>
+              <li>✅ All changes <strong>LOGGED</strong> — time-travel debugging!</li>
+              <li>✅ Everyone sees the <strong>SAME dashboard</strong> (Single source of truth)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <ExcitementBanner
+        gradient="linear-gradient(90deg, #7c3aed, #4f46e5)"
+        title="Now watch it all come alive 🚀"
+        subtitle="Dispatch actions, watch the reducer compute new state, and see <strong>only subscribed components</strong> flash green."
+        pills={['🎬 Actions', '⚙️ Reducer', '🗃️ Store', '📊 Selectors', '⚡ Route-based components']}
+      />
+
+      <NgRxPlayground client:load />
+
+      <!-- Service vs NgRx comparison -->
+      <div class="reveal">
+        <h2 class="text-2xl font-extrabold mb-6">⚔️ Service + BehaviorSubject vs NgRx</h2>
+        <div class="overflow-x-auto rounded-2xl shadow-sm mb-6">
+          <table class="w-full border-collapse bg-white text-sm">
+            <thead>
+              <tr class="bg-[#1a1a2e] text-white">
+                <th class="p-3 text-left">Aspect</th>
+                <th class="p-3 text-left">Service + BehaviorSubject</th>
+                <th class="p-3 text-left">NgRx Store</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ['How to change state', 'Call service.next(value) directly', 'Dispatch Action → Reducer → Store'],
+                ['Analogy',            'Slack channel — anyone posts freely','Company Jira — submit ticket, manager processes'],
+                ['History / logging',  '❌ No history. State just changes.', '✅ Every action logged. Time-travel!'],
+                ['Predictability',     'Any component can mutate anytime',   'Only reducers can change state — 100% predictable'],
+                ['Boilerplate',        'Very little — just a service',       'More — actions, reducers, effects, selectors'],
+                ['Best for',          'Small–medium apps, few shared states', 'Large apps, many devs, complex logic'],
+              ].map(([aspect, bs, ngrx]) => (
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                  <td class="p-3 font-semibold bg-gray-50">{aspect}</td>
+                  <td class="p-3 text-gray-600">{bs}</td>
+                  <td class="p-3 text-gray-600">{ngrx}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div class="bg-green-50 border-2 border-green-400 rounded-2xl p-5 text-sm">
+          <h4 class="font-bold text-green-800 mb-2">🎯 The KEY Difference in one sentence:</h4>
+          <p class="mb-2"><strong>Service:</strong> Component says "Hey service, change this!" → Done instantly. No paperwork.</p>
+          <p><strong>NgRx:</strong> Component dispatches an Action → Reducer processes it → creates new state → Store updates → Selectors notify. <em>All logged!</em></p>
+        </div>
+      </div>
+
+      <KeyTakeaways color="purple" points={[
+        'NgRx enforces a <strong>strict unidirectional data flow</strong>: Action → Reducer → Store → Selector → Component. No component ever mutates state directly.',
+        '<strong>Selectors</strong> are the key to performance — a component only re-renders when the specific slice it subscribes to changes.',
+        'Use NgRx when your app has complex shared state, multiple developers, or you need time-travel debugging. For simpler apps, BehaviorSubject is enough.',
+      ]} />
+
+    </div>
+  </div>
+  </main>
+  <Footer />
+</MainLayout>
