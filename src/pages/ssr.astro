@@ -1380,7 +1380,8 @@ import Footer from '../components/Footer.astro';
                 &nbsp;&nbsp;&#125;<br/>
                 <br/>
                 &nbsp;&nbsp;<span class="cm">// 🧩 onClick method — exists in BOTH server and browser Component Objects</span><br/>
-                &nbsp;&nbsp;<span class="cm">// ⚠️ On the server: this method EXISTS but is never called — server only renders, never handles clicks</span><br/>
+                &nbsp;&nbsp;<span class="cm">// ⚠️ On the server: this method EXISTS in memory but is never triggered</span><br/>
+                &nbsp;&nbsp;<span class="cm">// ⚠️ The server has no screen, no user, no mouse — clicks only happen in a browser</span><br/>
                 &nbsp;&nbsp;<span class="cm">// ⚠️ In the browser: Angular wires this to the &lt;button&gt; DOM Node via addEventListener()</span><br/>
                 &nbsp;&nbsp;<span class="fn">onClick</span>() &#123;<br/>
                 &nbsp;&nbsp;&nbsp;&nbsp;<span class="hi">this</span>.<span class="hi">count</span>++;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// updates count → Angular updates the DOM</span><br/>
@@ -1548,7 +1549,7 @@ import Footer from '../components/Footer.astro';
                     {[
                       ['new HelloComponent()', 'Component Object created in Node.js RAM'],
                       ['ngOnInit() runs', 'platform = "Server"'],
-                      ['onClick() exists', 'but is NEVER called — server only renders'],
+                      ['onClick() exists in RAM', 'but never triggered — no screen, no user, no mouse on the server'],
                       ['template evaluated', '→ HTML string produced'],
                       ['HTML string sent over HTTP', 'Component Object destroyed'],
                     ].map(([code, desc]) => (
@@ -1597,7 +1598,7 @@ import Footer from '../components/Footer.astro';
                 <p style="font-size:.72rem;font-weight:800;color:var(--ink-1);margin-bottom:.75rem;">🔑 Key insight</p>
                 <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.71rem;color:var(--ink-2);line-height:1.7;">
                   <p>• <strong style="color:var(--ink-1);">The class (main.js) runs in BOTH places</strong> — same code, two different environments.</p>
-                  <p>• <strong style="color:var(--ink-1);">Server job = produce HTML string.</strong> The onClick method exists but is never called. The server only renders — it never handles user interaction.</p>
+                  <p>• <strong style="color:var(--ink-1);">Server job = produce HTML string.</strong> The onClick method exists in the Component Object but is never triggered — the server has no screen, no user, no mouse. Clicks only happen in a browser.</p>
                   <p>• <strong style="color:var(--ink-1);">Browser job = connect interactivity to DOM nodes.</strong> Angular doesn't re-create the DOM (hydration). It re-creates the Component Object, then wires onClick() to the existing &lt;button&gt; node via addEventListener().</p>
                   <p>• <strong style="color:var(--ink-1);">The HTML string travels. The Component Object never does.</strong> That's the core constraint that makes all of SSR necessary.</p>
                 </div>
