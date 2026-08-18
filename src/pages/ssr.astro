@@ -958,7 +958,30 @@ import Footer from '../components/Footer.astro';
               throw it away and rebuild from scratch — and what it needs from the server to reuse it instead.
             </p>
 
-            <!-- Part A: Two things -->
+            <!-- Why Component Objects are created twice -->
+            <div style="background:rgba(0,0,0,.03);border:1px solid var(--grid);border-left:3px solid var(--orange);border-radius:.75rem;padding:1rem 1.25rem;margin-bottom:1.75rem;">
+              <p style="font-size:.72rem;font-weight:800;color:var(--ink-1);margin-bottom:.85rem;">⚠️ Why Angular creates Component Objects twice</p>
+              <div style="display:flex;flex-direction:column;gap:.6rem;">
+                <div style="display:flex;gap:.75rem;align-items:flex-start;background:#fff7ed;border:1px solid #fed7aa;border-radius:.55rem;padding:.65rem .9rem;">
+                  <span style="font-size:.85rem;flex-shrink:0;">🖥️</span>
+                  <div>
+                    <p style="font-size:.71rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">Server — job: produce the HTML string</p>
+                    <p style="font-size:.68rem;color:var(--ink-2);line-height:1.65;"><code style="font-size:.65rem;background:rgba(0,0,0,.06);padding:.1rem .3rem;border-radius:.25rem;">new HelloComponent()</code> → evaluates template → produces HTML string → <strong style="color:var(--ink-1);">job done → object discarded from RAM</strong>. The HTML string travels over HTTP. The Component Object never does.</p>
+                  </div>
+                </div>
+                <div style="display:flex;gap:.75rem;align-items:flex-start;background:#eff6ff;border:1px solid #bfdbfe;border-radius:.55rem;padding:.65rem .9rem;">
+                  <span style="font-size:.85rem;flex-shrink:0;">🌐</span>
+                  <div>
+                    <p style="font-size:.71rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">Browser — job: connect interactivity to existing DOM nodes</p>
+                    <p style="font-size:.68rem;color:var(--ink-2);line-height:1.65;"><code style="font-size:.65rem;background:rgba(0,0,0,.06);padding:.1rem .3rem;border-radius:.25rem;">new HelloComponent()</code> again — a <strong style="color:var(--ink-1);">fresh object, this time in browser RAM</strong>. The DOM nodes already exist (HTML Parser built them). Angular's only job now is to find them and attach event listeners.</p>
+                  </div>
+                </div>
+                <div style="background:rgba(0,0,0,.03);border:1px solid var(--grid);border-radius:.55rem;padding:.55rem .9rem;font-size:.68rem;color:var(--ink-2);line-height:1.6;text-align:center;">
+                  Component Objects are always created twice — that's unavoidable.<br/>
+                  <strong style="color:var(--ink-1);">Hydration stops the DOM from being recreated a second time.</strong> That's its only job.
+                </div>
+              </div>
+            </div>
             <div style="margin-bottom:2rem;">
               <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">
                 First: Two Things That Must Both Exist
