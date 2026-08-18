@@ -569,6 +569,58 @@ import Footer from '../components/Footer.astro';
               They never talk to each other directly — they all go through the DOM tree.
             </div>
 
+            <!-- Worker 1 / 2 / 3 deep explanation -->
+            <p style="font-size:.7rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin:1.5rem 0 .9rem;">How each worker does its job</p>
+
+            <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem;">
+
+              <!-- Worker 1 -->
+              <div style="background:var(--surface);border:1px solid var(--grid);border-left:3px solid var(--blue);border-radius:.75rem;padding:1rem 1.1rem;">
+                <p style="font-size:.68rem;font-weight:800;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;margin-bottom:.5rem;">Worker 1 — HTML Parser</p>
+                <p style="font-size:.73rem;color:var(--ink-2);line-height:1.7;margin-bottom:.75rem;">The server sends a raw text string over HTTP. The HTML Parser reads it character by character. Every time it sees a complete tag, it does one thing: <strong style="color:var(--ink-1);">creates a DOM node object in memory</strong> and places it in the tree. No JavaScript. No painting. Just: text in → DOM nodes out.</p>
+                <div class="code-block" style="font-size:.65rem;line-height:1.85;padding:.8rem 1rem;">
+                  <span class="cm">// Server sends this raw text string over HTTP:</span><br/>
+                  <span class="st">"&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;World&lt;/p&gt;"</span><br/>
+                  <br/>
+                  <span class="cm">// HTML Parser reads character by character:</span><br/>
+                  <span class="cm">//   sees &lt;h1&gt;  → CREATE h1 node in DOM tree</span><br/>
+                  <span class="cm">//   sees Hello → CREATE text node, attach to h1</span><br/>
+                  <span class="cm">//   sees &lt;/h1&gt; → close h1</span><br/>
+                  <span class="cm">//   sees &lt;p&gt;   → CREATE p node  ...and so on</span>
+                </div>
+              </div>
+
+              <!-- Worker 2 -->
+              <div style="background:var(--surface);border:1px solid var(--grid);border-left:3px solid var(--orange);border-radius:.75rem;padding:1rem 1.1rem;">
+                <p style="font-size:.68rem;font-weight:800;letter-spacing:.08em;color:var(--orange);text-transform:uppercase;margin-bottom:.5rem;">Worker 2 — DOM API (JavaScript's writing interface)</p>
+                <p style="font-size:.73rem;color:var(--ink-2);line-height:1.7;margin-bottom:.75rem;">JavaScript cannot touch the DOM tree directly — it goes through the DOM API, a set of browser-provided methods. <strong style="color:var(--ink-1);">Angular is the writer. DOM API is the door. The DOM tree is what changes.</strong></p>
+                <div class="code-block" style="font-size:.65rem;line-height:1.85;padding:.8rem 1rem;">
+                  <span class="kw">const</span> h1 = document.<span class="fn">createElement</span>(<span class="st">'h1'</span>)    <span class="cm">// CREATE h1 node</span><br/>
+                  h1.textContent = <span class="st">'Hello'</span>                    <span class="cm">// attach text node</span><br/>
+                  document.body.<span class="fn">appendChild</span>(h1)              <span class="cm">// INSERT into DOM tree</span><br/>
+                  <br/>
+                  <span class="kw">const</span> btn = document.<span class="fn">createElement</span>(<span class="st">'button'</span>)<br/>
+                  btn.<span class="fn">addEventListener</span>(<span class="st">'click'</span>, fn)          <span class="cm">// attach event to node</span><br/>
+                  document.body.<span class="fn">appendChild</span>(btn)             <span class="cm">// INSERT into DOM tree</span>
+                </div>
+              </div>
+
+              <!-- Worker 3 -->
+              <div style="background:var(--surface);border:1px solid var(--grid);border-left:3px solid var(--green);border-radius:.75rem;padding:1rem 1.1rem;">
+                <p style="font-size:.68rem;font-weight:800;letter-spacing:.08em;color:var(--green);text-transform:uppercase;margin-bottom:.5rem;">Worker 3 — Rendering Engine (Blink in Chrome)</p>
+                <p style="font-size:.73rem;color:var(--ink-2);line-height:1.7;margin-bottom:.75rem;">Watches the DOM tree. The moment any node is added or changed — by either the HTML Parser or by DOM API — it wakes up automatically and runs its 3-step pipeline. <strong style="color:var(--ink-1);">It never talks to JavaScript. It never reads HTML strings. It only reads the DOM tree.</strong></p>
+                <div class="code-block" style="font-size:.65rem;line-height:1.85;padding:.8rem 1rem;">
+                  <span class="cm">// DOM tree changed (by HTML Parser OR by Angular via DOM API)</span><br/>
+                  <span class="cm">// Rendering Engine wakes up automatically:</span><br/>
+                  <br/>
+                  <span class="kw">1.</span> Style calculation   <span class="cm">→ which CSS applies to each node</span><br/>
+                  <span class="kw">2.</span> Layout              <span class="cm">→ where each node sits (x, y, width, height)</span><br/>
+                  <span class="kw">3.</span> Paint               <span class="cm">→ draw actual pixels on screen → user sees content</span>
+                </div>
+              </div>
+
+            </div>
+
             <!-- CSR vs SSR detailed flow -->
             <p style="font-size:.7rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">How these 3 systems work in CSR vs SSR</p>
 
