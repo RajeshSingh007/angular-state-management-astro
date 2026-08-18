@@ -533,6 +533,114 @@ import Footer from '../components/Footer.astro';
                 social media preview works immediately.
               </p>
             </div>
+
+            <!-- ── What actually happens inside the browser ── -->
+            <p style="font-size:.7rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin:2rem 0 .9rem;">Under the hood — 3 systems inside every browser</p>
+            <p style="font-size:.78rem;color:var(--ink-2);line-height:1.75;margin-bottom:1rem;">
+              To understand why CSR is slow and SSR is fast, you need to know that the browser has
+              <strong style="color:var(--ink-1);">three separate systems</strong> — and each one plays a different role in putting pixels on screen.
+              People constantly confuse them.
+            </p>
+
+            <div class="g3" style="margin-bottom:1.5rem;">
+              <div style="background:var(--surface);border:1px solid var(--grid);border-top:3px solid var(--blue);border-radius:.75rem;padding:1rem 1.1rem;">
+                <p style="font-size:.65rem;font-weight:800;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;margin-bottom:.5rem;">① HTML Parser</p>
+                <p style="font-size:.78rem;font-weight:700;color:var(--ink-1);margin-bottom:.4rem;">Reads HTML text → builds DOM nodes</p>
+                <p style="font-size:.72rem;color:var(--ink-2);line-height:1.65;">Runs automatically when HTML arrives over the network. No JavaScript needed. Reads the HTML string character by character and creates a live tree of DOM node objects in memory.</p>
+                <p style="font-size:.68rem;color:var(--blue);margin-top:.6rem;font-weight:600;">Triggered by: server sending HTML</p>
+              </div>
+              <div style="background:var(--surface);border:1px solid var(--grid);border-top:3px solid var(--orange);border-radius:.75rem;padding:1rem 1.1rem;">
+                <p style="font-size:.65rem;font-weight:800;letter-spacing:.08em;color:var(--orange);text-transform:uppercase;margin-bottom:.5rem;">② DOM API</p>
+                <p style="font-size:.78rem;font-weight:700;color:var(--ink-1);margin-bottom:.4rem;">JavaScript's interface to create/modify DOM nodes &amp; attach events</p>
+                <p style="font-size:.72rem;color:var(--ink-2);line-height:1.65;"><code style="font-size:.67rem;background:rgba(0,0,0,.05);padding:.1rem .3rem;border-radius:.25rem;">document.createElement()</code>, <code style="font-size:.67rem;background:rgba(0,0,0,.05);padding:.1rem .3rem;border-radius:.25rem;">appendChild()</code>, <code style="font-size:.67rem;background:rgba(0,0,0,.05);padding:.1rem .3rem;border-radius:.25rem;">addEventListener()</code> — this is how Angular talks to the DOM from JavaScript.</p>
+                <p style="font-size:.68rem;color:var(--orange);margin-top:.6rem;font-weight:600;">Triggered by: Angular calling it</p>
+              </div>
+              <div style="background:var(--surface);border:1px solid var(--grid);border-top:3px solid var(--green);border-radius:.75rem;padding:1rem 1.1rem;">
+                <p style="font-size:.65rem;font-weight:800;letter-spacing:.08em;color:var(--green);text-transform:uppercase;margin-bottom:.5rem;">③ Rendering Engine</p>
+                <p style="font-size:.78rem;font-weight:700;color:var(--ink-1);margin-bottom:.4rem;">Reads DOM tree → calculates layout → paints pixels</p>
+                <p style="font-size:.72rem;color:var(--ink-2);line-height:1.65;">Blink (Chrome), WebKit (Safari), Gecko (Firefox). Watches the DOM for changes and automatically repaints. No JavaScript involved — it runs independently.</p>
+                <p style="font-size:.68rem;color:var(--green);margin-top:.6rem;font-weight:600;">Triggered by: DOM tree changing</p>
+              </div>
+            </div>
+
+            <div style="background:rgba(0,0,0,.03);border:1px solid var(--grid);border-radius:.75rem;padding:.85rem 1.1rem;margin-bottom:1.5rem;font-size:.72rem;color:var(--ink-2);line-height:1.75;">
+              <strong style="color:var(--ink-1);">The DOM tree is the shared data structure</strong> all three talk through.
+              HTML Parser <em>writes</em> to it. DOM API (Angular) <em>writes</em> to it. Rendering Engine <em>reads</em> from it and paints.
+              They never talk to each other directly — they all go through the DOM tree.
+            </div>
+
+            <!-- CSR vs SSR detailed flow -->
+            <p style="font-size:.7rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">How these 3 systems work in CSR vs SSR</p>
+
+            <div class="g2" style="margin-bottom:1.5rem;gap:1rem;">
+
+              <!-- CSR flow -->
+              <div style="background:var(--surface);border:1px solid var(--grid);border-radius:.75rem;overflow:hidden;">
+                <div style="background:#fef2f2;border-bottom:1px solid #fecaca;padding:.65rem 1rem;">
+                  <p style="font-size:.7rem;font-weight:800;letter-spacing:.07em;color:var(--red);text-transform:uppercase;">CSR — Angular builds the DOM</p>
+                </div>
+                <div style="padding:.9rem 1rem;display:flex;flex-direction:column;gap:.6rem;">
+                  {[
+                    { n:'1', c:'#fef2f2', bc:'#fecaca', nc:'var(--red)', label:'HTML Parser gets empty HTML', body:'Builds skeleton DOM: just <code>&lt;app-root&gt;&lt;/app-root&gt;</code> — no content inside.' },
+                    { n:'2', c:'#fef2f2', bc:'#fecaca', nc:'var(--red)', label:'Rendering Engine paints it', body:'Paints the empty skeleton → <strong>blank screen</strong>. User sees nothing.' },
+                    { n:'3', c:'#fff7ed', bc:'#fed7aa', nc:'var(--orange)', label:'main.js downloads + executes', body:'<code>defer</code> held it until DOM was ready. Now Angular\'s <code>bootstrapApplication()</code> runs.' },
+                    { n:'4', c:'#fff7ed', bc:'#fed7aa', nc:'var(--orange)', label:'Angular creates Component Objects', body:'<code>new HelloComponent()</code> — data and methods live in memory. No DOM yet.' },
+                    { n:'5', c:'#fff7ed', bc:'#fed7aa', nc:'var(--orange)', label:'Angular calls DOM API', body:'<code>createElement(\'h1\')</code>, <code>appendChild()</code> — Angular itself builds every DOM node.' },
+                    { n:'6', c:'#f0fdf4', bc:'#bbf7d0', nc:'#166534', label:'Rendering Engine repaints', body:'Sees new DOM nodes → paints pixels → user finally sees content. (~2–5s total)' },
+                    { n:'7', c:'#f0fdf4', bc:'#bbf7d0', nc:'#166534', label:'Angular attaches event listeners', body:'<code>addEventListener()</code> on the existing DOM nodes. Page is now interactive.' },
+                  ].map(({ n, c, bc, nc, label, body }) => (
+                    <div style={`display:flex;gap:.65rem;align-items:flex-start;background:${c};border:1px solid ${bc};border-radius:.55rem;padding:.55rem .75rem;`}>
+                      <span style={`min-width:1.3rem;height:1.3rem;border-radius:50%;border:1.5px solid ${bc};display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:900;color:${nc};flex-shrink:0;margin-top:.05rem;`}>{n}</span>
+                      <div>
+                        <p style="font-size:.71rem;font-weight:700;color:var(--ink-1);">{label}</p>
+                        <p style="font-size:.68rem;color:var(--ink-2);line-height:1.55;margin-top:.15rem;" set:html={body}></p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <!-- SSR flow -->
+              <div style="background:var(--surface);border:1px solid var(--grid);border-radius:.75rem;overflow:hidden;">
+                <div style="background:#f0fdf4;border-bottom:1px solid #bbf7d0;padding:.65rem 1rem;">
+                  <p style="font-size:.7rem;font-weight:800;letter-spacing:.07em;color:#166534;text-transform:uppercase;">SSR — HTML Parser builds the DOM</p>
+                </div>
+                <div style="padding:.9rem 1rem;display:flex;flex-direction:column;gap:.6rem;">
+                  {[
+                    { n:'1', c:'#eff6ff', bc:'#bfdbfe', nc:'#1d4ed8', label:'Server runs Angular in Node.js', body:'Creates Component Objects, evaluates templates, produces a full HTML string. Sends it over HTTP.' },
+                    { n:'2', c:'#f0fdf4', bc:'#bbf7d0', nc:'#166534', label:'HTML Parser gets full HTML', body:'Builds complete DOM: <code>&lt;h1&gt;Hello World&lt;/h1&gt;</code>, all content, fully populated.' },
+                    { n:'3', c:'#f0fdf4', bc:'#bbf7d0', nc:'#166534', label:'Rendering Engine paints it', body:'Full DOM → full content on screen <strong>immediately</strong>. User sees page before JS even loads. ✅' },
+                    { n:'4', c:'#eff6ff', bc:'#bfdbfe', nc:'#1d4ed8', label:'main.js downloads + executes', body:'Was downloading in parallel (defer). DOM was already ready. <code>bootstrapApplication()</code> runs.' },
+                    { n:'5', c:'#eff6ff', bc:'#bfdbfe', nc:'#1d4ed8', label:'Angular creates Component Objects', body:'Fresh <code>new HelloComponent()</code> in browser memory. Server\'s objects are gone — these are new.' },
+                    { n:'6', c:'#eff6ff', bc:'#bfdbfe', nc:'#1d4ed8', label:'Hydration — DOM API reads, not writes', body:'Angular does NOT call <code>createElement()</code>. It finds existing nodes and connects them to Component Objects.' },
+                    { n:'7', c:'#f0fdf4', bc:'#bbf7d0', nc:'#166534', label:'Angular attaches event listeners', body:'Same as CSR: <code>addEventListener()</code> on existing nodes. Page is now interactive. ✅' },
+                  ].map(({ n, c, bc, nc, label, body }) => (
+                    <div style={`display:flex;gap:.65rem;align-items:flex-start;background:${c};border:1px solid ${bc};border-radius:.55rem;padding:.55rem .75rem;`}>
+                      <span style={`min-width:1.3rem;height:1.3rem;border-radius:50%;border:1.5px solid ${bc};display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:900;color:${nc};flex-shrink:0;margin-top:.05rem;`}>{n}</span>
+                      <div>
+                        <p style="font-size:.71rem;font-weight:700;color:var(--ink-1);">{label}</p>
+                        <p style="font-size:.68rem;color:var(--ink-2);line-height:1.55;margin-top:.15rem;" set:html={body}></p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <!-- Key difference callout -->
+            <div style="background:rgba(0,0,0,.03);border:1px solid var(--grid);border-radius:.75rem;padding:1rem 1.25rem;margin-bottom:.5rem;">
+              <p style="font-size:.72rem;font-weight:800;color:var(--ink-1);margin-bottom:.65rem;">The one difference that explains everything:</p>
+              <div class="g2" style="gap:.75rem;">
+                <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:.55rem;padding:.75rem 1rem;">
+                  <p style="font-size:.68rem;font-weight:800;color:var(--red);margin-bottom:.3rem;">CSR</p>
+                  <p style="font-size:.72rem;color:var(--ink-2);line-height:1.6;"><strong style="color:var(--ink-1);">Angular (DOM API)</strong> creates DOM nodes.<br/>Rendering Engine paints them.<br/>User waits for all of this. 😩</p>
+                </div>
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:.55rem;padding:.75rem 1rem;">
+                  <p style="font-size:.68rem;font-weight:800;color:#166534;margin-bottom:.3rem;">SSR</p>
+                  <p style="font-size:.72rem;color:var(--ink-2);line-height:1.6;"><strong style="color:var(--ink-1);">HTML Parser</strong> creates DOM nodes from server HTML.<br/>Rendering Engine paints immediately.<br/>Angular only wires events later. ✅</p>
+                </div>
+              </div>
+            </div>
           </section>
 
           <hr class="divider" />
