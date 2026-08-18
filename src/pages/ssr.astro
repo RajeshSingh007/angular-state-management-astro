@@ -446,6 +446,7 @@ import Footer from '../components/Footer.astro';
             <a href="#analogies"       class="left-nav-item"><span class="left-nav-num">04</span><span class="left-nav-dot"></span>Mental Models</a>
             <a href="#hydration"       class="left-nav-item"><span class="left-nav-num">05</span><span class="left-nav-dot"></span>Hydration</a>
             <a href="#hybrid"          class="left-nav-item"><span class="left-nav-num">06</span><span class="left-nav-dot"></span>Hybrid Rendering</a>
+            <a href="#code-anatomy"    class="left-nav-item"><span class="left-nav-num">↳</span><span class="left-nav-dot"></span>Code Anatomy Lab</a>
           </div>
 
           <div class="left-nav-section">
@@ -457,10 +458,6 @@ import Footer from '../components/Footer.astro';
             <a href="#takeaways"       class="left-nav-item"><span class="left-nav-num">11</span><span class="left-nav-dot"></span>Key Takeaways</a>
           </div>
 
-          <div class="left-nav-section">
-            <div class="left-nav-section-label">Code Lab</div>
-            <a href="#code-anatomy"    class="left-nav-item"><span class="left-nav-num">→</span><span class="left-nav-dot"></span>Code Anatomy</a>
-          </div>
         </nav>
 
         <!-- ── MAIN ── -->
@@ -595,11 +592,11 @@ import Footer from '../components/Footer.astro';
                 <p style="font-size:.68rem;font-weight:800;letter-spacing:.08em;color:var(--orange);text-transform:uppercase;margin-bottom:.5rem;">Worker 2 — DOM API (JavaScript's writing interface)</p>
                 <p style="font-size:.73rem;color:var(--ink-2);line-height:1.7;margin-bottom:.75rem;">JavaScript cannot touch the DOM tree directly — it goes through the DOM API, a set of browser-provided methods. <strong style="color:var(--ink-1);">Angular is the writer. DOM API is the door. The DOM tree is what changes.</strong></p>
                 <div class="code-block" style="font-size:.65rem;line-height:1.85;padding:.8rem 1rem;">
-                  <span class="kw">const</span> h1 = document.<span class="fn">createElement</span>(<span class="st">'h1'</span>)    <span class="cm">// CREATE h1 node</span><br/>
+                  <span class="ky">const</span> h1 = document.<span class="fn">createElement</span>(<span class="st">'h1'</span>)    <span class="cm">// CREATE h1 node</span><br/>
                   h1.textContent = <span class="st">'Hello'</span>                    <span class="cm">// attach text node</span><br/>
                   document.body.<span class="fn">appendChild</span>(h1)              <span class="cm">// INSERT into DOM tree</span><br/>
                   <br/>
-                  <span class="kw">const</span> btn = document.<span class="fn">createElement</span>(<span class="st">'button'</span>)<br/>
+                  <span class="ky">const</span> btn = document.<span class="fn">createElement</span>(<span class="st">'button'</span>)<br/>
                   btn.<span class="fn">addEventListener</span>(<span class="st">'click'</span>, fn)          <span class="cm">// attach event to node</span><br/>
                   document.body.<span class="fn">appendChild</span>(btn)             <span class="cm">// INSERT into DOM tree</span>
                 </div>
@@ -613,9 +610,9 @@ import Footer from '../components/Footer.astro';
                   <span class="cm">// DOM tree changed (by HTML Parser OR by Angular via DOM API)</span><br/>
                   <span class="cm">// Rendering Engine wakes up automatically:</span><br/>
                   <br/>
-                  <span class="kw">1.</span> Style calculation   <span class="cm">→ which CSS applies to each node</span><br/>
-                  <span class="kw">2.</span> Layout              <span class="cm">→ where each node sits (x, y, width, height)</span><br/>
-                  <span class="kw">3.</span> Paint               <span class="cm">→ draw actual pixels on screen → user sees content</span>
+                  <span class="ky">1.</span> Style calculation   <span class="cm">→ which CSS applies to each node</span><br/>
+                  <span class="ky">2.</span> Layout              <span class="cm">→ where each node sits (x, y, width, height)</span><br/>
+                  <span class="ky">3.</span> Paint               <span class="cm">→ draw actual pixels on screen → user sees content</span>
                 </div>
               </div>
 
@@ -1089,6 +1086,9 @@ import Footer from '../components/Footer.astro';
             </div>
             <div class="code-block">
               <span class="cm">// Angular auto-generates this on the server — you never write it</span><br/>
+              <span class="cm">// ⚠️ Conceptual simplification: real ng-state stores Transfer Cache data</span><br/>
+              <span class="cm">// (serialized HTTP responses). Angular's hydration node mapping uses</span><br/>
+              <span class="cm">// HTML comment markers (&lt;!--ng-ssr-...--&gt;) injected in the markup instead.</span><br/>
               <span class="ok">&lt;<span class="ky">script</span> id=<span class="st">"ng-state"</span> type=<span class="st">"application/json"</span>&gt;</span><br/>
               &nbsp;&nbsp;&#123; <span class="st">"node:0"</span>: <span class="st">"HeaderComponent"</span>,<br/>
               &nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"node:3"</span>: <span class="st">"ProductListComponent"</span>,<br/>
@@ -1403,7 +1403,7 @@ import Footer from '../components/Footer.astro';
                     &nbsp;&nbsp;<span class="ok">&lt;<span class="ky">h1</span>&gt;</span><span class="st">Hello, World!</span><span class="ok">&lt;/<span class="ky">h1</span>&gt;</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// ← HTML string, just text</span><br/>
                     &nbsp;&nbsp;<span class="ok">&lt;<span class="ky">p</span>&gt;</span><span class="st">Running on: Server</span><span class="ok">&lt;/<span class="ky">p</span>&gt;</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// ← HTML string, just text</span><br/>
                     <span class="ok">&lt;/<span class="ky">app-hello</span>&gt;</span><br/>
-                    <span class="ok">&lt;<span class="ky">script</span> id=<span class="st">"ng-state"</span>&gt;</span>&#123;<span class="st">"node:0"</span>:<span class="st">"HelloComponent"</span>&#125;<span class="ok">&lt;/<span class="ky">script</span>&gt;</span>&nbsp;<span class="cm">// ← map for hydration</span>
+                    <span class="ok">&lt;<span class="ky">script</span> id=<span class="st">"ng-state"</span>&gt;</span>&#123;<span class="st">"node:0"</span>:<span class="st">"HelloComponent"</span>&#125;<span class="ok">&lt;/<span class="ky">script</span>&gt;</span>&nbsp;<span class="cm">// ← simplified: real ng-state stores Transfer Cache data</span>
                   </div>
                 </div>
 
@@ -2386,11 +2386,15 @@ import Footer from '../components/Footer.astro';
               </div>
               <span class="code-filename">app.config.ts — enable Transfer Cache</span>
             </div>
-            <div class="code-block" style="margin-bottom:1.5rem;">
+            <div class="code-block" style="margin-bottom:1rem;">
               <span class="fn">provideHttpClient</span>(<span class="fn">withHttpTransferCache</span>(&#123;<br/>
               &nbsp;&nbsp;includePostRequests: <span class="vl">false</span>,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// only GET by default — safe for idempotent reads</span><br/>
               &nbsp;&nbsp;includeRequestsWithAuthHeaders: <span class="vl">false</span>,&nbsp;<span class="cm">// never cache user-specific authenticated calls</span><br/>
               &#125;))
+            </div>
+
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:.65rem;padding:.75rem 1rem;margin-bottom:1.5rem;font-size:.71rem;color:#78350f;line-height:1.7;">
+              <strong style="color:#92400e;">⚡ Angular 18+ note:</strong> <code style="font-size:.67rem;background:rgba(0,0,0,.07);padding:.1rem .3rem;border-radius:.25rem;">withHttpTransferCache()</code> is the Angular 17 API. From Angular 18 onward, switching to <code style="font-size:.67rem;background:rgba(0,0,0,.07);padding:.1rem .3rem;border-radius:.25rem;">withFetch()</code> automatically enables Transfer Cache — no extra configuration needed: <code style="font-size:.67rem;background:rgba(0,0,0,.07);padding:.1rem .3rem;border-radius:.25rem;">provideHttpClient(withFetch())</code>. Both approaches work; <code style="font-size:.67rem;background:rgba(0,0,0,.07);padding:.1rem .3rem;border-radius:.25rem;">withFetch()</code> is the current recommended default.
             </div>
 
           </section>
@@ -2595,32 +2599,91 @@ import Footer from '../components/Footer.astro';
           <!-- ── 10 Setup ── -->
           <section id="setup" class="section reveal">
             <p class="eyebrow">10 · Setup</p>
-            <h2 class="sec-title">Two Commands</h2>
+            <h2 class="sec-title">How to Add SSR to an Angular App</h2>
+            <p class="sec-lead">
+              Angular SSR is one command away — but understanding what each generated file does
+              stops you being confused the first time something doesn't work.
+            </p>
+
+            <p style="font-size:.7rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">Two commands — choose one</p>
 
             <div class="g2" style="margin-bottom:1.5rem;">
               <div class="code-block" style="display:flex;flex-direction:column;gap:.5rem;">
-                <span class="cm">// New project with SSR</span>
+                <span class="cm">// New project with SSR from scratch</span>
                 <span><span style="color:#898781;">$</span> <span class="ok" style="font-weight:700;">ng new my-app --ssr</span></span>
-                <span class="cm" style="font-size:.65rem;">SSR + hydration + server routing out of the box</span>
+                <span class="cm" style="font-size:.65rem;">SSR + hydration + server routing enabled out of the box</span>
               </div>
               <div class="code-block" style="display:flex;flex-direction:column;gap:.5rem;">
-                <span class="cm">// Add SSR to existing project</span>
+                <span class="cm">// Add SSR to an existing project</span>
                 <span><span style="color:#898781;">$</span> <span class="ok" style="font-weight:700;">ng add @angular/ssr</span></span>
-                <span class="cm" style="font-size:.65rem;">Generates server files, updates app.config.ts</span>
+                <span class="cm" style="font-size:.65rem;">Generates server files and updates app.config.ts automatically</span>
               </div>
             </div>
 
-            <div class="card">
-              <p style="font-size:.8rem;font-weight:700;color:var(--ink-1);margin-bottom:.75rem;">📁 Key files Angular SSR adds</p>
+            <p style="font-size:.7rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">What each generated file actually does</p>
+
+            <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem;">
               {[
-                { file: 'app.routes.server.ts', desc: 'Define renderMode per route — the main SSR config file' },
-                { file: 'server.ts',             desc: 'Express/Node server entry point that boots Angular SSR' },
-                { file: 'app.config.server.ts',  desc: 'Server-only providers (override browser providers)' },
-                { file: 'app.config.ts',         desc: 'Updated to include provideClientHydration()' },
-              ].map(({ file, desc }) => (
-                <div class="file-row">
-                  <span class="file-chip">{file}</span>
-                  <span class="file-desc">{desc}</span>
+                {
+                  file: 'app.routes.server.ts',
+                  badge: 'Main SSR config',
+                  badgeColor: 'var(--blue)',
+                  desc: 'Defines the renderMode for every route — Server, Prerender, or Client. This is the file you edit most. If a route is missing here, Angular defaults to Server mode.',
+                  example: "{ path: 'home', renderMode: RenderMode.Prerender },\n{ path: 'profile', renderMode: RenderMode.Server },"
+                },
+                {
+                  file: 'server.ts',
+                  badge: 'Node.js entry point',
+                  badgeColor: 'var(--green)',
+                  desc: 'The Express/Node server that boots Angular SSR. For every incoming request it calls Angular\'s request handler, which runs your components on the server and returns the rendered HTML string. You rarely edit this — but knowing it exists explains why deployment requires a Node.js host, not just a static CDN.',
+                  example: null
+                },
+                {
+                  file: 'app.config.server.ts',
+                  badge: 'Server-only providers',
+                  badgeColor: 'var(--orange)',
+                  desc: 'Providers that only apply when Angular runs on Node.js. Use this to override browser providers with server-safe alternatives — e.g. a different HTTP base URL for server-side API calls, or a server-safe logging service.',
+                  example: null
+                },
+                {
+                  file: 'app.config.ts',
+                  badge: 'Updated automatically',
+                  badgeColor: '#6b7280',
+                  desc: 'ng add @angular/ssr adds provideClientHydration() here. This single provider does three things: tells Angular to adopt existing DOM nodes instead of recreating them, enables the HTTP Transfer Cache, and activates the hydration event replay buffer.',
+                  example: "provideClientHydration(\n  withHttpTransferCache()   // Angular 17\n  // withFetch()            // Angular 18+ (recommended)\n)"
+                },
+              ].map(({ file, badge, badgeColor, desc, example }) => (
+                <div style="background:var(--surface);border:1px solid var(--grid);border-radius:.75rem;padding:1rem 1.1rem;">
+                  <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                    <code style="font-size:.7rem;font-weight:700;background:rgba(0,0,0,.06);padding:.15rem .5rem;border-radius:.3rem;color:var(--ink-1);">{file}</code>
+                    <span style={`font-size:.6rem;font-weight:800;letter-spacing:.07em;color:white;background:${badgeColor};padding:.15rem .5rem;border-radius:99px;text-transform:uppercase;`}>{badge}</span>
+                  </div>
+                  <p style="font-size:.72rem;color:var(--ink-2);line-height:1.7;margin-bottom:0;">{desc}</p>
+                  {example && (
+                    <div class="code-block" style="margin-top:.65rem;font-size:.64rem;line-height:1.75;padding:.65rem .9rem;">
+                      <span class="cm" set:html={example.replace(/\n/g, '<br/>')}></span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <p style="font-size:.7rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">Common first-run gotchas</p>
+
+            <div style="display:flex;flex-direction:column;gap:.65rem;margin-bottom:.5rem;">
+              {[
+                { icon: '🔴', title: 'Hydration mismatch error in DevTools', body: 'Means the HTML your server produced is different from what Angular expects in the browser. Usually caused by code that reads browser globals (window, document) during server render. Fix: guard with isPlatformBrowser() or afterNextRender().' },
+                { icon: '🔴', title: 'window is not defined', body: 'Your code runs on Node.js where window doesn\'t exist. Wrap any window/document/localStorage access in afterNextRender() or inject PLATFORM_ID and check isPlatformBrowser().' },
+                { icon: '🟠', title: 'Page content flickers on first load', body: 'Hydration is off or provideClientHydration() is missing from app.config.ts. Without it Angular discards the server HTML and rebuilds the DOM from scratch, causing a visible flash.' },
+                { icon: '🟠', title: 'API called twice (once server, once browser)', body: 'Transfer Cache is not enabled. Add withHttpTransferCache() (Angular 17) or withFetch() (Angular 18+) inside provideClientHydration(). See section 08 for the full explanation.' },
+                { icon: '🔵', title: 'ng serve still runs CSR — where is SSR?', body: 'ng serve runs dev mode which uses CSR by default for faster iteration. SSR runs when you deploy. To test SSR locally: ng build then node dist/my-app/server/server.mjs.' },
+              ].map(({ icon, title, body }) => (
+                <div style="display:flex;gap:.75rem;align-items:flex-start;background:var(--surface);border:1px solid var(--grid);border-radius:.65rem;padding:.7rem .9rem;">
+                  <span style="font-size:1rem;flex-shrink:0;margin-top:.05rem;">{icon}</span>
+                  <div>
+                    <p style="font-size:.71rem;font-weight:700;color:var(--ink-1);margin-bottom:.2rem;">{title}</p>
+                    <p style="font-size:.68rem;color:var(--ink-2);line-height:1.6;">{body}</p>
+                  </div>
                 </div>
               ))}
             </div>
