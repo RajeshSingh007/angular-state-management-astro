@@ -1358,8 +1358,9 @@ import Footer from '../components/Footer.astro';
                 <br/>
                 &nbsp;&nbsp;<span class="cm" style="color:#a78bfa;">// ── 📄 TEMPLATE: Angular evaluates this → produces the HTML String ──</span><br/>
                 &nbsp;&nbsp;<span class="hi">template</span>: <span class="st">`</span><br/>
-                &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">&lt;<span class="ky">h1</span>&gt;</span><span class="st">Hello, &#123;&#123; name &#125;&#125;!</span><span class="ok">&lt;/<span class="ky">h1</span>&gt;</span><span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 🌳 → &lt;h1&gt; DOM Node in browser</span><br/>
-                &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">&lt;<span class="ky">p</span>&gt;</span><span class="st">Running on: &#123;&#123; platform &#125;&#125;</span><span class="ok">&lt;/<span class="ky">p</span>&gt;</span><span class="cm">&nbsp;&nbsp;&nbsp;// 🌳 → &lt;p&gt; DOM Node in browser</span><br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">&lt;<span class="ky">h1</span>&gt;</span><span class="st">Hello, &#123;&#123; name &#125;&#125;!</span><span class="ok">&lt;/<span class="ky">h1</span>&gt;</span><span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 🌳 → &lt;h1&gt; DOM Node in browser</span><br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">&lt;<span class="ky">p</span>&gt;</span><span class="st">Running on: &#123;&#123; platform &#125;&#125;</span><span class="ok">&lt;/<span class="ky">p</span>&gt;</span><span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 🌳 → &lt;p&gt; DOM Node in browser</span><br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="ok">&lt;<span class="ky">button</span> <span class="hi">(click)</span>=<span class="st">"onClick()"</span>&gt;</span><span class="st">Clicked &#123;&#123; count &#125;&#125; times</span><span class="ok">&lt;/<span class="ky">button</span>&gt;</span><span class="cm">&nbsp;// 🌳 → &lt;button&gt; DOM Node — (click) wired in browser only</span><br/>
                 &nbsp;&nbsp;<span class="st">`</span>,<br/>
                 &#125;)<br/>
                 <span class="ky">export class</span> <span class="fn">HelloComponent</span> &#123;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 🧩 blueprint — Angular calls new HelloComponent() from this</span><br/>
@@ -1367,6 +1368,7 @@ import Footer from '../components/Footer.astro';
                 &nbsp;&nbsp;<span class="cm">// 🧩 These define WHAT the Component Object will contain when Angular creates it:</span><br/>
                 &nbsp;&nbsp;<span class="hi">name</span>     = <span class="st">'World'</span>;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// → fills &#123;&#123; name &#125;&#125; in the template</span><br/>
                 &nbsp;&nbsp;<span class="hi">platform</span> = <span class="st">''</span>;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// → set to 'Server' or 'Browser'</span><br/>
+                &nbsp;&nbsp;<span class="hi">count</span>    = <span class="vl">0</span>;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// → fills &#123;&#123; count &#125;&#125; in the template</span><br/>
                 <br/>
                 &nbsp;&nbsp;<span class="ky">constructor</span>(<span class="ky">private</span> <span class="hi">platformId</span> = <span class="fn">inject</span>(<span class="hi">PLATFORM_ID</span>)) &#123;&#125;<br/>
                 <br/>
@@ -1375,6 +1377,13 @@ import Footer from '../components/Footer.astro';
                 &nbsp;&nbsp;&nbsp;&nbsp;<span class="hi">this</span>.<span class="hi">platform</span> = <span class="fn">isPlatformBrowser</span>(<span class="hi">this</span>.<span class="hi">platformId</span>)<br/>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;? <span class="st">'Browser'</span>&nbsp;&nbsp;<span class="cm">// ← browser component object runs THIS branch</span><br/>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="st">'Server'</span>;&nbsp;&nbsp;<span class="cm">// ← server component object runs THIS branch</span><br/>
+                &nbsp;&nbsp;&#125;<br/>
+                <br/>
+                &nbsp;&nbsp;<span class="cm">// 🧩 onClick method — exists in BOTH server and browser Component Objects</span><br/>
+                &nbsp;&nbsp;<span class="cm">// ⚠️ On the server: this method EXISTS but is never called — server only renders, never handles clicks</span><br/>
+                &nbsp;&nbsp;<span class="cm">// ⚠️ In the browser: Angular wires this to the &lt;button&gt; DOM Node via addEventListener()</span><br/>
+                &nbsp;&nbsp;<span class="fn">onClick</span>() &#123;<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="hi">this</span>.<span class="hi">count</span>++;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// updates count → Angular updates the DOM</span><br/>
                 &nbsp;&nbsp;&#125;<br/>
                 &#125;
               </div>
@@ -1523,6 +1532,75 @@ import Footer from '../components/Footer.astro';
                   </div>
                 </div>
 
+              </div>
+            </div>
+
+            <!-- ── Run 1 vs Run 2 ── -->
+            <div style="margin-bottom:2rem;">
+              <p style="font-size:.72rem;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;margin-bottom:.9rem;">The same code runs twice — but does a different job each time</p>
+
+              <div class="g2" style="gap:1rem;margin-bottom:1rem;">
+
+                <!-- Run 1 -->
+                <div style="background:var(--surface);border:1px solid var(--grid);border-top:3px solid var(--orange);border-radius:.75rem;padding:1rem 1.1rem;">
+                  <p style="font-size:.65rem;font-weight:800;letter-spacing:.08em;color:var(--orange);text-transform:uppercase;margin-bottom:.65rem;">🖥️ Run 1 — Server (Node.js)</p>
+                  <div style="display:flex;flex-direction:column;gap:.45rem;margin-bottom:.85rem;">
+                    {[
+                      ['new HelloComponent()', 'Component Object created in Node.js RAM'],
+                      ['ngOnInit() runs', 'platform = "Server"'],
+                      ['onClick() exists', 'but is NEVER called — server only renders'],
+                      ['template evaluated', '→ HTML string produced'],
+                      ['HTML string sent over HTTP', 'Component Object destroyed'],
+                    ].map(([code, desc]) => (
+                      <div style="display:flex;gap:.5rem;align-items:flex-start;font-size:.68rem;">
+                        <code style="font-size:.63rem;background:rgba(249,115,22,.1);color:#9a3412;padding:.1rem .35rem;border-radius:.25rem;white-space:nowrap;flex-shrink:0;">{code}</code>
+                        <span style="color:var(--ink-2);line-height:1.5;">{desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div class="code-block" style="font-size:.64rem;line-height:1.75;padding:.7rem .9rem;">
+                    <span class="cm">// What the server produces and sends:</span><br/>
+                    <span class="ok">&lt;<span class="ky">h1</span>&gt;</span><span class="st">Hello, World!</span><span class="ok">&lt;/<span class="ky">h1</span>&gt;</span><br/>
+                    <span class="ok">&lt;<span class="ky">p</span>&gt;</span><span class="st">Running on: Server</span><span class="ok">&lt;/<span class="ky">p</span>&gt;</span><br/>
+                    <span class="ok">&lt;<span class="ky">button</span>&gt;</span><span class="st">Clicked 0 times</span><span class="ok">&lt;/<span class="ky">button</span>&gt;</span>&nbsp;<span class="cm">// ← static text, no click handler yet</span>
+                  </div>
+                </div>
+
+                <!-- Run 2 -->
+                <div style="background:var(--surface);border:1px solid var(--grid);border-top:3px solid var(--teal);border-radius:.75rem;padding:1rem 1.1rem;">
+                  <p style="font-size:.65rem;font-weight:800;letter-spacing:.08em;color:var(--teal);text-transform:uppercase;margin-bottom:.65rem;">🌐 Run 2 — Browser</p>
+                  <div style="display:flex;flex-direction:column;gap:.45rem;margin-bottom:.85rem;">
+                    {[
+                      ['HTML Parser already ran', 'DOM nodes exist — content visible on screen ✅'],
+                      ['new HelloComponent()', 'FRESH Component Object in browser RAM'],
+                      ['ngOnInit() runs', 'platform = "Browser"'],
+                      ['hydration', 'Angular finds existing DOM nodes — no recreation'],
+                      ['onClick() wired', 'addEventListener("click") on the <button> DOM node'],
+                    ].map(([code, desc]) => (
+                      <div style="display:flex;gap:.5rem;align-items:flex-start;font-size:.68rem;">
+                        <code style="font-size:.63rem;background:rgba(13,148,136,.1);color:#0f766e;padding:.1rem .35rem;border-radius:.25rem;white-space:nowrap;flex-shrink:0;">{code}</code>
+                        <span style="color:var(--ink-2);line-height:1.5;">{desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div class="code-block" style="font-size:.64rem;line-height:1.75;padding:.7rem .9rem;">
+                    <span class="cm">// After hydration — same DOM nodes, now live:</span><br/>
+                    <span class="fn">document</span>.<span class="hi">querySelector</span>(<span class="st">'button'</span>).<span class="hi">onclick</span>&nbsp;<span class="cm">// → onClick() ✅ wired</span><br/>
+                    <span class="cm">// User clicks → onClick() runs → count++ → DOM updates</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Key insight -->
+              <div style="background:rgba(0,0,0,.03);border:1px solid var(--grid);border-radius:.75rem;padding:1rem 1.25rem;">
+                <p style="font-size:.72rem;font-weight:800;color:var(--ink-1);margin-bottom:.75rem;">🔑 Key insight</p>
+                <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.71rem;color:var(--ink-2);line-height:1.7;">
+                  <p>• <strong style="color:var(--ink-1);">The class (main.js) runs in BOTH places</strong> — same code, two different environments.</p>
+                  <p>• <strong style="color:var(--ink-1);">Server job = produce HTML string.</strong> The onClick method exists but is never called. The server only renders — it never handles user interaction.</p>
+                  <p>• <strong style="color:var(--ink-1);">Browser job = connect interactivity to DOM nodes.</strong> Angular doesn't re-create the DOM (hydration). It re-creates the Component Object, then wires onClick() to the existing &lt;button&gt; node via addEventListener().</p>
+                  <p>• <strong style="color:var(--ink-1);">The HTML string travels. The Component Object never does.</strong> That's the core constraint that makes all of SSR necessary.</p>
+                </div>
               </div>
             </div>
 
