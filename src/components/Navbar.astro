@@ -5,71 +5,300 @@ interface Props {
 }
 const { active = '', step } = Astro.props;
 
-const links = [
-  { href: '/ssr', label: '🌐 SSR' },
-];
----
-<nav class="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-sm z-50 border-b border-gray-100" id="navbar">
-  <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <a href="/" class="font-extrabold text-base tracking-tight text-[#1a1a2e]">
-        ⚡ Angular
-      </a>
-      {step && (
-        <span class="hidden sm:inline-block text-xs font-bold px-2.5 py-1 rounded-full text-white"
-          style="background: linear-gradient(90deg, rgba(42,123,155,1), rgba(87,199,133,1))">
-          {step}
-        </span>
-      )}
-    </div>
+const ssrPaths = ['/ssr', '/ssr_v1'];
 
-    <!-- Desktop links -->
-    <ul class="hidden md:flex gap-1">
-      {links.map(l => (
+const topics = [
+  { href: '/ssr_v1', label: 'SSR', emoji: '🌐', desc: 'Server-Side Rendering', isActive: ssrPaths.includes(active), soon: false },
+];
+
+// Parse "Step 2 of 4" → { cur: 2, total: 4 }
+let stepCur = 0, stepTotal = 0;
+if (step) {
+  const m = step.match(/(\d+)\D+(\d+)/);
+  if (m) { stepCur = +m[1]; stepTotal = +m[2]; }
+}
+---
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet" />
+
+<nav class="dln-nav" id="navbar">
+  <div class="dln-inner">
+
+    <!-- Logo -->
+    <a href="/ssr_v1" class="dln-logo">
+      <span class="dln-logo-bolt">⚡</span>
+      <span class="dln-logo-name">Angular <span class="dln-logo-accent">Deep Dives</span></span>
+    </a>
+
+    <!-- Topic pills (desktop) -->
+    <ul class="dln-topics" role="list">
+      {topics.map(t => (
         <li>
           <a
-            href={l.href}
-            class={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-              active === l.href
-                ? 'text-white bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 shadow-lg shadow-fuchsia-500/30'
-                : 'text-gray-600 hover:bg-gray-100 hover:text-[#1a1a2e]'
-            }`}
+            href={t.soon ? undefined : t.href}
+            class={`dln-pill${t.isActive ? ' dln-pill--on' : ''}${t.soon ? ' dln-pill--soon' : ''}`}
+            aria-current={t.isActive ? 'page' : undefined}
+            tabindex={t.soon ? -1 : undefined}
           >
-            {l.label}
+            <span class="dln-pill-icon">{t.emoji}</span>
+            <span class="dln-pill-lbl">{t.label}</span>
+            {t.soon && <span class="dln-badge-soon">Soon</span>}
           </a>
         </li>
       ))}
     </ul>
 
-    <div class="flex items-center gap-2">
-      <!-- Hamburger (mobile) -->
-      <button id="hamburger" aria-label="Open menu" class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
-        <svg id="burger-icon" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
-      </button>
-    </div>
+    <!-- Step progress dots (course pages only) -->
+    {step && stepTotal > 0 && (
+      <div class="dln-steps" aria-label={step} title={step}>
+        {Array.from({ length: stepTotal }, (_, i) => (
+          <span class={`dln-dot${i < stepCur ? ' dln-dot--done' : ''}${i === stepCur - 1 ? ' dln-dot--active' : ''}`}></span>
+        ))}
+        <span class="dln-steps-label">{stepCur}/{stepTotal}</span>
+      </div>
+    )}
+
+    <!-- Burger (mobile) -->
+    <button class="dln-burger" id="dln-burger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
   </div>
 
-  <!-- Mobile menu -->
-  <div id="mobile-menu">
-    {links.map(l => (
-      <a href={l.href}
-        class={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-          active === l.href
-            ? 'text-white bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500'
-            : 'text-gray-600 hover:bg-gray-100'
-        }`}
+  <!-- Mobile dropdown -->
+  <div class="dln-mobile" id="dln-mobile" aria-hidden="true">
+    {topics.map(t => (
+      <a
+        href={t.soon ? undefined : t.href}
+        class={`dln-mob-row${t.isActive ? ' dln-mob-row--on' : ''}${t.soon ? ' dln-mob-row--soon' : ''}`}
       >
-        {l.label}
+        <span class="dln-mob-icon">{t.emoji}</span>
+        <span class="dln-mob-text">
+          <span class="dln-mob-lbl">{t.label}</span>
+          <span class="dln-mob-desc">{t.desc}</span>
+        </span>
+        {t.soon
+          ? <span class="dln-badge-soon">Soon</span>
+          : t.isActive
+            ? <span class="dln-mob-check">✓</span>
+            : <span class="dln-mob-arrow">→</span>
+        }
       </a>
     ))}
   </div>
 </nav>
 
+<style>
+  /* ── Duolingo design tokens (self-contained) ── */
+  .dln-nav {
+    --green:      #58cc02;
+    --green-dk:   #46a302;
+    --green-pale: #f0fce8;
+    --ink:        #4b4b4b;
+    --ink-muted:  #777777;
+    --border:     #e5e5e5;
+    --surface:    #ffffff;
+    --radius:     12px;
+    --ls:         0.053em;
+    --font:       'Nunito', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; }
+
+  .dln-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    background: var(--surface);
+    border-bottom: 1.5px solid var(--border);
+    font-family: var(--font);
+  }
+
+  /* ── Inner bar ── */
+  .dln-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  /* ── Logo ── */
+  .dln-logo {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .dln-logo-bolt { font-size: 1.35rem; line-height: 1; }
+  .dln-logo-name {
+    font-size: .92rem;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: var(--ls);
+    white-space: nowrap;
+  }
+  .dln-logo-accent { color: var(--green-dk); }
+
+  /* ── Topic pills ── */
+  .dln-topics {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    list-style: none;
+    padding: 0;
+    flex: 1;
+  }
+
+  .dln-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .38rem .75rem;
+    border-radius: var(--radius);
+    border: 1.5px solid transparent;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: var(--ls);
+    color: var(--ink-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .15s, border-color .15s, color .15s;
+    background: transparent;
+  }
+  .dln-pill:hover:not(.dln-pill--soon) {
+    background: var(--green-pale);
+    border-color: var(--green);
+    color: var(--ink);
+  }
+  .dln-pill--on {
+    background: var(--green-pale);
+    border-color: var(--green);
+    color: var(--green-dk);
+  }
+  .dln-pill--soon { opacity: .42; cursor: not-allowed; pointer-events: none; }
+
+  .dln-pill-icon { font-size: .85rem; line-height: 1; }
+  .dln-pill-lbl  { line-height: 1; }
+
+  .dln-badge-soon {
+    font-size: .52rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    background: var(--border);
+    color: var(--ink-muted);
+    padding: .1rem .3rem;
+    border-radius: var(--radius);
+    line-height: 1.4;
+  }
+
+  /* ── Step progress dots ── */
+  .dln-steps {
+    display: flex;
+    align-items: center;
+    gap: .28rem;
+    flex-shrink: 0;
+  }
+  .dln-dot {
+    width: .42rem;
+    height: .42rem;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background .15s, width .15s, height .15s;
+  }
+  .dln-dot--done   { background: var(--green); }
+  .dln-dot--active { background: var(--green-dk); width: .55rem; height: .55rem; }
+  .dln-steps-label {
+    font-size: .62rem;
+    font-weight: 800;
+    color: var(--ink-muted);
+    letter-spacing: .06em;
+    margin-left: .15rem;
+  }
+
+  /* ── Burger ── */
+  .dln-burger {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    padding: .45rem .5rem;
+    border-radius: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: border-color .15s, background .15s;
+  }
+  .dln-burger:hover { background: var(--green-pale); border-color: var(--green); }
+  .dln-burger span  { display: block; width: 20px; height: 2px; background: var(--ink); border-radius: 2px; }
+
+  /* ── Mobile menu ── */
+  .dln-mobile {
+    display: none;
+    flex-direction: column;
+    gap: .3rem;
+    padding: .75rem 1rem 1rem;
+    border-top: 1.5px solid var(--border);
+    background: var(--surface);
+  }
+  .dln-mobile.open { display: flex; }
+
+  .dln-mob-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .65rem .9rem;
+    border-radius: var(--radius);
+    border: 1.5px solid transparent;
+    text-decoration: none;
+    color: var(--ink-muted);
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .dln-mob-row:hover:not(.dln-mob-row--soon) {
+    background: var(--green-pale);
+    border-color: var(--green);
+    color: var(--ink);
+  }
+  .dln-mob-row--on   { background: var(--green-pale); border-color: var(--green); color: var(--green-dk); }
+  .dln-mob-row--soon { opacity: .42; pointer-events: none; }
+
+  .dln-mob-icon  { font-size: 1.15rem; line-height: 1; flex-shrink: 0; }
+  .dln-mob-text  { display: flex; flex-direction: column; gap: .1rem; flex: 1; min-width: 0; }
+  .dln-mob-lbl   { font-size: .82rem; font-weight: 800; letter-spacing: var(--ls); color: inherit; }
+  .dln-mob-desc  { font-size: .68rem; font-weight: 500; color: var(--ink-muted); }
+  .dln-mob-check { font-size: .75rem; font-weight: 900; color: var(--green-dk); flex-shrink: 0; }
+  .dln-mob-arrow { font-size: .75rem; color: var(--ink-muted); flex-shrink: 0; }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .dln-topics, .dln-steps { display: none; }
+    .dln-burger { display: flex; }
+  }
+</style>
+
 <script is:inline>
-  // Hamburger
-  const ham = document.getElementById('hamburger');
-  const menu = document.getElementById('mobile-menu');
-  ham && ham.addEventListener('click', () => menu && menu.classList.toggle('open'));
+  const burger = document.getElementById('dln-burger');
+  const mobile = document.getElementById('dln-mobile');
+  if (burger && mobile) {
+    burger.addEventListener('click', () => {
+      const open = mobile.classList.toggle('open');
+      burger.setAttribute('aria-expanded', String(open));
+      mobile.setAttribute('aria-hidden', String(!open));
+    });
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (!burger.contains(e.target) && !mobile.contains(e.target)) {
+        mobile.classList.remove('open');
+        burger.setAttribute('aria-expanded', 'false');
+        mobile.setAttribute('aria-hidden', 'true');
+      }
+    });
+  }
 </script>
