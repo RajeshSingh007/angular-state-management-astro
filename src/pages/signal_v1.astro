@@ -930,16 +930,7 @@ import Navbar from '../components/Navbar.astro';
               </div>
               <p class="card-body"><strong class="c-ink">Template:</strong> <code>&#123;&#123; count() &#125;&#125;</code><br/><strong class="c-ink">Angular detects change:</strong> signal notifies Angular directly<br/><strong class="c-ink">Good for:</strong> all UI state</p>
             </div>
-            <div class="sticker sticker-left-blue">
-              <header class="sticker-title">Observable (RxJS)</header>
-              <div class="code-wrap mt-sm">
-                <div class="code-body code-body-sm">
-                  count$ = <span class="ky">new</span> <span class="fn">BehaviorSubject</span>(<span class="vl">0</span>);<br/>
-                  count$.<span class="fn">next</span>(<span class="vl">5</span>);
-                </div>
-              </div>
-              <p class="card-body"><strong class="c-ink">Template:</strong> <code>&#123;&#123; count$ | async &#125;&#125;</code><br/><strong class="c-ink">Angular detects change:</strong> async pipe subscribes<br/><strong class="c-ink">Good for:</strong> HTTP, event streams, complex async</p>
-            </div>
+            
           </div>
         </div>
 
