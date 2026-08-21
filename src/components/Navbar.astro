@@ -62,6 +62,16 @@ if (step) {
       </div>
     )}
 
+    <!-- Theme picker -->
+    <div class="dln-theme-wrap" id="dln-theme-wrap">
+      <button class="dln-theme-btn" id="dln-theme-btn" aria-label="Change theme" title="Change theme">
+        <span class="dln-theme-dot" id="dln-theme-dot"></span>
+      </button>
+      <div class="dln-theme-panel" id="dln-theme-panel" aria-hidden="true">
+        <div class="dln-theme-grid" id="dln-theme-grid"></div>
+      </div>
+    </div>
+
     <!-- Burger (mobile) -->
     <button class="dln-burger" id="dln-burger" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -278,6 +288,90 @@ if (step) {
   .dln-mob-check { font-size: .75rem; font-weight: 900; color: var(--green-dk); flex-shrink: 0; }
   .dln-mob-arrow { font-size: .75rem; color: var(--ink-muted); flex-shrink: 0; }
 
+  /* ── Theme Picker ── */
+  .dln-theme-wrap { position: relative; flex-shrink: 0; }
+
+  .dln-theme-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: border-color .15s;
+    flex-shrink: 0;
+  }
+  .dln-theme-btn:hover { border-color: var(--green); }
+
+  .dln-theme-dot {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--green);
+    display: block;
+    pointer-events: none;
+  }
+
+  .dln-theme-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: .75rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    z-index: 300;
+    min-width: 200px;
+  }
+  .dln-theme-panel.open { display: block; }
+
+  .dln-theme-heading {
+    font-size: .65rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: .5rem;
+  }
+
+  .dln-theme-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 37px);
+    gap: 8px;
+  }
+
+  .dln-theme-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .2rem;
+  }
+
+  :global(.dln-theme-swatch) {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2.5px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: transform .12s, box-shadow .12s;
+    display: block;
+  }
+  :global(.dln-theme-swatch:hover) { transform: scale(1.15); box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+  :global(.dln-theme-swatch.active) { border-color: #1a1a1a; box-shadow: 0 0 0 2px #fff inset; }
+
+  .dln-theme-swatch-label {
+    font-size: .52rem;
+    font-weight: 700;
+    color: var(--ink-muted);
+    text-align: center;
+    line-height: 1.2;
+  }
+
   /* ── Responsive ── */
   @media (max-width: 640px) {
     .dln-topics, .dln-steps { display: none; }
@@ -294,7 +388,6 @@ if (step) {
       burger.setAttribute('aria-expanded', String(open));
       mobile.setAttribute('aria-hidden', String(!open));
     });
-    // Close on outside click
     document.addEventListener('click', (e) => {
       if (!burger.contains(e.target) && !mobile.contains(e.target)) {
         mobile.classList.remove('open');
@@ -303,4 +396,80 @@ if (step) {
       }
     });
   }
+
+  // ── Theme Picker ──
+  (function() {
+    var THEMES = [
+      { name: 'Classic Green',   short: 'Classic',  green: '#58cc02', dark: '#46a302', light: '#d7ffb8', pale: '#f0fde4' },
+      { name: 'Blue Ocean',      short: 'Blue',     green: '#1cb0f6', dark: '#0a95da', light: '#b3e5fc', pale: '#e8f7ff' },
+      { name: 'Super Purple',    short: 'Purple',   green: '#8549ba', dark: '#6a35a0', light: '#e0c8ff', pale: '#f4eeff' },
+      { name: 'Midnight Indigo', short: 'Indigo',   green: '#4338ca', dark: '#3730a3', light: '#c7d2fe', pale: '#eef2ff' },
+      { name: 'Midnight Navy',   short: 'Navy',     green: '#1e40af', dark: '#1e3a8a', light: '#bfdbfe', pale: '#eff6ff' },
+      { name: 'Orange Torch',    short: 'Orange',   green: '#f97316', dark: '#ea6c00', light: '#fed7aa', pale: '#fff7ed' },
+      { name: 'Ruby Red',        short: 'Ruby',     green: '#ef4444', dark: '#dc2626', light: '#fecaca', pale: '#fef2f2' },
+      { name: 'Rose Gold',       short: 'Rose',     green: '#e11d91', dark: '#be185d', light: '#fbcfe8', pale: '#fdf2f8' },
+      { name: 'Amber Gold',      short: 'Amber',    green: '#d97706', dark: '#b45309', light: '#fde68a', pale: '#fffbeb' },
+      { name: 'Teal Jade',       short: 'Teal',     green: '#0d9488', dark: '#0f766e', light: '#99f6e4', pale: '#f0fdfa' },
+      { name: 'Slate Dark',      short: 'Slate',    green: '#475569', dark: '#334155', light: '#cbd5e1', pale: '#f1f5f9' },
+      { name: 'Emerald',         short: 'Emerald',  green: '#10b981', dark: '#059669', light: '#a7f3d0', pale: '#ecfdf5' },
+    ];
+
+    function applyTheme(t, save) {
+      var r = document.documentElement;
+      r.style.setProperty('--green', t.green);
+      r.style.setProperty('--green-dark', t.dark);
+      r.style.setProperty('--green-light', t.light);
+      r.style.setProperty('--green-pale', t.pale);
+      var nav = document.querySelector('.dln-nav');
+      if (nav) {
+        nav.style.setProperty('--green', t.green);
+        nav.style.setProperty('--green-dk', t.dark);
+        nav.style.setProperty('--green-pale', t.pale);
+      }
+      document.querySelectorAll('.dln-theme-swatch').forEach(function(s) {
+        s.classList.toggle('active', s.dataset.name === t.name);
+      });
+      if (save) localStorage.setItem('dln-theme', t.name);
+    }
+
+    var saved = localStorage.getItem('dln-theme');
+    var initial = THEMES.find(function(t) { return t.name === saved; }) || THEMES[0];
+    applyTheme(initial, false);
+
+    var grid = document.getElementById('dln-theme-grid');
+    var panel = document.getElementById('dln-theme-panel');
+    var btn = document.getElementById('dln-theme-btn');
+    var wrap = document.getElementById('dln-theme-wrap');
+
+    if (grid) {
+      THEMES.forEach(function(t) {
+        var swatch = document.createElement('button');
+        swatch.className = 'dln-theme-swatch';
+        swatch.dataset.name = t.name;
+        swatch.style.background = t.green;
+        swatch.title = t.name;
+        if (t.name === initial.name) swatch.classList.add('active');
+        swatch.addEventListener('click', function(e) {
+          e.stopPropagation();
+          applyTheme(t, true);
+          if (panel) { panel.classList.remove('open'); panel.setAttribute('aria-hidden', 'true'); }
+        });
+        grid.appendChild(swatch);
+      });
+    }
+
+    if (btn && panel) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var open = panel.classList.toggle('open');
+        panel.setAttribute('aria-hidden', String(!open));
+      });
+      document.addEventListener('click', function(e) {
+        if (wrap && !wrap.contains(e.target)) {
+          panel.classList.remove('open');
+          panel.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+  })();
 </script>
