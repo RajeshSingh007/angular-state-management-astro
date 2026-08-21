@@ -627,7 +627,7 @@ import Navbar from '../components/Navbar.astro';
                 <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-filename">dashboard.component.ts</span></div>
                 <div class="code-body" style="font-size:.78rem;line-height:1.85;">
                   <span class="ky">export class</span> <span class="fn">DashboardComponent</span> &#123;<br/>
-                  &nbsp;&nbsp;<span class="anatomy-hl anatomy-hl-red">myChartData</span>:&lt;ChartData[]&gt;= [];&nbsp;<span class="anat-n">1</span><br/><br/>
+                  &nbsp;&nbsp;<span class="anatomy-hl anatomy-hl-red">myChartData</span>:&lt;ChartData[]&gt; = [];&nbsp;<span class="anat-n">1</span><br/><br/>
                   &nbsp;&nbsp;<span class="fn">loadData</span>() &#123;<br/>
                   &nbsp;&nbsp;&nbsp;&nbsp;<span class="ky">this</span>.http.<span class="fn">get</span>&lt;ChartData[]&gt;(<span class="st">'/api/data'</span>)<br/>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">subscribe</span>(res =&gt; &#123;<br/>
@@ -690,7 +690,6 @@ import Navbar from '../components/Navbar.astro';
 
         <div class="mental-section">
           <header class="route-section-title">What a Signal Actually Is</header>
-          <p class="sec-lead" style="margin-bottom:1.1rem;">A signal is not a stream, not an observable, not a pub/sub system. It is exactly two things bundled together.</p>
           <div class="g2 mb-md">
             <div class="sticker sticker-top-green">
               <header class="sticker-title">① A value</header>
@@ -1565,8 +1564,8 @@ import Navbar from '../components/Navbar.astro';
   .tl-list::before {
     content: '';
     position: absolute;
-    left: calc(1rem + .4rem + .65rem - 1px);
-    top: 0; bottom: 0;
+    left: calc(1rem + .2rem - 1px);
+    top: 15px; bottom: 22px;
     width: 2px;
     background: var(--border);
     z-index: 0;
@@ -1622,7 +1621,7 @@ import Navbar from '../components/Navbar.astro';
   .tl-item:hover  .tl-step-label { color: var(--green-dark); }
 
   /* ── Content Pane ── */
-  .content-pane { min-height: 80vh; padding: 5rem 2rem 4rem 2rem; }
+  .content-pane { min-height: 80vh; padding: 3rem 2rem 4rem 2rem; }
 
   /* ── Section ── */
   .section { display: none; }
