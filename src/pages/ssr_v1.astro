@@ -79,7 +79,7 @@ import Navbar from '../components/Navbar.astro';
       line-height: var(--lh-body);
       letter-spacing: var(--ls-base);
       font-weight: var(--fw-medium);
-      color: var(--ink-muted);
+      color: var(--ink);
     }
 
     /* ── PAGE SHELL ── */
@@ -128,7 +128,7 @@ import Navbar from '../components/Navbar.astro';
 
     .hero-lead {
       font-size: 1.05rem;
-      color: var(--ink-muted);
+      color: var(--ink);
       line-height: 1.75;
       margin-bottom: 2rem;
       max-width: 46ch;
@@ -198,7 +198,7 @@ import Navbar from '../components/Navbar.astro';
 
     .sec-lead {
       font-size: var(--text-heading-sm);
-      color: var(--ink-muted);
+      color: var(--ink);
       line-height: var(--lh-hsm);
       letter-spacing: var(--ls-base);
       font-weight: var(--fw-medium);
@@ -206,8 +206,9 @@ import Navbar from '../components/Navbar.astro';
     }
 
     /* ── TYPOGRAPHY UTILITIES ── */
-    .card-body  { font-size: var(--text-body); color: var(--ink-muted); line-height: var(--lh-body); letter-spacing: var(--ls-base); font-weight: var(--fw-medium); }
+    .card-body  { font-size: var(--text-body); color: var(--ink); line-height: var(--lh-body); letter-spacing: var(--ls-base); font-weight: var(--fw-medium); }
     .card-title { font-size: var(--text-body); font-weight: var(--fw-bold); color: var(--ink); letter-spacing: var(--ls-base); margin-bottom: .25rem; }
+    .c-ink { color: var(--ink); }
     .sticker-header { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
     .sticker-icon   { font-size: 1.25rem; flex-shrink: 0; }
     .sticker-label  { font-size: var(--text-body); font-weight: 800; color: var(--ink); letter-spacing: var(--ls-base); }
@@ -227,12 +228,12 @@ import Navbar from '../components/Navbar.astro';
     .worker-body    { padding: 0 1rem .75rem; }
     .flow-header    { font-size: var(--text-caption); font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
     .step-label     { font-size: var(--text-body); font-weight: var(--fw-bold); color: var(--ink); margin-bottom: .15rem; }
-    .step-body      { font-size: var(--text-caption); color: var(--ink-muted); line-height: var(--lh-caption); }
+    .step-body      { font-size: var(--text-caption); color: var(--ink); line-height: var(--lh-caption); }
 
     /* ── SECTION-01 LAYOUT UTILITIES ── */
     .sec-stickers   { display: flex; flex-direction: column; gap: var(--sp-12); margin-bottom: var(--sp-24); }
     .tl-card-title  { font-size: var(--text-body); font-weight: var(--fw-bold); color: var(--ink); letter-spacing: var(--ls-base); margin-bottom: var(--sp-12); }
-    .tl-card-note   { font-size: var(--text-caption); color: var(--ink-muted); line-height: var(--lh-body); letter-spacing: var(--ls-base); margin-top: var(--sp-12); }
+    .tl-card-note   { font-size: var(--text-caption); color: var(--ink); line-height: var(--lh-body); letter-spacing: var(--ls-base); margin-top: var(--sp-12); }
 
     /* browser-worker overview cards */
     .browser-systems { margin-top: var(--sp-24); }
@@ -256,7 +257,7 @@ import Navbar from '../components/Navbar.astro';
       background: var(--surface); border: var(--border-w) solid var(--border);
       border-radius: var(--radius); padding: var(--sp-12) var(--sp-16);
       margin-bottom: var(--sp-24); font-size: var(--text-caption);
-      color: var(--ink-muted); line-height: var(--lh-body);
+      color: var(--ink); line-height: var(--lh-body);
     }
 
     /* worker detail cards */
@@ -403,7 +404,7 @@ import Navbar from '../components/Navbar.astro';
     .phase-badge-orange { background: var(--orange); }
     .phase-badge-green  { background: var(--green); }
     .phase-steps { display: flex; flex-direction: column; gap: var(--sp-8); margin-bottom: var(--sp-12); }
-    .phase-step-row   { display: flex; gap: var(--sp-8); align-items: flex-start; font-size: var(--text-caption); color: var(--ink-muted); line-height: var(--lh-body); }
+    .phase-step-row   { display: flex; gap: var(--sp-8); align-items: flex-start; font-size: var(--text-caption); color: var(--ink); line-height: var(--lh-body); }
     .phase-arrow          { font-weight: 900; flex-shrink: 0; color: var(--orange); }
     .phase-arrow-green    { color: var(--green-dark); }
 
@@ -414,7 +415,7 @@ import Navbar from '../components/Navbar.astro';
     .api-lbl-green { color: var(--green-dark); }
     .api-lbl-blue  { color: var(--blue); }
     .api-lbl-red   { color: var(--red); }
-    .api-desc      { color: var(--ink-muted); text-align: right; }
+    .api-desc      { color: var(--ink); text-align: right; }
     .api-desc-err  { color: #dc2626; font-weight: 600; text-align: right; }
 
     /* ── SECTION 04 WORLD/MENTAL-MODEL ── */
@@ -427,12 +428,12 @@ import Navbar from '../components/Navbar.astro';
     .menu-item  { display: flex; gap: var(--sp-12); align-items: flex-start; }
     .menu-icon  { font-size: var(--text-body); flex-shrink: 0; }
     .explain-rows { display: flex; flex-direction: column; gap: var(--sp-8); margin-bottom: var(--sp-16); }
-    .explain-row  { display: flex; gap: var(--sp-12); align-items: flex-start; font-size: var(--text-caption); color: var(--ink-muted); line-height: var(--lh-body); }
+    .explain-row  { display: flex; gap: var(--sp-12); align-items: flex-start; font-size: var(--text-caption); color: var(--ink); line-height: var(--lh-body); }
     .explain-num  { font-weight: var(--fw-bold); flex-shrink: 0; }
     .explain-num-green { color: var(--green-dark); }
     .explain-num-blue  { color: var(--blue); }
     .desc-rows { display: flex; flex-direction: column; gap: var(--sp-8); margin-bottom: var(--sp-16); }
-    .desc-row  { display: flex; gap: var(--sp-12); align-items: flex-start; font-size: var(--text-caption); color: var(--ink-muted); line-height: var(--lh-body); }
+    .desc-row  { display: flex; gap: var(--sp-12); align-items: flex-start; font-size: var(--text-caption); color: var(--ink); line-height: var(--lh-body); }
     .desc-icon { font-size: var(--text-body); flex-shrink: 0; }
 
     /* ── FLEX COLUMN HELPERS ── */
@@ -441,7 +442,7 @@ import Navbar from '../components/Navbar.astro';
     .flex-col-lg { display: flex; flex-direction: column; gap: var(--sp-24); }
 
     /* ── STICKER LIST ── */
-    .sticker-list { display: flex; flex-direction: column; gap: var(--sp-8); font-size: var(--text-caption); color: var(--ink-muted); line-height: var(--lh-body); }
+    .sticker-list { display: flex; flex-direction: column; gap: var(--sp-8); font-size: var(--text-caption); color: var(--ink); line-height: var(--lh-body); }
 
     /* ── STICKER CARD ── */
     .sticker {
@@ -503,11 +504,11 @@ import Navbar from '../components/Navbar.astro';
     .mode-emoji { font-size: 2.5rem; line-height: 1; }
     .mode-name  { font-size: var(--text-caption); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
     .mode-title { font-family: var(--font-head); font-size: 1.1rem; font-weight: 900; color: var(--ink); margin-bottom: .35rem; }
-    .mode-desc  { font-size: var(--text-body); color: var(--ink-muted); line-height: var(--lh-body); letter-spacing: var(--ls-base); }
+    .mode-desc  { font-size: var(--text-body); color: var(--ink); line-height: var(--lh-body); letter-spacing: var(--ls-base); }
     .mode-analogy {
       background: rgba(0,0,0,.05); border: 1.5px solid rgba(0,0,0,.08);
       border-radius: var(--radius); padding: .65rem .85rem;
-      font-size: var(--text-caption); line-height: var(--lh-body); color: var(--ink-muted);
+      font-size: var(--text-caption); line-height: var(--lh-body); color: var(--ink);
     }
     .mode-pros  { display: flex; flex-direction: column; gap: .2rem; font-size: var(--text-body); }
     .pro { color: var(--green-dark); font-weight: var(--fw-bold); }
@@ -553,10 +554,10 @@ import Navbar from '../components/Navbar.astro';
     }
     .tl-dot.bad   { background: var(--red-pale);   border-color: var(--red);   color: var(--red); }
     .tl-dot.good  { background: var(--green-pale);  border-color: var(--green); color: var(--green-dark); }
-    .tl-dot.mixed { background: var(--page);         border-color: var(--border); color: var(--ink-muted); }
+    .tl-dot.mixed { background: var(--page);         border-color: var(--border); color: var(--ink); }
 
     .tl-label { font-size: .68rem; font-weight: 800; color: var(--ink); text-align: center; margin-top: .5rem; max-width: 6rem; line-height: 1.35; }
-    .tl-sub   { font-size: .6rem;  color: var(--ink-muted); text-align: center; margin-top: .1rem; max-width: 6rem; line-height: 1.3; }
+    .tl-sub   { font-size: .6rem;  color: var(--ink); text-align: center; margin-top: .1rem; max-width: 6rem; line-height: 1.3; }
     .tl-time  { font-size: .58rem; font-weight: 800; margin-top: .3rem; padding: .12rem .45rem; border-radius: var(--radius); border: 1.5px solid; }
     .tl-time.bad  { background: var(--red-pale);   color: var(--red);        border-color: var(--red); }
     .tl-time.good { background: var(--green-pale); color: var(--green-dark); border-color: var(--green); }
@@ -593,7 +594,7 @@ import Navbar from '../components/Navbar.astro';
     .matrix-row:last-child { border-bottom: none; }
     .matrix-row:hover { background: var(--green-pale); }
     .ma { font-size: .8rem; font-weight: 800; color: var(--ink); }
-    .mc { font-size: .78rem; color: var(--ink-muted); text-align: center; }
+    .mc { font-size: .78rem; color: var(--ink); text-align: center; }
     .check { color: var(--green-dark); font-weight: 900; }
     .cross { color: var(--red); font-weight: 900; }
 
@@ -653,7 +654,7 @@ import Navbar from '../components/Navbar.astro';
       border: var(--border-w) solid;
     }
     .hyd-lbl { font-size: .85rem; font-weight: 800; color: var(--ink); margin-bottom: .2rem; }
-    .hyd-body { font-size: .8rem; color: var(--ink-muted); line-height: 1.65; }
+    .hyd-body { font-size: .8rem; color: var(--ink); line-height: 1.65; }
 
     /* ── BEFORE / AFTER ── */
     .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
@@ -674,7 +675,7 @@ import Navbar from '../components/Navbar.astro';
     }
     .ba-n.bad     { background: var(--red-pale);   border-color: var(--red);   color: var(--red); }
     .ba-n.good    { background: var(--green-pale); border-color: var(--green); color: var(--green-dark); }
-    .ba-n.neutral { background: var(--page);       border-color: var(--border); color: var(--ink-muted); }
+    .ba-n.neutral { background: var(--page);       border-color: var(--border); color: var(--ink); }
     .s-bad  { color: var(--red);        font-weight: 800; }
     .s-good { color: var(--green-dark); font-weight: 800; }
 
@@ -687,7 +688,7 @@ import Navbar from '../components/Navbar.astro';
     }
     .route-card:hover { transform: translateY(-2px); border-color: var(--green); }
     .route-path { font-family: var(--font-code); font-size: .8rem; font-weight: 700; color: var(--ink); }
-    .route-desc { font-size: .77rem; color: var(--ink-muted); line-height: 1.55; }
+    .route-desc { font-size: .77rem; color: var(--ink); line-height: 1.55; }
     .mode-pre { background: var(--green-light); color: var(--green-dark); border-color: var(--green); }
     .mode-srv { background: var(--blue-light);  color: #0076a8;           border-color: var(--blue); }
     .mode-csr { background: var(--red-light);   color: #c0392b;           border-color: var(--red); }
@@ -714,7 +715,7 @@ import Navbar from '../components/Navbar.astro';
       background: var(--green); border: 2px solid var(--green-dark);
       flex-shrink: 0; margin-top: .55rem;
     }
-    .tk-text { font-size: .88rem; color: var(--ink-muted); line-height: 1.75; }
+    .tk-text { font-size: .88rem; color: var(--ink); line-height: 1.75; }
     .tk-text strong { color: var(--ink); }
 
     /* ── WORLD CARDS ── */
@@ -728,7 +729,7 @@ import Navbar from '../components/Navbar.astro';
     .world-card:hover { transform: translateY(-2px); border-color: var(--green); }
     .world-icon { font-size: 2rem; margin-bottom: .5rem; }
     .world-name { font-size: .85rem; font-weight: 900; color: var(--ink); margin-bottom: .35rem; }
-    .world-desc { font-size: .75rem; color: var(--ink-muted); line-height: 1.6; }
+    .world-desc { font-size: .75rem; color: var(--ink); line-height: 1.6; }
     .world-arrow { font-size: 1.5rem; color: var(--ink-light); flex-shrink: 0; }
 
     /* ── APP SHELL — content + right sidebar ── */
@@ -841,7 +842,7 @@ import Navbar from '../components/Navbar.astro';
     .tl-step-label {
       font-size: .76rem;
       font-weight: 700;
-      color: var(--ink-muted);
+      color: var(--ink);
       line-height: 1.35;
     }
     .tl-group-label {
@@ -1086,7 +1087,7 @@ import Navbar from '../components/Navbar.astro';
               <header class="subsec-label">Under the hood — 3 systems inside every browser</header>
               <p class="card-body">
                 To understand why CSR is slow and SSR is fast, you need to know that the browser has
-                <strong style="color:var(--ink);">three separate systems</strong> — and each one plays a different role in putting pixels on screen.
+                <strong class="c-ink">three separate systems</strong> — and each one plays a different role in putting pixels on screen.
               </p>
               <div class="worker-cards">
                 <div class="worker-card worker-card-blue">
@@ -1109,7 +1110,7 @@ import Navbar from '../components/Navbar.astro';
                 </div>
               </div>
               <div class="dom-note">
-                <strong style="color:var(--ink);">The DOM tree is the shared data structure</strong> all three talk through.
+                <strong class="c-ink">The DOM tree is the shared data structure</strong> all three talk through.
                 HTML Parser <em>writes</em> to it. DOM API (Angular) <em>writes</em> to it. Rendering Engine <em>reads</em> from it and paints.
                 They never talk to each other directly.
               </div>
@@ -1119,7 +1120,7 @@ import Navbar from '../components/Navbar.astro';
 
                 <div class="worker-detail-card worker-detail-blue">
                   <header class="worker-name worker-name-blue">Worker 1 — HTML Parser</header>
-                  <p class="worker-body card-body">The server sends a raw text string. The HTML Parser reads it character by character. Every time it sees a complete tag, it <strong style="color:var(--ink);">creates a DOM node object in memory</strong>. No JavaScript. No painting. Text in → DOM nodes out.</p>
+                  <p class="worker-body card-body">The server sends a raw text string. The HTML Parser reads it character by character. Every time it sees a complete tag, it <strong class="c-ink">creates a DOM node object in memory</strong>. No JavaScript. No painting. Text in → DOM nodes out.</p>
                   <div class="worker-detail-code code-wrap">
                     <div class="code-body code-body-sm" style="line-height:1.9;">
                       <span style="color:var(--ink-light);font-style:italic;">// Server sends this raw text string over HTTP:</span><br/>
@@ -1136,7 +1137,7 @@ import Navbar from '../components/Navbar.astro';
 
                 <div class="worker-detail-card worker-detail-orange">
                   <header class="worker-name worker-name-orange">Worker 2 — DOM API (JavaScript's writing interface)</header>
-                  <p class="worker-body card-body">JavaScript cannot touch the DOM tree directly — it goes through the DOM API. <strong style="color:var(--ink);">Angular is the writer. DOM API is the door. The DOM tree is what changes.</strong></p>
+                  <p class="worker-body card-body">JavaScript cannot touch the DOM tree directly — it goes through the DOM API. <strong class="c-ink">Angular is the writer. DOM API is the door. The DOM tree is what changes.</strong></p>
                   <div class="worker-detail-code code-wrap">
                     <div class="code-body code-body-sm" style="line-height:1.9;">
                       <span class="ky">const</span> h1 = document.<span class="fn">createElement</span>(<span class="st">'h1'</span>)&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// CREATE h1 node</span><br/>
@@ -1152,7 +1153,7 @@ import Navbar from '../components/Navbar.astro';
 
                 <div class="worker-detail-card worker-detail-green">
                   <header class="worker-name worker-name-green">Worker 3 — Rendering Engine (Blink in Chrome)</header>
-                  <p class="worker-body card-body">Watches the DOM tree. The moment any node is added or changed — by either the HTML Parser or DOM API — it wakes up automatically. <strong style="color:var(--ink);">Never talks to JS. Never reads HTML strings. Only reads the DOM tree.</strong></p>
+                  <p class="worker-body card-body">Watches the DOM tree. The moment any node is added or changed — by either the HTML Parser or DOM API — it wakes up automatically. <strong class="c-ink">Never talks to JS. Never reads HTML strings. Only reads the DOM tree.</strong></p>
                   <div class="worker-detail-code code-wrap">
                     <div class="code-body code-body-sm" style="line-height:1.9;">
                       <span style="color:var(--ink-light);font-style:italic;">// DOM tree changed → Rendering Engine wakes up automatically:</span><br/>
@@ -1230,11 +1231,11 @@ import Navbar from '../components/Navbar.astro';
                 <div class="diff-items">
                   <div class="diff-item diff-item-csr">
                     <div class="diff-item-label">CSR</div>
-                    <p class="card-body"><strong style="color:var(--ink);">Angular (DOM API)</strong> creates DOM nodes.<br/>Rendering Engine paints them.<br/>User waits for all of this. 😩</p>
+                    <p class="card-body"><strong class="c-ink">Angular (DOM API)</strong> creates DOM nodes.<br/>Rendering Engine paints them.<br/>User waits for all of this. 😩</p>
                   </div>
                   <div class="diff-item diff-item-ssr">
                     <div class="diff-item-label">SSR</div>
-                    <p class="card-body"><strong style="color:var(--ink);">HTML Parser</strong> creates DOM nodes from server HTML.<br/>Rendering Engine paints immediately.<br/>Angular only wires events later. ✅</p>
+                    <p class="card-body"><strong class="c-ink">HTML Parser</strong> creates DOM nodes from server HTML.<br/>Rendering Engine paints immediately.<br/>Angular only wires events later. ✅</p>
                   </div>
                 </div>
               </div>
@@ -1403,7 +1404,7 @@ import Navbar from '../components/Navbar.astro';
           <div class="callout callout-blue">
             <header class="callout-title callout-title-blue">The constraint that drives everything</header>
             <p>
-              <strong style="color:var(--ink);">HTML strings travel. Component objects never do.</strong>
+              <strong class="c-ink">HTML strings travel. Component objects never do.</strong>
               The server builds a component object, evaluates its template into an HTML string, and sends only that string.
               The component object is destroyed. The browser must build a fresh one from scratch.
               That single fact is why hydration, server-safe code, and the HTTP Transfer Cache all exist.
@@ -1440,7 +1441,7 @@ import Navbar from '../components/Navbar.astro';
             <div class="sticker sticker-red">
               <header class="sticker-title">✗ Without Hydration — Demolish &amp; Rebuild</header>
               <p class="card-body">
-                The server delivers a <strong style="color:var(--ink);">fully furnished apartment</strong> — all furniture, walls, and fittings are there.
+                The server delivers a <strong class="c-ink">fully furnished apartment</strong> — all furniture, walls, and fittings are there.
                 But Angular (without hydration) walks in, demolishes everything, and rebuilds the exact same apartment from scratch.
                 User sees the furniture disappear and reappear. Wasteful and jarring.
               </p>
@@ -1448,7 +1449,7 @@ import Navbar from '../components/Navbar.astro';
             <div class="sticker sticker-green">
               <header class="sticker-title">✓ With Hydration — Move In &amp; Wire the Electricity</header>
               <p class="card-body">
-                Angular walks into the already-furnished apartment and simply <strong style="color:var(--ink);">installs the electricity and plumbing</strong>.
+                Angular walks into the already-furnished apartment and simply <strong class="c-ink">installs the electricity and plumbing</strong>.
                 Furniture stays exactly where it is. No visible disruption. The apartment goes from static to interactive
                 without the user noticing anything change.
               </p>
@@ -1463,12 +1464,12 @@ import Navbar from '../components/Navbar.astro';
             <header class="callout-title callout-title-green">👨‍🍳 The chef can't travel — but the recipe can</header>
             <p class="card-body">
               The server is a chef who prepares a dish and sends it to your table.
-              You receive the finished dish — the <strong style="color:var(--ink);">HTML string</strong>.
-              You can also receive the ingredient list — the <strong style="color:var(--ink);">JSON data</strong> — alongside it.
+              You receive the finished dish — the <strong class="c-ink">HTML string</strong>.
+              You can also receive the ingredient list — the <strong class="c-ink">JSON data</strong> — alongside it.
             </p>
             <p class="card-body">
               But you <em>cannot</em> receive the chef. The chef's knowledge of when the butter is about to burn.
-              The chef's hands. Those are <strong style="color:var(--ink);">live capabilities that only exist in the chef's body</strong>.
+              The chef's hands. Those are <strong class="c-ink">live capabilities that only exist in the chef's body</strong>.
               The browser must grow its own chef (component objects) from scratch —
               which is exactly why Angular boots fresh and why the HTTP Transfer Cache passes the ingredient list
               (JSON data) in the HTML, so the browser's chef doesn't have to re-fetch the same ingredients.
@@ -1669,27 +1670,27 @@ import Navbar from '../components/Navbar.astro';
             <div class="menu-items">
               <div class="menu-item">
                 <span class="menu-icon">💧</span>
-                <p class="card-body"><strong style="color:var(--ink);">Packaged water</strong> — same for every customer, never changes. You can stock 1000 bottles in the morning and hand them out all day. There is zero reason to "prepare" a new bottle for each customer.</p>
+                <p class="card-body"><strong class="c-ink">Packaged water</strong> — same for every customer, never changes. You can stock 1000 bottles in the morning and hand them out all day. There is zero reason to "prepare" a new bottle for each customer.</p>
               </div>
               <div class="menu-item">
                 <span class="menu-icon">🍲</span>
-                <p class="card-body"><strong style="color:var(--ink);">Today's special</strong> — same for all customers today, but changes daily. Cook a big batch in the morning, keep it warm, serve all day. Throw away at night.</p>
+                <p class="card-body"><strong class="c-ink">Today's special</strong> — same for all customers today, but changes daily. Cook a big batch in the morning, keep it warm, serve all day. Throw away at night.</p>
               </div>
               <div class="menu-item">
                 <span class="menu-icon">🎂</span>
-                <p class="card-body"><strong style="color:var(--ink);">Custom birthday cake</strong> — completely unique per customer, made fresh only when ordered. You cannot prepare this in advance. It must be made on-demand.</p>
+                <p class="card-body"><strong class="c-ink">Custom birthday cake</strong> — completely unique per customer, made fresh only when ordered. You cannot prepare this in advance. It must be made on-demand.</p>
               </div>
             </div>
           </div>
 
           <div class="callout callout-red-left mb-md">
             <header class="callout-title callout-title-red">Now imagine your kitchen has ONE rule for everything:</header>
-            <p><strong style="color:var(--ink);">"Cook everything fresh, to order, for every customer, every time."</strong><br/>The water? You open a new bottle for every person — wasted effort. The special? You cook it fresh each time — also wasted. The cake? Correct — but only by accident. <strong style="color:var(--red);">One kitchen rule applied to everything = two out of three are wrong.</strong></p>
+            <p><strong class="c-ink">"Cook everything fresh, to order, for every customer, every time."</strong><br/>The water? You open a new bottle for every person — wasted effort. The special? You cook it fresh each time — also wasted. The cake? Correct — but only by accident. <strong style="color:var(--red);">One kitchen rule applied to everything = two out of three are wrong.</strong></p>
           </div>
 
           <div class="callout callout-green">
             <header class="callout-title callout-title-green">This is exactly what Angular SSR does by default</header>
-            <p><strong style="color:var(--ink);">/home</strong> = packaged water. Same HTML for every user. But SSR rebuilds it fresh on every request anyway — wasted.<br/><strong style="color:var(--ink);">/products/123</strong> = today's special. Changes daily but same for all users. Could be cached, but SSR rebuilds it every time.<br/><strong style="color:var(--ink);">/dashboard</strong> = birthday cake. Unique per user. Must be fresh. SSR handles this correctly — but only by accident.</p>
+            <p><strong class="c-ink">/home</strong> = packaged water. Same HTML for every user. But SSR <strong>rebuilds it fresh on every request anyway — wasted.</strong><br/><strong class="c-ink">/products/123</strong> = today's special. Changes daily but same for all users. <strong>Could be cached, but SSR rebuilds it every time.</strong><br/><strong class="c-ink">/dashboard</strong> = birthday cake. Unique per user. Must be fresh. SSR handles this correctly — <strong>but only by accident.</strong></p>
           </div>
         </div>
 
@@ -1701,21 +1702,21 @@ import Navbar from '../components/Navbar.astro';
               <div class="sol-num sol-num-red">1</div>
               <div>
                 <p class="card-title">Before SSR — the server was completely blind to routes</p>
-                <p class="card-body">In a normal Angular app there is no real server. Every URL — <code>/home</code>, <code>/dashboard</code>, <code>/products/123</code> — returns the exact same empty <code>index.html</code> + JS bundle. Angular boots in the browser and figures out which page to show. The server has no idea what route was requested.</p>
+                <p class="card-body">In a normal Angular app there is no real server. Every URL — <code>/home</code>, <code>/dashboard</code>, <code>/products/123</code> — returns the exact same <strong>empty <code>index.html</code> + JS bundle</strong>. Angular boots in the browser and figures out which page to show. <strong>The server has no idea what route was requested.</strong></p>
               </div>
             </div>
             <div class="sol-step">
               <div class="sol-num sol-num-orange">2</div>
               <div>
                 <p class="card-title">With SSR — the server finally understands which route is being requested</p>
-                <p class="card-body">Now Angular runs on the server. The server knows whether you hit <code>/home</code> or <code>/dashboard</code>. It runs the right component, fetches the right data, and sends back a fully-built HTML page. But by default, it does this the same way for every route — fresh render, every time, no exceptions.</p>
+                <p class="card-body">Now Angular runs on the server. The server knows whether you hit <code>/home</code> or <code>/dashboard</code>. It runs the right component, fetches the right data, and sends back a fully-built HTML page. But by default, <strong>it does this the same way for every route — fresh render, every time, no exceptions.</strong></p>
               </div>
             </div>
             <div class="sol-step">
               <div class="sol-num sol-num-green">3</div>
               <div>
                 <p class="card-title">Server Routing — a new file where you write per-route instructions</p>
-                <p class="card-body">Angular 17+ introduced <code>app.routes.server.ts</code> — a separate file that sits alongside your existing <code>app.routes.ts</code>. Your existing routes are untouched. This file only adds server-side behaviour on top: <em>"for /home, build it once at deploy."</em> <em>"for /dashboard, render fresh every time, never cache."</em> <em>"for /old-page, send a 301 redirect."</em></p>
+                <p class="card-body">Angular 17+ introduced <code>app.routes.server.ts</code> — a separate file that sits alongside your existing <code>app.routes.ts</code>. <strong>Your existing routes are untouched.</strong> This file only adds server-side behaviour on top: <strong><em>"for /home, build it once at deploy."</em> <em>"for /dashboard, render fresh every time, never cache."</em> <em>"for /old-page, send a 301 redirect."</em></strong></p>
               </div>
             </div>
           </div>
@@ -1729,19 +1730,19 @@ import Navbar from '../components/Navbar.astro';
               <div class="sticker-emoji">💧</div>
               <header class="sticker-title">/home, /about</header>
               <p class="worker-action">Prerender — build once</p>
-              <p class="card-body">Never changes. Same HTML for every user. Build at deploy time, serve as a static file forever. Zero server cost per request.</p>
+              <p class="card-body">Never changes. Same HTML for every user. Build at deploy time, serve as a static file forever. <strong>Zero server cost per request.</strong></p>
             </div>
             <div class="sticker sticker-left-blue">
               <div class="sticker-emoji">🛍️</div>
               <header class="sticker-title">/products/:id</header>
               <p class="worker-action">Server + Cache</p>
-              <p class="card-body">Changes when stock or price changes — same for all users. Server-render once, cache for an hour, serve many users from that cache.</p>
+              <p class="card-body">Changes when stock or price changes — <strong>same for all users.</strong> Server-render once, cache for an hour, serve many users from that cache.</p>
             </div>
             <div class="sticker sticker-left-red">
               <div class="sticker-emoji">👤</div>
               <header class="sticker-title">/dashboard</header>
               <p class="worker-action">Server — never cache</p>
-              <p class="card-body">Unique per user, changes in real time. Must render fresh on the server for every single request. Caching would show User A's data to User B.</p>
+              <p class="card-body">Unique per user, changes in real time. Must render fresh on the server for every single request. <strong>Caching would show User A's data to User B.</strong></p>
             </div>
           </div>
         </div>
@@ -1753,25 +1754,25 @@ import Navbar from '../components/Navbar.astro';
             <div class="sticker sticker-left-green">
               <header class="sticker-title">💧 Prerender — /home, /about</header>
               <div class="explain-rows">
-                <div class="explain-row"><span class="explain-num explain-num-green">①</span><span>At <strong style="color:var(--ink);">deploy time</strong>, Angular builds the HTML once for this page</span></div>
-                <div class="explain-row"><span class="explain-num explain-num-green">②</span><span>That HTML is saved as a <strong style="color:var(--ink);">static file</strong> on the server</span></div>
-                <div class="explain-row"><span class="explain-num explain-num-green">③</span><span>User 1, User 50, User 100 — all get <strong style="color:var(--ink);">that exact same file</strong>. Server never runs Angular again</span></div>
-                <div class="explain-row"><span class="explain-num explain-num-green">④</span><span>Page only changes when you <strong style="color:var(--ink);">deploy again</strong></span></div>
+                <div class="explain-row"><span class="explain-num explain-num-green">①</span><span>At <strong class="c-ink">deploy time</strong>, Angular builds the HTML once for this page</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-green">②</span><span>That HTML is saved as a <strong class="c-ink">static file</strong> on the server</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-green">③</span><span>User 1, User 50, User 100 — all get <strong class="c-ink">that exact same file</strong>. Server never runs Angular again</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-green">④</span><span>Page only changes when you <strong class="c-ink">deploy again</strong></span></div>
               </div>
             </div>
             <div class="sticker sticker-left-blue">
               <header class="sticker-title">🛍️ Server + Cache — /products/:id</header>
               <div class="explain-rows">
-                <div class="explain-row"><span class="explain-num explain-num-blue">①</span><span><strong style="color:var(--ink);">User 1</strong> requests the page → server runs Angular, fetches data, builds HTML, sends it</span></div>
-                <div class="explain-row"><span class="explain-num explain-num-blue">②</span><span>Server tells the browser/CDN: <strong style="color:var(--ink);">"keep this for 1 hour"</strong> (via <code>Cache-Control</code>)</span></div>
-                <div class="explain-row"><span class="explain-num explain-num-blue">③</span><span><strong style="color:var(--ink);">Users 2–100</strong> within that hour → get the cached copy. Server is never touched</span></div>
-                <div class="explain-row"><span class="explain-num explain-num-blue">④</span><span>After 1 hour, cache expires → <strong style="color:var(--ink);">next request triggers a fresh build</strong> and the cycle repeats</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-blue">①</span><span><strong class="c-ink">User 1</strong> requests the page → server runs Angular, fetches data, builds HTML, sends it</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-blue">②</span><span>Server tells the browser/CDN: <strong class="c-ink">"keep this for 1 hour"</strong> (via <code>Cache-Control</code>)</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-blue">③</span><span><strong class="c-ink">Users 2–100</strong> within that hour → get the cached copy. Server is never touched</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-blue">④</span><span>After 1 hour, cache expires → <strong class="c-ink">next request triggers a fresh build</strong> and the cycle repeats</span></div>
               </div>
             </div>
           </div>
           <div class="callout callout-blue">
             <header class="callout-title callout-title-blue">The key difference</header>
-            <p><strong style="color:var(--ink);">Prerender</strong> is built at deploy time — never rebuilds unless you redeploy. Perfect for pages that never change.<br/><strong style="color:var(--ink);">Server + Cache</strong> is built on the first request after the cache expires — perfect for pages that change (stock, price) but are the same for all users within that window.</p>
+            <p><strong class="c-ink">Prerender</strong> is built at deploy time — never rebuilds unless you redeploy. Perfect for pages that never change.<br/><strong class="c-ink">Server + Cache</strong> is built on the first request after the cache expires — perfect for pages that change (stock, price) but are the same for all users within that window.</p>
           </div>
         </div>
 
@@ -1812,7 +1813,7 @@ import Navbar from '../components/Navbar.astro';
         <!-- Two Files Side by Side -->
         <div class="mental-section">
           <header class="subsec-label">How <code style="font-size:.7rem;text-transform:none;">app.routes.ts</code> and <code style="font-size:.7rem;text-transform:none;">app.routes.server.ts</code> Work Together</header>
-          <p class="card-body">You do not change your existing <code>app.routes.ts</code> at all. These two files answer <em>different questions</em> about the same URL.</p>
+          <p class="card-body">You do not change your existing <code>app.routes.ts</code> at all. These two files answer <strong>different questions about the same URL.</strong></p>
           <div class="g2 mb-md">
             <div class="code-wrap">
               <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">app.routes.ts — "which component?"</span></div>
@@ -1856,13 +1857,13 @@ import Navbar from '../components/Navbar.astro';
             </div>
           </div>
           <div class="desc-rows">
-            <div class="desc-row"><span class="desc-icon">📋</span><span><code>app.routes.ts</code> answers: <strong style="color:var(--ink);">"When the user visits /products/123, show ProductDetailComponent."</strong> — This is pure Angular, runs in the browser.</span></div>
-            <div class="desc-row"><span class="desc-icon">🖥️</span><span><code>app.routes.server.ts</code> answers: <strong style="color:var(--ink);">"When the server receives a request for /products/123, run Angular and cache the result for 1 hour."</strong> — Read only by the server, never the browser.</span></div>
-            <div class="desc-row"><span class="desc-icon">🔗</span><span>Angular matches them by <strong style="color:var(--ink);">the same path string</strong>. For <code>products/:id</code>: use ProductDetailComponent (routes) AND render on server with cache (server routes).</span></div>
+            <div class="desc-row"><span class="desc-icon">📋</span><span><code>app.routes.ts</code> answers: <strong class="c-ink">"When the user visits /products/123, show ProductDetailComponent."</strong> — This is pure Angular, runs in the browser.</span></div>
+            <div class="desc-row"><span class="desc-icon">🖥️</span><span><code>app.routes.server.ts</code> answers: <strong class="c-ink">"When the server receives a request for /products/123, run Angular and cache the result for 1 hour."</strong> — Read only by the server, never the browser.</span></div>
+            <div class="desc-row"><span class="desc-icon">🔗</span><span>Angular matches them by <strong class="c-ink">the same path string</strong>. For <code>products/:id</code>: use ProductDetailComponent (routes) AND render on server with cache (server routes).</span></div>
           </div>
           <div class="callout callout-orange-left">
             <header class="callout-title callout-title-orange">Hotel analogy</header>
-            <p><code>app.routes.ts</code> is the <strong style="color:var(--ink);">room directory</strong> — "Room 101 is a standard room, Room 201 is a suite."<br/><code>app.routes.server.ts</code> is the <strong style="color:var(--ink);">housekeeping schedule</strong> — "Standard rooms cleaned daily, suites every 12 hours."<br/>Two separate lists about the same rooms. One answers <em>what</em> the room is. The other answers <em>how</em> to service it.</p>
+            <p><code>app.routes.ts</code> is the <strong class="c-ink">room directory</strong> — "Room 101 is a standard room, Room 201 is a suite."<br/><code>app.routes.server.ts</code> is the <strong class="c-ink">housekeeping schedule</strong> — "Standard rooms cleaned daily, suites every 12 hours."<br/>Two separate lists about the same rooms. One answers <em>what</em> the room is. The other answers <em>how</em> to service it.</p>
           </div>
         </div>
 
@@ -1874,21 +1875,21 @@ import Navbar from '../components/Navbar.astro';
               <div class="sol-num sol-num-red">1</div>
               <div>
                 <p class="card-title"><code>renderMode</code> — how the HTML is produced</p>
-                <p class="card-body"><code>RenderMode.Prerender</code> — built once at deploy time, served as a static file. Zero server cost per visit.<br/><code>RenderMode.Server</code> — Angular runs on the server for every request and builds fresh HTML.<br/><code>RenderMode.Client</code> — no SSR, Angular boots entirely in the browser (same as default Angular).</p>
+                <p class="card-body"><code>RenderMode.Prerender</code> — built once at deploy time, served as a static file. <strong>Zero server cost per visit.</strong><br/><code>RenderMode.Server</code> — Angular runs on the server for every request and <strong>builds fresh HTML.</strong><br/><code>RenderMode.Client</code> — no SSR, <strong>Angular boots entirely in the browser</strong> (same as default Angular).</p>
               </div>
             </div>
             <div class="sol-step">
               <div class="sol-num sol-num-orange">2</div>
               <div>
                 <p class="card-title"><code>headers</code> — how long the browser and CDN should keep a copy</p>
-                <p class="card-body"><code>Cache-Control: max-age=3600</code> means "keep this response for 1 hour — don't ask the server again." <code>no-store</code> means "throw it away immediately — always ask the server." Without this, your dashboard could get cached by a CDN and served to the wrong user.</p>
+                <p class="card-body"><code>Cache-Control: max-age=3600</code> means <strong>"keep this response for 1 hour — don't ask the server again."</strong> <code>no-store</code> means <strong>"throw it away immediately — always ask the server."</strong> Without this, <strong>your dashboard could get cached by a CDN and served to the wrong user.</strong></p>
               </div>
             </div>
             <div class="sol-step">
               <div class="sol-num sol-num-blue">3</div>
               <div>
                 <p class="card-title"><code>status</code> / <code>redirectTo</code> — real HTTP codes, not fake browser ones</p>
-                <p class="card-body">Without SSR, Angular handles 404s inside the browser — but the server still returns HTTP 200 to everyone. Google sees a 200 for a page that doesn't exist and thinks it's fine. With Server Routing, <code>status: 404</code> sends a genuine 404 HTTP response. <code>redirectTo + status: 301</code> sends a permanent redirect that browsers and search engines both honour.</p>
+                <p class="card-body">Without SSR, Angular handles 404s inside the browser — but <strong>the server still returns HTTP 200 to everyone.</strong> Google sees a 200 for a page that doesn't exist and thinks it's fine. With Server Routing, <code>status: 404</code> sends a <strong>genuine 404 HTTP response.</strong> <code>redirectTo + status: 301</code> sends a <strong>permanent redirect that browsers and search engines both honour.</strong></p>
               </div>
             </div>
           </div>
@@ -1991,7 +1992,7 @@ import Navbar from '../components/Navbar.astro';
               <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.75rem;color:var(--ink-muted);line-height:1.6;">
                 <p>• <code style="background:var(--orange-pale);color:var(--orange);padding:.1rem .3rem;border-radius:6px;">new HelloComponent()</code> created in Node.js RAM</p>
                 <p>• <code style="background:var(--orange-pale);color:var(--orange);padding:.1rem .3rem;border-radius:6px;">ngOnInit()</code> runs — platform = "Server"</p>
-                <p>• Template evaluated → <strong style="color:var(--ink);">HTML string produced</strong></p>
+                <p>• Template evaluated → <strong class="c-ink">HTML string produced</strong></p>
                 <p>• HTML sent over HTTP → Component Object <strong style="color:var(--red);">destroyed</strong></p>
                 <p>• onClick exists in RAM but is never triggered — server has no screen, no user, no mouse</p>
               </div>
@@ -2000,7 +2001,7 @@ import Navbar from '../components/Navbar.astro';
               <header class="sticker-title">🌐 Run 2 — Browser</header>
               <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.75rem;color:var(--ink-muted);line-height:1.6;">
                 <p>• HTML already parsed → DOM nodes visible on screen ✅</p>
-                <p>• <code style="background:var(--green-pale);color:var(--green-dark);padding:.1rem .3rem;border-radius:6px;">new HelloComponent()</code> — <strong style="color:var(--ink);">fresh object in browser RAM</strong></p>
+                <p>• <code style="background:var(--green-pale);color:var(--green-dark);padding:.1rem .3rem;border-radius:6px;">new HelloComponent()</code> — <strong class="c-ink">fresh object in browser RAM</strong></p>
                 <p>• <code style="background:var(--green-pale);color:var(--green-dark);padding:.1rem .3rem;border-radius:6px;">ngOnInit()</code> runs — platform = "Browser"</p>
                 <p>• Hydration: Angular finds existing DOM nodes — no recreation</p>
                 <p>• onClick wired → <code style="background:var(--green-pale);color:var(--green-dark);padding:.1rem .3rem;border-radius:6px;">addEventListener("click")</code> on &lt;button&gt;</p>
@@ -2031,7 +2032,7 @@ import Navbar from '../components/Navbar.astro';
                   ].map(([step, detail]) => (
                     <div class="phase-step-row">
                       <span class="phase-arrow">→</span>
-                      <span><strong style="color:var(--ink);">{step}</strong> — {detail}</span>
+                      <span><strong class="c-ink">{step}</strong> — {detail}</span>
                     </div>
                   ))}
                 </div>
@@ -2069,7 +2070,7 @@ import Navbar from '../components/Navbar.astro';
                   ].map(([step, detail]) => (
                     <div style="display:flex;gap:.6rem;align-items:flex-start;font-size:.74rem;color:var(--ink-muted);line-height:1.6;">
                       <span style="color:var(--blue);font-weight:900;flex-shrink:0;">→</span>
-                      <span><strong style="color:var(--ink);">{step}</strong> — {detail}</span>
+                      <span><strong class="c-ink">{step}</strong> — {detail}</span>
                     </div>
                   ))}
                 </div>
@@ -2107,7 +2108,7 @@ import Navbar from '../components/Navbar.astro';
                   ].map(([step, detail]) => (
                     <div class="phase-step-row">
                       <span class="phase-arrow phase-arrow-green">→</span>
-                      <span><strong style="color:var(--ink);">{step}</strong> — <span set:html={detail}></span></span>
+                      <span><strong class="c-ink">{step}</strong> — <span set:html={detail}></span></span>
                     </div>
                   ))}
                 </div>
@@ -2138,9 +2139,9 @@ import Navbar from '../components/Navbar.astro';
         <div class="callout callout-green">
           <header class="callout-title callout-title-green">🔑 Component Object and DOM Node are always two separate things</header>
           <p>
-            Angular always maintains two separate things: a <strong style="color:var(--ink);">component object</strong> in JavaScript memory
-            and a <strong style="color:var(--ink);">DOM node</strong> in the browser's tree.
-            <strong style="color:var(--ink);">Hydration is the act of connecting those two things</strong> —
+            Angular always maintains two separate things: a <strong class="c-ink">component object</strong> in JavaScript memory
+            and a <strong class="c-ink">DOM node</strong> in the browser's tree.
+            <strong class="c-ink">Hydration is the act of connecting those two things</strong> —
             so that when the component object's property changes, the DOM node updates.
             The HTML string travels. The Component Object never does.
             That is the core constraint that makes all of SSR necessary.
@@ -2156,7 +2157,7 @@ import Navbar from '../components/Navbar.astro';
         <p class="sec-lead">
           When Angular boots in the browser, it creates fresh component objects with no memory of what ran on the server.
           That means <code>ngOnInit</code> fires again — and with it, your <code>http.get()</code> calls.
-          The data is already in the DOM, but Angular fetches it again anyway.
+          <strong>The data is already in the DOM, but Angular fetches it again anyway.</strong>
           Transfer Cache stops this.
         </p>
 
@@ -2179,7 +2180,7 @@ import Navbar from '../components/Navbar.astro';
             <header class="sticker-title">✅ With Transfer Cache</header>
             <div class="sticker-list">
               <p>🖥️ Server: <code>ngOnInit</code> → GET /api/products → data arrives</p>
-              <p>⚙️ Builds HTML + <strong style="color:var(--ink);">embeds JSON in &lt;script&gt; tag</strong></p>
+              <p>⚙️ Builds HTML + <strong class="c-ink">embeds JSON in &lt;script&gt; tag</strong></p>
               <p>📤 HTML + embedded JSON sent together (one HTTP response)</p>
               <p>🌐 Browser renders DOM nodes — user sees the list</p>
               <p>⬇️ Angular JS downloads, boots, creates fresh component</p>
@@ -2194,20 +2195,34 @@ import Navbar from '../components/Navbar.astro';
         <div class="mental-section">
           <header class="subsec-label">How It Works — Step by Step</header>
           <div class="tc-steps">
-            {[
-              { n:'1', label:'Server: ngOnInit runs — Transfer Cache watches silently', body:'Your component calls http.get(\'/api/products\') on the server. Transfer Cache intercepts it and quietly copies the API response. Your component is unaffected.' },
-              { n:'2', label:'Server: JSON embedded in HTML as a <script> tag', body:'Transfer Cache writes the API response as plain JSON text into a <script type="application/json" id="ng-transfer-state"> tag, right inside the HTML.' },
-              { n:'3', label:'One HTTP response carries both: HTML + data', body:'Browser receives a single response — rendered HTML and embedded JSON travel together. No extra round-trip. Data is there before Angular even boots.' },
-              { n:'4', label:'Browser: ngOnInit fires — intercepted instantly, zero network', body:'Angular boots, calls http.get() — Transfer Cache intercepts it, reads the JSON from the ng-transfer-state tag, returns it instantly. Zero network request, zero spinner.' },
-            ].map(({ n, label, body }) => (
-              <div class="tc-step">
-                <div class="tc-num">{n}</div>
-                <div>
-                  <header class="sticker-title">{label}</header>
-                  <p class="card-body">{body}</p>
-                </div>
+            <div class="tc-step">
+              <div class="tc-num">1</div>
+              <div>
+                <header class="sticker-title">Server: ngOnInit runs — Transfer Cache watches silently</header>
+                <p class="card-body">Your component calls <code>http.get('/api/products')</code> on the server. <strong>Transfer Cache intercepts it and quietly copies the API response.</strong> Your component is unaffected.</p>
               </div>
-            ))}
+            </div>
+            <div class="tc-step">
+              <div class="tc-num">2</div>
+              <div>
+                <header class="sticker-title">Server: JSON embedded in HTML as a &lt;script&gt; tag</header>
+                <p class="card-body">Transfer Cache writes the API response as plain JSON text into a <code>&lt;script type="application/json" id="ng-transfer-state"&gt;</code> tag, right inside the HTML. <strong>No extra request — it travels with the page.</strong></p>
+              </div>
+            </div>
+            <div class="tc-step">
+              <div class="tc-num">3</div>
+              <div>
+                <header class="sticker-title">One HTTP response carries both: HTML + data</header>
+                <p class="card-body">Browser receives a single response — rendered HTML and embedded JSON travel together. <strong>No extra round-trip. Data is there before Angular even boots.</strong></p>
+              </div>
+            </div>
+            <div class="tc-step">
+              <div class="tc-num">4</div>
+              <div>
+                <header class="sticker-title">Browser: ngOnInit fires — intercepted instantly, zero network</header>
+                <p class="card-body">Angular boots, calls <code>http.get()</code> — Transfer Cache intercepts it, reads the JSON from the <code>ng-transfer-state</code> tag, returns it instantly. <strong>Zero network request. Zero spinner.</strong></p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2236,8 +2251,8 @@ import Navbar from '../components/Navbar.astro';
         <div class="callout callout-yellow">
           <header class="callout-title callout-title-yellow">⚠️ Never cache authenticated requests</header>
           <p>
-            Transfer Cache only runs for GET requests by default. Never enable it for API calls that include
-            auth headers — that would cache one user's data and serve it to the next user who hits the same URL.
+            Transfer Cache only runs for GET requests by default. <strong>Never enable it for API calls that include
+            auth headers</strong> — that would cache one user's data and serve it to the next user who hits the same URL.
             Use <code>includeRequestsWithAuthHeaders: false</code> (the default) or skip Transfer Cache
             entirely for auth-gated endpoints.
           </p>
@@ -2252,7 +2267,7 @@ import Navbar from '../components/Navbar.astro';
         <p class="sec-lead">
           When SSR is enabled, your component runs in two places — the browser <em>and</em> a Node.js server.
           <code>window</code>, <code>document</code>, and <code>localStorage</code> are browser inventions.
-          Node.js has never heard of them — calling them server-side crashes the entire request.
+          <strong>Node.js has never heard of them — calling them server-side crashes the entire request.</strong>
         </p>
 
         <div class="callout callout-yellow mb-lg">
@@ -2302,7 +2317,7 @@ import Navbar from '../components/Navbar.astro';
                   </div>
                 ))}
               </div>
-              <p class="card-body">❌ Node.js has never had browser globals — they simply do not exist</p>
+              <p class="card-body">❌ <strong>Node.js has never had browser globals — they simply do not exist</strong></p>
             </div>
 
           </div>
@@ -2316,7 +2331,7 @@ import Navbar from '../components/Navbar.astro';
               <div class="sol-num sol-num-blue">1</div>
               <div>
                 <p class="card-title">You enable SSR — Angular now runs your component on the Node.js server</p>
-                <p class="card-body">Every time a user hits your URL, Node.js boots an Angular component, calls its lifecycle hooks (including <code>ngOnInit</code>), builds the HTML string, and sends it to the browser. Your component code now runs server-side on every request.</p>
+                <p class="card-body">Every time a user hits your URL, Node.js boots an Angular component, calls its lifecycle hooks (including <code>ngOnInit</code>), builds the HTML string, and sends it to the browser. <strong>Your component code now runs server-side on every request.</strong></p>
               </div>
             </div>
             <div class="sol-step">
@@ -2330,14 +2345,14 @@ import Navbar from '../components/Navbar.astro';
               <div class="sol-num sol-num-err">3</div>
               <div>
                 <header class="sticker-title"><code>window</code> is not in any scope — Node.js throws <code>ReferenceError: window is not defined</code></header>
-                <p class="card-body">Node.js can't find <code>window</code> anywhere. JavaScript throws immediately — at the JS engine level, before Angular can react. Angular never gets a chance to catch it or skip it. It's the same as calling any variable that was never declared.</p>
+                <p class="card-body">Node.js can't find <code>window</code> anywhere. <strong>JavaScript throws immediately — at the JS engine level, before Angular can react.</strong> Angular never gets a chance to catch it or skip it. It's the same as calling any variable that was never declared.</p>
               </div>
             </div>
             <div class="sol-step sol-step-err">
               <div class="sol-num sol-num-err">4</div>
               <div>
                 <header class="sticker-title">The entire HTTP request crashes — the user gets a blank page or 500 error</header>
-                <p class="card-body">The unhandled error bubbles up through Angular's server renderer, through the Node HTTP server, and kills the request. The browser never receives any HTML. The user sees a blank page or a generic server error — with no indication of what went wrong.</p>
+                <p class="card-body"><strong>The unhandled error bubbles up through Angular's server renderer, through the Node HTTP server, and kills the request.</strong> The browser never receives any HTML. The user sees a blank page or a generic server error — with no indication of what went wrong.</p>
               </div>
             </div>
           </div>
@@ -2345,7 +2360,7 @@ import Navbar from '../components/Navbar.astro';
           <div class="callout callout-blue-left">
             <p class="card-body">The question you're probably asking: "Why can't Angular just skip browser API calls when running on the server?"</p>
             <p class="card-body">Angular doesn't inspect or intercept your code before running it — it just calls your function. When JavaScript hits <code>window.scrollTo(0, 0)</code>, it looks up <code>window</code> in scope. That lookup fails at the JS engine level, before Angular can do anything. It's not a runtime logic error Angular can catch — it's a missing variable, same as calling <code>foo()</code> when <code>foo</code> was never declared.</p>
-            <p class="card-body"><strong style="color:var(--ink);">Think of it like a recipe:</strong> You write a recipe that says "microwave for 2 minutes." That recipe works perfectly at home (browser). When a catering team tries to cook it in a kitchen with no microwave (Node.js server), the entire preparation halts. The fix is to add: "skip this step if there is no microwave." That's exactly what <code>afterNextRender()</code> does.</p>
+            <p class="card-body"><strong class="c-ink">Think of it like a recipe:</strong> You write a recipe that says "microwave for 2 minutes." That recipe works perfectly at home (browser). When a catering team tries to cook it in a kitchen with no microwave (Node.js server), the entire preparation halts. The fix is to add: "skip this step if there is no microwave." That's exactly what <code>afterNextRender()</code> does.</p>
           </div>
         </div>
 
@@ -2358,7 +2373,7 @@ import Navbar from '../components/Navbar.astro';
               <div class="sol-num sol-num-green">1</div>
               <div style="flex:1;">
                 <p class="card-title"><code>afterNextRender()</code> — Angular's "browser only" hook <span style="font-weight:400;color:var(--ink-muted);">(Angular 16+, simplest)</span></p>
-                <p class="card-body" style="margin-bottom:.6rem;">Register browser-only code inside this callback. Angular guarantees it will <strong>only ever fire in the browser</strong>, after the first DOM render. The server never calls it. Use this for scroll position, animations, and any third-party library that needs the DOM.</p>
+                <p class="card-body" style="margin-bottom:.6rem;">Register browser-only code inside this callback. <strong>Angular guarantees it will only ever fire in the browser</strong>, after the first DOM render. <strong>The server never calls it.</strong> Use this for scroll position, animations, and any third-party library that needs the DOM.</p>
                 <div class="code-wrap">
                   <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">component.ts</span></div>
                   <div class="code-body code-body-sm">
@@ -2377,7 +2392,7 @@ import Navbar from '../components/Navbar.astro';
               <div class="sol-num sol-num-blue">2</div>
               <div style="flex:1;">
                 <p class="card-title"><code>isPlatformBrowser(PLATFORM_ID)</code> — check which environment you're in at runtime</p>
-                <p class="card-body" style="margin-bottom:.6rem;">Ask Angular which environment you're in — browser or server. Wrap browser-only code in an <code>if</code> block: the server always gets <code>false</code> and skips it, the browser gets <code>true</code> and runs it. Use this when you need completely different logic on each side.</p>
+                <p class="card-body" style="margin-bottom:.6rem;">Ask Angular which environment you're in — browser or server. Wrap browser-only code in an <code>if</code> block: <strong>the server always gets <code>false</code> and skips it, the browser gets <code>true</code> and runs it.</strong> Use this when you need completely different logic on each side.</p>
                 <div class="code-wrap">
                   <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">component.ts</span></div>
                   <div class="code-body code-body-sm">
@@ -2397,7 +2412,7 @@ import Navbar from '../components/Navbar.astro';
               <div class="sol-num sol-num-purple">3</div>
               <div style="flex:1;">
                 <p class="card-title"><code>inject(DOCUMENT)</code> — Angular's safe document token</p>
-                <p class="card-body" style="margin-bottom:.6rem;">Instead of calling <code>document</code> directly (which crashes on the server), ask Angular for it using <code>inject(DOCUMENT)</code>. In the browser Angular gives you the real <code>document</code>. On the server it gives you a safe dummy version that silently does nothing instead of crashing. Use this for <code>document.title</code>, <code>document.cookie</code>, or setting page meta tags that search engines read.</p>
+                <p class="card-body" style="margin-bottom:.6rem;">Instead of calling <code>document</code> directly (which crashes on the server), ask Angular for it using <code>inject(DOCUMENT)</code>. <strong>In the browser Angular gives you the real <code>document</code>. On the server it gives you a safe dummy version that silently does nothing instead of crashing.</strong> Use this for <code>document.title</code>, <code>document.cookie</code>, or setting page meta tags that search engines read.</p>
                 <div class="code-wrap">
                   <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">component.ts</span></div>
                   <div class="code-body code-body-sm">

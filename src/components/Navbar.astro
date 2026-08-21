@@ -6,9 +6,11 @@ interface Props {
 const { active = '', step } = Astro.props;
 
 const ssrPaths = ['/ssr', '/ssr_v1'];
+const signalPaths = ['/signal_v1'];
 
 const topics = [
-  { href: '/ssr_v1', label: 'SSR', emoji: '🌐', desc: 'Server-Side Rendering', isActive: ssrPaths.includes(active), soon: false },
+  { href: '/ssr_v1',    label: 'SSR',     emoji: '🌐', desc: 'Server-Side Rendering', isActive: ssrPaths.includes(active),    soon: false },
+  { href: '/signal_v1', label: 'Signals', emoji: '⚡', desc: 'Angular Signals',        isActive: signalPaths.includes(active), soon: false },
 ];
 
 // Parse "Step 2 of 4" → { cur: 2, total: 4 }

@@ -1,0 +1,2704 @@
+---
+import Navbar from '../components/Navbar.astro';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Angular Signals — Deep Dive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<Navbar active="/signal_v1" />
+
+<main>
+<div class="pt-14">
+
+  <!-- ══ HERO ══ -->
+  <div class="hero-wrap">
+  <div class="hero">
+    <p class="pill"><span class="pill-dot"></span>Angular · Signals</p>
+    <h1>Angular <span>Signals</span></h1>
+    <p class="hero-sub">
+      The reactive state system that tells Angular <em>exactly</em> what changed —
+      so only the right parts of your UI update. No more guessing. No more Zone.js magic.
+    </p>
+  </div>
+  </div><!-- /hero-wrap -->
+
+  <!-- ══ APP SHELL ══ -->
+  <div class="app-shell">
+
+    <!-- ── Sidebar ── -->
+    <aside class="tl-sidebar" aria-label="Section navigation">
+      <p class="tl-group-label">Foundation</p>
+      <div class="tl-list">
+        {[
+          { sid:'the-problem',    n:'01', label:'The Problem'       },
+          { sid:'what-is-signal', n:'02', label:'What Is a Signal?' },
+          { sid:'signal-vs-prop', n:'03', label:'Signal vs Property'},
+        ].map(({ sid, n, label }) => (
+          <button class={`tl-item${sid === 'the-problem' ? ' active' : ''}`} data-target={sid} type="button">
+            <span class="tl-badge">{n}</span>
+            <span class="tl-meta">
+              <span class="tl-step-num">Section {n}</span>
+              <span class="tl-step-label">{label}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+      <p class="tl-group-label">Deep Dive</p>
+      <div class="tl-list">
+        {[
+          { sid:'creating-signals', n:'04', label:'Creating Signals' },
+          { sid:'computed',         n:'05', label:'computed()'       },
+          { sid:'effects',          n:'06', label:'effect()'         },
+        ].map(({ sid, n, label }) => (
+          <button class="tl-item" data-target={sid} type="button">
+            <span class="tl-badge">{n}</span>
+            <span class="tl-meta">
+              <span class="tl-step-num">Section {n}</span>
+              <span class="tl-step-label">{label}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+      <p class="tl-group-label">Advanced</p>
+      <div class="tl-list">
+        {[
+          { sid:'readonly',  n:'07', label:'asReadonly()'   },
+          { sid:'untracked', n:'08', label:'untracked()'    },
+          { sid:'gotchas',   n:'09', label:'The Rules'      },
+          { sid:'rxjs',      n:'10', label:'Signals vs RxJS'},
+        ].map(({ sid, n, label }) => (
+          <button class="tl-item" data-target={sid} type="button">
+            <span class="tl-badge">{n}</span>
+            <span class="tl-meta">
+              <span class="tl-step-num">Section {n}</span>
+              <span class="tl-step-label">{label}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </aside>
+
+    <!-- ── Content Pane ── -->
+    <div class="content-pane">
+
+      <!-- ════ 01 THE PROBLEM ════ -->
+      <section data-sid="the-problem" class="section sec-panel active">
+        <p class="eyebrow">01 · The Problem</p>
+        <h2 class="sec-title">Why Does Your UI <span>Lie to You</span>?</h2>
+        <p class="sec-lead">
+          You update a variable. Nothing happens on screen. Or you change one tiny thing and the
+          entire component tree re-renders. Both are symptoms of the same root cause:
+          <strong>Angular had no way to know exactly what changed — and who actually cares.</strong>
+        </p>
+
+        <!-- ══ GRAPHIC: Zoney vs Sparky ══ -->
+        <div class="s1-graphic">
+
+          <!-- LEFT: Old Way -->
+          <div class="s1-panel-graphic s1-panel-old">
+            <div class="s1-panel-tag s1-tag-red">Zone.js — Old Way</div>
+
+            <svg class="s1-mascot zoney-anim" viewBox="0 0 130 145" xmlns="http://www.w3.org/2000/svg">
+              <!-- Shadow -->
+              <ellipse cx="62" cy="138" rx="32" ry="6" fill="rgba(0,0,0,.08)"/>
+              <!-- Body -->
+              <circle cx="62" cy="62" r="48" fill="#ff9600" stroke="#c46700" stroke-width="3"/>
+              <!-- Belly shine -->
+              <ellipse cx="50" cy="45" rx="14" ry="10" fill="rgba(255,255,255,.18)" transform="rotate(-20,50,45)"/>
+              <!-- Cheek blush -->
+              <circle cx="32" cy="75" r="12" fill="#e07000" opacity=".35"/>
+              <circle cx="92" cy="75" r="12" fill="#e07000" opacity=".35"/>
+              <!-- Left stressed eyebrow -->
+              <path d="M28 36 Q40 26 52 35" fill="none" stroke="#7a3800" stroke-width="4" stroke-linecap="round"/>
+              <!-- Right stressed eyebrow -->
+              <path d="M72 35 Q84 26 96 36" fill="none" stroke="#7a3800" stroke-width="4" stroke-linecap="round"/>
+              <!-- Left eye white -->
+              <ellipse cx="40" cy="52" rx="11" ry="12" fill="white"/>
+              <circle cx="43" cy="54" r="7" fill="#1a1a1a"/>
+              <circle cx="45" cy="51" r="2.5" fill="white"/>
+              <!-- Right eye white -->
+              <ellipse cx="84" cy="52" rx="11" ry="12" fill="white"/>
+              <circle cx="87" cy="54" r="7" fill="#1a1a1a"/>
+              <circle cx="89" cy="51" r="2.5" fill="white"/>
+              <!-- Worried mouth -->
+              <path d="M44 79 Q62 72 80 79" fill="none" stroke="#7a3800" stroke-width="3" stroke-linecap="round"/>
+              <!-- Sweat drop -->
+              <path d="M100 18 Q106 9 112 18 Q112 28 100 28 Z" fill="#1cb0f6"/>
+              <path d="M104 18 Q107 14 110 18 Q110 24 104 24 Z" fill="rgba(255,255,255,.4)"/>
+              <!-- Left leg -->
+              <rect x="38" y="105" width="18" height="28" rx="9" fill="#c46700" transform="rotate(-15,47,119)"/>
+              <!-- Right leg -->
+              <rect x="74" y="108" width="18" height="28" rx="9" fill="#c46700" transform="rotate(15,83,122)"/>
+              <!-- Left shoe -->
+              <ellipse cx="36" cy="131" rx="14" ry="7" fill="#7a3800" transform="rotate(-15,36,131)"/>
+              <!-- Right shoe -->
+              <ellipse cx="92" cy="133" rx="14" ry="7" fill="#7a3800" transform="rotate(15,92,133)"/>
+              <!-- Magnifying glass handle -->
+              <line x1="105" y1="78" x2="122" y2="96" stroke="#7a3800" stroke-width="6" stroke-linecap="round"/>
+              <!-- Magnifying glass ring -->
+              <circle cx="97" cy="68" r="18" fill="rgba(255,255,255,.25)" stroke="#7a3800" stroke-width="4.5"/>
+              <!-- Glass shine -->
+              <path d="M87 57 Q91 54 96 57" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+
+            <p class="s1-mascot-name">Zoney</p>
+            <p class="s1-mascot-caption">Scans <em>everything</em> after every async event</p>
+
+            <div class="s1-comps-row">
+              <div class="s1-comp-box s1-comp-scan" style="animation-delay:0s">
+                <span class="s1-comp-icon">📦</span>
+                <span>C1</span>
+              </div>
+              <div class="s1-comp-box s1-comp-scan" style="animation-delay:.5s">
+                <span class="s1-comp-icon">📦</span>
+                <span>C2</span>
+              </div>
+              <div class="s1-comp-box s1-comp-scan s1-comp-changed" style="animation-delay:1s">
+                <span class="s1-comp-icon">🔥</span>
+                <span>C3</span>
+              </div>
+              <div class="s1-comp-box s1-comp-scan" style="animation-delay:1.5s">
+                <span class="s1-comp-icon">📦</span>
+                <span>C4</span>
+              </div>
+              <div class="s1-comp-box s1-comp-scan" style="animation-delay:2s">
+                <span class="s1-comp-icon">📦</span>
+                <span>C5</span>
+              </div>
+            </div>
+            <div class="s1-verdict s1-verdict-bad">Checked 5 — found 1 change — wasted 4 checks</div>
+          </div>
+
+          <!-- VS pill -->
+          <div class="s1-vs">VS</div>
+
+          <!-- RIGHT: Signal Way -->
+          <div class="s1-panel-graphic s1-panel-new">
+            <div class="s1-panel-tag s1-tag-green">Signals — New Way</div>
+
+            <svg class="s1-mascot sparky-anim" viewBox="0 0 130 155" xmlns="http://www.w3.org/2000/svg">
+              <!-- Shadow -->
+              <ellipse cx="65" cy="148" rx="30" ry="6" fill="rgba(0,0,0,.08)"/>
+              <!-- Lightning bolt body -->
+              <polygon points="80,6 42,72 66,72 32,148 92,68 68,68 100,6"
+                       fill="#58cc02" stroke="#2d6e00" stroke-width="3.5" stroke-linejoin="round"/>
+              <!-- Inner bolt highlight -->
+              <polygon points="77,14 52,62 68,62 45,118 84,74 68,74 92,14"
+                       fill="#7ae800" opacity=".45"/>
+              <!-- Face background -->
+              <ellipse cx="68" cy="46" rx="20" ry="24" fill="#7ae800" opacity=".3"/>
+              <!-- Left eye white -->
+              <ellipse cx="58" cy="40" rx="9" ry="10" fill="white"/>
+              <circle cx="60" cy="42" r="6" fill="#1a1a1a"/>
+              <circle cx="62" cy="39" r="2" fill="white"/>
+              <!-- Right eye white -->
+              <ellipse cx="79" cy="38" rx="9" ry="10" fill="white"/>
+              <circle cx="81" cy="40" r="6" fill="#1a1a1a"/>
+              <circle cx="83" cy="37" r="2" fill="white"/>
+              <!-- Happy eyebrows -->
+              <path d="M51 30 Q58 26 65 31" fill="none" stroke="#2d6e00" stroke-width="3" stroke-linecap="round"/>
+              <path d="M72 29 Q79 25 86 30" fill="none" stroke="#2d6e00" stroke-width="3" stroke-linecap="round"/>
+              <!-- Big smile -->
+              <path d="M55 56 Q68 68 82 56" fill="none" stroke="#2d6e00" stroke-width="3" stroke-linecap="round"/>
+              <!-- Cheek blush -->
+              <circle cx="48" cy="52" rx="8" fill="#46a302" opacity=".3"/>
+              <circle cx="88" cy="50" rx="8" fill="#46a302" opacity=".3"/>
+              <!-- Left arm pointing -->
+              <path d="M44 75 Q30 90 20 105" fill="none" stroke="#2d6e00" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="18" cy="108" r="5" fill="#2d6e00"/>
+              <!-- Right arm -->
+              <path d="M90 70 Q104 82 112 75" fill="none" stroke="#2d6e00" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="114" cy="74" r="5" fill="#2d6e00"/>
+              <!-- Star sparkles -->
+              <circle cx="22" cy="22" r="4" fill="#ffc800"/>
+              <circle cx="112" cy="30" r="3" fill="#ffc800"/>
+              <circle cx="18" cy="52" r="2.5" fill="#ffc800"/>
+            </svg>
+
+            <p class="s1-mascot-name">Sparky</p>
+            <p class="s1-mascot-caption">Notifies <em>only the exact</em> component that cares</p>
+
+            <div class="s1-comps-row">
+              <div class="s1-comp-box s1-comp-idle">
+                <span class="s1-comp-icon">📦</span>
+                <span>C1</span>
+              </div>
+              <div class="s1-comp-box s1-comp-idle">
+                <span class="s1-comp-icon">📦</span>
+                <span>C2</span>
+              </div>
+              <div class="s1-comp-box s1-comp-target">
+                <span class="s1-comp-icon">⚡</span>
+                <span>C3</span>
+              </div>
+              <div class="s1-comp-box s1-comp-idle">
+                <span class="s1-comp-icon">📦</span>
+                <span>C4</span>
+              </div>
+              <div class="s1-comp-box s1-comp-idle">
+                <span class="s1-comp-icon">📦</span>
+                <span>C5</span>
+              </div>
+            </div>
+            <div class="s1-verdict s1-verdict-good">Notified C3 only — C1 C2 C4 C5 untouched ✓</div>
+          </div>
+
+        </div>
+        <!-- ══ /GRAPHIC ══ -->
+
+        <!-- Zone.js plain-language card -->
+        <div class="mental-section">
+          <header class="route-section-title">Wait — What Even Is Zone.js?</header>
+          <div class="zonejs-card">
+            <div class="zonejs-icon">🕵️</div>
+            <div class="zonejs-body">
+              <p class="zonejs-title">Zone.js is a spy Angular hired to watch your browser</p>
+              <p class="card-body">Your browser does async things constantly — click events, HTTP responses, timers. Zone.js secretly wraps all of them. The moment any async thing finishes, Zone.js taps Angular on the shoulder and says <strong>"Hey! Something just happened. You should probably check if anything changed."</strong></p>
+              <p class="card-body" style="margin-top:.5rem;">That's it. Zone.js doesn't know <em>what</em> changed. It just knows <em>that</em> something async ran. Angular then has to do the checking itself.</p>
+              <div class="zonejs-flow">
+                <div class="zonejs-step">
+                  <span class="zonejs-step-icon">🖱️</span>
+                  <span class="zonejs-step-label">Async event<br/>(click, HTTP, timer)</span>
+                </div>
+                <div class="zonejs-arrow">→</div>
+                <div class="zonejs-step">
+                  <span class="zonejs-step-icon">🕵️</span>
+                  <span class="zonejs-step-label">Zone.js<br/>intercepts it</span>
+                </div>
+                <div class="zonejs-arrow">→</div>
+                <div class="zonejs-step">
+                  <span class="zonejs-step-icon">⚠️</span>
+                  <span class="zonejs-step-label">Tells Angular:<br/>"Something ran!"</span>
+                </div>
+                <div class="zonejs-arrow">→</div>
+                <div class="zonejs-step zonejs-step-panic">
+                  <span class="zonejs-step-icon">😰</span>
+                  <span class="zonejs-step-label">Angular checks<br/><strong>everything</strong></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="route-section-title">How Angular Used to Detect Changes</header>
+          <div class="g2 mb-md">
+            <div class="sticker sticker-red">
+              <header class="sticker-title">😩 The Old Way — Zone.js</header>
+              <p class="card-body">Angular wrapped every async operation in the browser — <code>setTimeout</code>, HTTP calls, click events — and after each one it would walk your entire component tree asking <strong>"did anything change?"</strong>. It had to check everything because it had no idea what your code touched.</p>
+              <div class="tag-row">
+                <span class="chip chip-red">Checks everything</span>
+                <span class="chip chip-red">Imprecise</span>
+                <span class="chip chip-red">Slow on big trees</span>
+              </div>
+            </div>
+            <div class="sticker sticker-green">
+              <header class="sticker-title">✅ The Signal Way</header>
+              <p class="card-body">When you read a signal inside a template, Angular registers: <strong>"this component cares about this signal."</strong> When the signal value changes, Angular knows exactly which components to update — nothing more.</p>
+              <div class="tag-row">
+                <span class="chip chip-green">Surgical updates</span>
+                <span class="chip chip-green">No guessing</span>
+                <span class="chip chip-green">Fast</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="route-section-title">The Real-World Analogy</header>
+          <div class="sticker sticker-top-orange mb-md">
+            <header class="sticker-title">🚨 Old Way = A Fire Alarm That Trips on Everything</header>
+            <p class="card-body">
+              Every time anything happens in the building (someone opens a door, a light flickers, a breeze moves a curtain),
+              the fire alarm goes off. Everyone evacuates. Security checks every single room to see if there's actually a fire.
+              <strong>Most of the time: no fire. Wasted effort.</strong>
+            </p>
+          </div>
+          <div class="sticker sticker-top-green">
+            <header class="sticker-title">⚡ Signal Way = Smart Smoke Detector in Each Room</header>
+            <p class="card-body">
+              Each room has its own sensor. When Room 4B's sensor triggers, only Room 4B is investigated.
+              The other 200 rooms are not disturbed. <strong>Angular knows exactly which "room" (component) to update
+              because each signal reports exactly who is listening.</strong>
+            </p>
+          </div>
+        </div>
+
+        <div class="callout callout-blue">
+          <header class="callout-title callout-title-blue">💡 The Root Insight</header>
+          <p>The problem was never Angular being slow. The problem was Angular being <strong>blind</strong> — it couldn't see inside your properties, so it had to assume everything might have changed. Signals fix the blindness.</p>
+        </div>
+
+        <!-- Animated tree demo -->
+        <div class="mental-section">
+          <header class="route-section-title">Watch it happen — Angular checking every component</header>
+          <p class="card-body" style="margin-bottom:1rem;">When a button is clicked, here's what Angular does under the hood. Watch the tree get scanned node by node, even though only <strong>Chart</strong> actually changed.</p>
+
+          <div class="tree-demo">
+            <!-- Trigger bar -->
+            <div class="tree-trigger">
+              <div class="tree-trigger-btn">🖱️ Button clicked — HTTP response arrived</div>
+              <div class="tree-trigger-arrow">↓</div>
+              <div class="tree-zone-intercept">
+                <span class="tree-zone-dot"></span>
+                Zone.js intercepts → tells Angular → <strong>"Check everything now"</strong>
+              </div>
+              <div class="tree-trigger-arrow">↓</div>
+            </div>
+
+            <!-- Component tree: fully nested tree-col so all connectors auto-align -->
+            <div class="tree-visual">
+              <div class="tree-col">
+                <!-- AppRoot -->
+                <div class="tree-node-wrap">
+                  <div class="tree-node tnode-1">
+                    <span class="tnode-emoji">🏠</span>
+                    <span class="tnode-label">AppRoot</span>
+                    <span class="tnode-status">checking...</span>
+                  </div>
+                </div>
+                <!-- AppRoot → [Navbar, Dashboard]: asymmetric children → tbranch-root offsets the lines -->
+                <div class="tbranch tbranch-root">
+                  <span class="tbranch-l"></span>
+                  <span class="tbranch-r"></span>
+                </div>
+                <div class="tree-sub-level">
+                  <!-- Navbar (leaf) -->
+                  <div class="tree-node-wrap">
+                    <div class="tree-node tnode-2">
+                      <span class="tnode-emoji">🧭</span>
+                      <span class="tnode-label">Navbar</span>
+                      <span class="tnode-status">checking...</span>
+                    </div>
+                  </div>
+                  <div class="tree-node-gap"></div>
+                  <!-- Dashboard tree-col with all descendants inside -->
+                  <div class="tree-col">
+                    <div class="tree-node-wrap">
+                      <div class="tree-node tnode-3">
+                        <span class="tnode-emoji">📊</span>
+                        <span class="tnode-label">Dashboard</span>
+                        <span class="tnode-status">checking...</span>
+                      </div>
+                    </div>
+                    <div class="tbranch"><span class="tbranch-l"></span><span class="tbranch-r"></span></div>
+                    <div class="tree-sub-level">
+                      <!-- Chart tree-col -->
+                      <div class="tree-col">
+                        <div class="tree-node-wrap">
+                          <div class="tree-node tnode-4 tnode-changed">
+                            <span class="tnode-emoji">📈</span>
+                            <span class="tnode-label">Chart</span>
+                            <span class="tnode-changed-badge">CHANGED!</span>
+                          </div>
+                        </div>
+                        <div class="tbranch"><span class="tbranch-l"></span><span class="tbranch-r"></span></div>
+                        <div class="tree-sub-level">
+                          <div class="tree-node-wrap">
+                            <div class="tree-node tnode-sm tnode-5">
+                              <span class="tnode-emoji">📌</span>
+                              <span class="tnode-label">Legend</span>
+                              <span class="tnode-status">checking...</span>
+                            </div>
+                          </div>
+                          <div class="tree-node-gap-sm"></div>
+                          <div class="tree-node-wrap">
+                            <div class="tree-node tnode-sm tnode-6">
+                              <span class="tnode-emoji">💬</span>
+                              <span class="tnode-label">Tooltip</span>
+                              <span class="tnode-status">checking...</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="tree-node-gap-sm"></div>
+                      <!-- Table tree-col -->
+                      <div class="tree-col">
+                        <div class="tree-node-wrap">
+                          <div class="tree-node tnode-7">
+                            <span class="tnode-emoji">📋</span>
+                            <span class="tnode-label">Table</span>
+                            <span class="tnode-status">checking...</span>
+                          </div>
+                        </div>
+                        <div class="tbranch"><span class="tbranch-l"></span><span class="tbranch-r"></span></div>
+                        <div class="tree-sub-level">
+                          <div class="tree-node-wrap">
+                            <div class="tree-node tnode-sm tnode-8">
+                              <span class="tnode-emoji">📑</span>
+                              <span class="tnode-label">TblHeader</span>
+                              <span class="tnode-status">checking...</span>
+                            </div>
+                          </div>
+                          <div class="tree-node-gap-sm"></div>
+                          <div class="tree-node-wrap">
+                            <div class="tree-node tnode-sm tnode-9">
+                              <span class="tnode-emoji">📝</span>
+                              <span class="tnode-label">TblRow</span>
+                              <span class="tnode-status">checking...</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Result bar -->
+            <div class="tree-result-bar">
+              <div class="tree-result-item tree-result-total">
+                <span class="tree-result-num">9</span>
+                <span class="tree-result-lbl">Components<br/>checked</span>
+              </div>
+              <div class="tree-result-divider"></div>
+              <div class="tree-result-item tree-result-changed-item">
+                <span class="tree-result-num tree-result-num-red">1</span>
+                <span class="tree-result-lbl">Actually<br/>changed</span>
+              </div>
+              <div class="tree-result-divider"></div>
+              <div class="tree-result-item tree-result-wasted-item">
+                <span class="tree-result-num tree-result-num-grey">8</span>
+                <span class="tree-result-lbl">Wasted<br/>checks</span>
+              </div>
+              <div class="tree-result-verdict">Every async event → full tree scan. No exceptions.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ WHY CAN'T ANGULAR JUST STOP? ══ -->
+        <div class="mental-section">
+          <header class="route-section-title">The crux — why Zone.js left Angular blind</header>
+
+          <!-- Message comparison -->
+          <div class="msg-compare">
+            <div class="msg-card msg-card-bad">
+              <div class="msg-card-from">
+                <span class="msg-from-dot msg-from-dot-orange"></span>
+                Zone.js → Angular
+              </div>
+              <div class="msg-bubble msg-bubble-orange">
+                <p class="msg-bubble-text">"Hey, a click handler just finished."</p>
+              </div>
+              <ul class="msg-missing">
+                <li><span class="msg-x">✗</span> Which variable changed?</li>
+                <li><span class="msg-x">✗</span> Which component owns it?</li>
+                <li><span class="msg-x">✗</span> How many things changed?</li>
+              </ul>
+              <div class="msg-result msg-result-bad">Angular's only option: <strong>check everything</strong></div>
+            </div>
+
+            <div class="msg-vs">→</div>
+
+            <div class="msg-card msg-card-good">
+              <div class="msg-card-from">
+                <span class="msg-from-dot msg-from-dot-green"></span>
+                Signal → Angular
+              </div>
+              <div class="msg-bubble msg-bubble-green">
+                <p class="msg-bubble-text">"The <code>data</code> signal changed. Chart and Dashboard are watching it."</p>
+              </div>
+              <ul class="msg-missing">
+                <li><span class="msg-check">✓</span> Exact variable named</li>
+                <li><span class="msg-check">✓</span> Exact components named</li>
+                <li><span class="msg-check">✓</span> Zero guessing needed</li>
+              </ul>
+              <div class="msg-result msg-result-good">Angular's action: <strong>update only those 2</strong></div>
+            </div>
+          </div>
+
+          <!-- Why the walk doesn't stop early -->
+          <div class="no-stop-card">
+            <div class="no-stop-title">❓ But why doesn't Angular stop after finding Chart's property changed?</div>
+            <p class="card-body no-stop-body">Angular walks the <strong>entire tree</strong>, depth-first. After Chart changes, Angular still dives into Chart's children (because Chart re-rendering may have changed what it passes down via <code>@Input()</code>). Then it checks Table and all of Table's children too. Every node. Every time.</p>
+            <div class="no-stop-walk">
+              <div class="nsw-step nsw-same">AppRoot <span class="nsw-tag nsw-tag-grey">template output same → dive into children</span></div>
+              <div class="nsw-children">
+                <div class="nsw-step nsw-same">Navbar <span class="nsw-tag nsw-tag-grey">template output same → no children, back up</span></div>
+                <div class="nsw-step nsw-same">Dashboard <span class="nsw-tag nsw-tag-grey">template output same → dive into children</span></div>
+                <div class="nsw-children">
+                  <div class="nsw-step nsw-changed">Chart 📈 <span class="nsw-tag nsw-tag-red">property CHANGED → update DOM</span><span class="nsw-keep"> still dives into children ↓</span></div>
+                  <div class="nsw-children">
+                    <div class="nsw-step nsw-same">ChartLegend <span class="nsw-tag nsw-tag-grey">template output same → back up</span></div>
+                    <div class="nsw-step nsw-same">ChartTooltip <span class="nsw-tag nsw-tag-grey">template output same → back up</span></div>
+                  </div>
+                  <div class="nsw-step nsw-same">Table <span class="nsw-tag nsw-tag-grey">template output same → dive into children</span></div>
+                  <div class="nsw-children">
+                    <div class="nsw-step nsw-same">TableHeader <span class="nsw-tag nsw-tag-grey">template output same → back up</span></div>
+                    <div class="nsw-step nsw-same">TableRow <span class="nsw-tag nsw-tag-grey">template output same → 9 checks for 1 change</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- What "template output same" means -->
+          <div class="tpl-explain-card">
+            <div class="tpl-explain-title">📐 What "template output same" actually means</div>
+            <div class="tpl-explain-body">
+              <div class="tpl-step">
+                <span class="tpl-step-num">1</span>
+                <div class="tpl-step-text">
+                  <strong>Angular re-runs the template function.</strong> Every component has a template like:
+                  <pre class="tpl-code-block">&lt;h1&gt;&#123;&#123; title &#125;&#125;&lt;/h1&gt;
+&lt;p&gt;&#123;&#123; user.name &#125;&#125;&lt;/p&gt;</pre>
+                  Angular compiled this into a JS function. After every async event it calls that function — which reads the component's properties and returns a list of current values.
+                </div>
+              </div>
+              <div class="tpl-step">
+                <span class="tpl-step-num">2</span>
+                <div class="tpl-step-text">
+                  <strong>Angular compares the new list against the old list, value by value.</strong>
+                  <div class="tpl-compare">
+                    <div class="tpl-compare-row">
+                      <span class="tpl-compare-label">Last render</span>
+                      <code class="tpl-compare-code">["Hello World", "David"]</code>
+                    </div>
+                    <div class="tpl-compare-row">
+                      <span class="tpl-compare-label">This render</span>
+                      <code class="tpl-compare-code">["Hello World", "David"]</code>
+                    </div>
+                    <div class="tpl-compare-result tpl-compare-same">→ Every value identical. DOM untouched. This is what "template output same" means.</div>
+                    <div class="tpl-compare-row" style="margin-top:.65rem">
+                      <span class="tpl-compare-label">This render<br/><span style="font-size:.6rem">(after API update)</span></span>
+                      <code class="tpl-compare-code tpl-compare-code-red">["Hello World", "<strong>New Name</strong>"]</code>
+                    </div>
+                    <div class="tpl-compare-result tpl-compare-changed">→ Position 1 differs. Angular updates only that one DOM text node.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="tpl-explain-note">The wasted work is re-running the template function for every node just to discover the output is identical. Angular can't skip it — it has no idea which component's properties changed.</div>
+            </div>
+          </div>
+
+          <!-- The silent assignment insight -->
+          <div class="silent-card">
+            <div class="silent-title">🔇 The root cause — <code>this.data = response</code> is completely silent</div>
+            <div class="silent-compare">
+              <div class="silent-side silent-side-bad">
+                <div class="silent-side-label">Old — plain property</div>
+                <div class="silent-code">this.data = response</div>
+                <div class="silent-effect">
+                  <span class="silent-effect-icon">🤫</span>
+                  <span>JavaScript says nothing. No event fires. Angular has no idea this happened.</span>
+                </div>
+              </div>
+              <div class="silent-side silent-side-good">
+                <div class="silent-side-label">New — signal</div>
+                <div class="silent-code silent-code-green">this.data.set(response)</div>
+                <div class="silent-effect">
+                  <span class="silent-effect-icon">📣</span>
+                  <span><strong>Signal announces itself.</strong> "I changed. Chart is watching me. Update it — nothing else."</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ 02 WHAT IS A SIGNAL ════ -->
+      <section data-sid="what-is-signal" class="section sec-panel">
+        <p class="eyebrow">02 · What Is a Signal?</p>
+        <h2 class="sec-title">One Value. One Notify List. <span>Angular Only Visits Who's Watching.</span></h2>
+        <p class="sec-lead">
+          A signal is a <strong>box that holds a value</strong> — plus a built-in notification system.
+          When the value changes, everyone who is watching gets told automatically.
+          You never have to manually notify anyone.
+        </p>
+
+        <div class="mental-section">
+          <header class="route-section-title">Before vs After — 3 Lines Changed</header>
+          <p class="card-body" style="margin-bottom:1rem;">Everything from Section 01 — the 9-node scan, the wasted work — traces back to three specific lines. Here's exactly what changes when you add a signal.</p>
+          <div class="g2 mb-md">
+
+            <div class="anatomy-panel anatomy-bad">
+              <div class="anatomy-head anatomy-head-red">❌ &nbsp;BEFORE — Plain Property</div>
+              <div class="code-wrap">
+                <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-filename">dashboard.component.ts</span></div>
+                <div class="code-body" style="font-size:.78rem;line-height:1.85;">
+                  <span class="ky">export class</span> <span class="fn">DashboardComponent</span> &#123;<br/>
+                  &nbsp;&nbsp;<span class="anatomy-hl anatomy-hl-red">myChartData</span>:&lt;ChartData[]&gt;= [];&nbsp;<span class="anat-n">1</span><br/><br/>
+                  &nbsp;&nbsp;<span class="fn">loadData</span>() &#123;<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="ky">this</span>.http.<span class="fn">get</span>&lt;ChartData[]&gt;(<span class="st">'/api/data'</span>)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">subscribe</span>(res =&gt; &#123;<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="anatomy-hl anatomy-hl-red"><span class="ky">this</span>.myChartData = res;</span>&nbsp;&nbsp;&nbsp;<span class="anat-n">2</span><br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#125;);<br/>
+                  &nbsp;&nbsp;&#125;<br/>
+                  &#125;
+                </div>
+              </div>
+              <div class="code-wrap mt-sm">
+                <div class="code-bar"><span class="code-filename">template</span></div>
+                <div class="code-body" style="font-size:.78rem;">
+                  &lt;app-chart [chartData]="<span class="anatomy-hl anatomy-hl-red">myChartData</span>"&gt;&lt;/app-chart&gt;&nbsp;<span class="anat-n">3</span>
+                </div>
+              </div>
+              <div class="anatomy-notes">
+                <div class="anatomy-note anatomy-note-red"><span class="anat-badge anat-badge-red">1</span>plain property — nothing tells Angular when this value changes</div>
+                <div class="anatomy-note anatomy-note-red"><span class="anat-badge anat-badge-red">2</span>silent assignment — Angular has no idea this line ran</div>
+                <div class="anatomy-note anatomy-note-red"><span class="anat-badge anat-badge-red">3</span><code>"myChartData"</code> passes only the current value at render time — no ongoing connection, Angular won't track future changes</div>
+              </div>
+            </div>
+
+            <div class="anatomy-panel anatomy-good">
+              <div class="anatomy-head anatomy-head-green">✅ &nbsp;AFTER — Signal</div>
+              <div class="code-wrap">
+                <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-filename">dashboard.component.ts</span></div>
+                <div class="code-body" style="font-size:.78rem;line-height:1.85;">
+                  <span class="ky">export class</span> <span class="fn">DashboardComponent</span> &#123;<br/>
+                  &nbsp;&nbsp;<span class="anatomy-hl anatomy-hl-green">myChartData</span> = <span class="fn">signal</span>&lt;ChartData[]&gt;([]);&nbsp;<span class="anat-n">1</span><br/><br/>
+                  &nbsp;&nbsp;<span class="fn">loadData</span>() &#123;<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="ky">this</span>.http.<span class="fn">get</span>&lt;ChartData[]&gt;(<span class="st">'/api/data'</span>)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">subscribe</span>(res =&gt; &#123;<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="anatomy-hl anatomy-hl-green"><span class="ky">this</span>.myChartData.<span class="fn">set</span>(res);</span>&nbsp;&nbsp;&nbsp;<span class="anat-n">2</span><br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#125;);<br/>
+                  &nbsp;&nbsp;&#125;<br/>
+                  &#125;
+                </div>
+              </div>
+              <div class="code-wrap mt-sm">
+                <div class="code-bar"><span class="code-filename">template</span></div>
+                <div class="code-body" style="font-size:.78rem;">
+                  &lt;app-chart [chartData]="<span class="anatomy-hl anatomy-hl-green">myChartData()</span>"&gt;&lt;/app-chart&gt;&nbsp;<span class="anat-n">3</span>
+                </div>
+              </div>
+              <div class="anatomy-notes">
+                <div class="anatomy-note anatomy-note-green"><span class="anat-badge anat-badge-green">1</span>signal wrapper — Angular can watch this for changes. Initial value <code>[]</code> is set here.</div>
+                <div class="anatomy-note anatomy-note-green"><span class="anat-badge anat-badge-green">2</span><code>.set()</code> tells Angular: "myChartData changed" — Angular looks up the notify list and re-renders every watcher</div>
+                <div class="anatomy-note anatomy-note-green anatomy-note-block">
+                  <div class="anat-note-head"><span class="anat-badge anat-badge-green">3</span><span>When Dashboard's template renders, two things happen at this line:</span></div>
+                  <div class="anat-substeps">
+                    <div class="anat-substep"><span class="anat-sub-num">①</span><span><code>myChartData()</code> is called → Angular registers <strong>Dashboard's template</strong> on the notify list as a watcher — not the component class, the template view that read the signal</span></div>
+                    <div class="anat-substep"><span class="anat-sub-num">②</span><span>The current value (<code>[]</code> on first render) is extracted and passed to Chart as a plain array via <code>@Input</code> — the signal itself is never passed to Chart</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="route-section-title">What a Signal Actually Is</header>
+          <p class="sec-lead" style="margin-bottom:1.1rem;">A signal is not a stream, not an observable, not a pub/sub system. It is exactly two things bundled together.</p>
+          <div class="g2 mb-md">
+            <div class="sticker sticker-top-green">
+              <header class="sticker-title">① A value</header>
+              <p class="card-body">A box that holds data — <code>ChartData[]</code>, a number, a string. Read it with <code>myChartData()</code>. Replace it with <code>myChartData.set(newValue)</code>.</p>
+            </div>
+            <div class="sticker sticker-top-green">
+              <header class="sticker-title">② A notify list</header>
+              <p class="card-body">A list of templates Angular should re-render when the value changes. Angular manages this list automatically — you never write to it directly.</p>
+            </div>
+          </div>
+
+          <p class="sec-lead" style="margin-bottom:.75rem;">The notify list has exactly three states:</p>
+          <div class="nl-flow mb-md">
+            <div class="nl-state nl-state-grey">
+              <div class="nl-step-num">1</div>
+              <div class="nl-step-body">
+                <strong class="nl-step-title">Signal created</strong>
+                <div class="nl-list"><span class="nl-list-label">Notify list:</span><span class="nl-list-empty">[ empty ]</span></div>
+                <div class="nl-caption">Just a class property. Angular has nothing registered yet.</div>
+              </div>
+            </div>
+            <div class="nl-arrow">↓</div>
+            <div class="nl-state nl-state-orange">
+              <div class="nl-step-num">2</div>
+              <div class="nl-step-body">
+                <strong class="nl-step-title">Dashboard's template renders — calls <code>myChartData()</code></strong>
+                <div class="nl-list"><span class="nl-list-label">Notify list:</span><span class="nl-list-item nl-list-green">[ Dashboard's template ]</span></div>
+                <div class="nl-caption">Angular tracks every <code>signal()</code> call during a template render and registers that template as a watcher.</div>
+              </div>
+            </div>
+            <div class="nl-arrow">↓</div>
+            <div class="nl-state nl-state-green">
+              <div class="nl-step-num">3</div>
+              <div class="nl-step-body">
+                <strong class="nl-step-title"><code>myChartData.set(newValue)</code> runs</strong>
+                <div class="nl-list"><span class="nl-list-label">Angular reads list →</span><span class="nl-list-item nl-list-green">re-renders Dashboard's template</span></div>
+                <div class="nl-caption">No tree scan. No diff of 9 components. Angular visits the list, finds Dashboard, and re-renders only it.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-yellow mb-md">
+            <header class="callout-title callout-title-yellow">⚠️ Defining the signal is NOT the same as registering</header>
+            <p><code>myChartData = signal&lt;ChartData[]&gt;([]);</code> is just a class property. Writing this line does not register anything — the notify list is empty at this point. Angular only adds a template to the notify list when that template actually <strong>calls</strong> <code>myChartData()</code> during rendering. If Dashboard never uses <code>myChartData()</code> in its template, nothing is ever registered, and <code>myChartData.set()</code> will silently update the value with zero re-renders.</p>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="route-section-title">The Full Cascade — Step by Step</header>
+          <p class="card-body" style="margin-bottom:1rem;">Same component tree from Section 01. Same button click. Here is the exact sequence — from the first render that <em>builds</em> the notify list, to the data update that <em>uses</em> it.</p>
+
+          <div class="sig-trace mb-md">
+            <div class="sig-trace-step sig-step-blue">
+              <div class="sig-trace-num sig-num-blue">1</div>
+              <div class="sig-trace-body"><strong>App loads — Dashboard's template renders for the first time</strong><p>The template has <code>[chartData]="myChartData()"</code>. Angular calls <code>myChartData()</code> during this render and records: <em>"Dashboard's template is watching myChartData."</em> Notify list is now <code>[ Dashboard's template ]</code>.</p></div>
+            </div>
+            <div class="sig-trace-step sig-step-blue">
+              <div class="sig-trace-num sig-num-blue">2</div>
+              <div class="sig-trace-body"><strong>User clicks "Load Data" in Dashboard</strong><p>The click handler fires. An HTTP request goes out. Angular is not scanning anything — it is waiting.</p></div>
+            </div>
+            <div class="sig-trace-step sig-step-blue">
+              <div class="sig-trace-num sig-num-blue">3</div>
+              <div class="sig-trace-body"><strong>HTTP response arrives, <code>subscribe</code> callback runs</strong><p>The chart data is ready. The critical line is about to execute.</p></div>
+            </div>
+            <div class="sig-trace-step sig-step-green">
+              <div class="sig-trace-num sig-num-green">4</div>
+              <div class="sig-trace-body"><strong><code>this.myChartData.set(response)</code> — the signal checks its notify list</strong><p>The signal does not silently swap its value. It says: <em>"I changed — who is on my list?"</em> It finds: <code>[ Dashboard's template ]</code>. One lookup. No tree scan.</p></div>
+            </div>
+            <div class="sig-trace-step sig-step-green">
+              <div class="sig-trace-num sig-num-green">5</div>
+              <div class="sig-trace-body"><strong>Dashboard re-renders — passes new value to Chart via @Input</strong><p>Angular re-renders Dashboard's template. That template has <code>[chartData]="myChartData()"</code> — so Chart receives the updated value as a normal <code>@Input</code>. Chart re-renders because its <code>@Input</code> changed. Chart never subscribed to <code>myChartData</code> directly.</p></div>
+            </div>
+            <div class="sig-trace-step sig-step-red">
+              <div class="sig-trace-num sig-num-red">6</div>
+              <div class="sig-trace-body"><strong>AppRoot, Navbar, Table, ChartLegend, ChartTooltip, TableHeader, TableRow — never visited</strong><p>None of these templates ever called <code>myChartData()</code>. They are not on the notify list. Angular does not touch them — not even to check a diff.</p></div>
+            </div>
+          </div>
+
+          <div class="sig-tree-wrap mb-md">
+            <div class="sig-tree-header">
+              <span class="sig-tree-title">The same 9-component tree — signal update</span>
+              <span class="sig-tree-badge">1 watcher &nbsp;·&nbsp; 1 @Input update &nbsp;·&nbsp; 7 never visited</span>
+            </div>
+            <div class="sig-walk">
+              <div class="sig-node sig-node-idle">AppRoot <span class="sig-tag sig-tag-grey">not on notify list — never visited</span></div>
+              <div class="nsw-children">
+                <div class="sig-node sig-node-idle">Navbar <span class="sig-tag sig-tag-grey">not on notify list — never visited</span></div>
+                <div class="sig-node sig-node-target">Dashboard <span class="sig-tag sig-tag-green">⚡ template called myChartData() — on notify list, re-renders</span></div>
+                <div class="nsw-children">
+                  <div class="sig-node sig-node-input">Chart 📈 <span class="sig-tag sig-tag-blue">@Input changed — re-renders (not a watcher)</span></div>
+                  <div class="nsw-children">
+                    <div class="sig-node sig-node-idle">ChartLegend <span class="sig-tag sig-tag-grey">not on notify list — never visited</span></div>
+                    <div class="sig-node sig-node-idle">ChartTooltip <span class="sig-tag sig-tag-grey">not on notify list — never visited</span></div>
+                  </div>
+                  <div class="sig-node sig-node-idle">Table <span class="sig-tag sig-tag-grey">not on notify list — never visited</span></div>
+                  <div class="nsw-children">
+                    <div class="sig-node sig-node-idle">TableHeader <span class="sig-tag sig-tag-grey">not on notify list — never visited</span></div>
+                    <div class="sig-node sig-node-idle">TableRow <span class="sig-tag sig-tag-grey">not on notify list — never visited</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="g2 mb-md">
+            <div class="sticker sticker-red">
+              <header class="sticker-title">📣 Zone.js — Shouts at Everyone</header>
+              <div class="explain-rows">
+                <div class="explain-row"><span class="explain-num" style="background:var(--red-pale);color:var(--red);">✗</span><span>An async event happened — Angular scans the whole tree</span></div>
+                <div class="explain-row"><span class="explain-num" style="background:var(--red-pale);color:var(--red);">✗</span><span>All 9 components checked every single time</span></div>
+                <div class="explain-row"><span class="explain-num" style="background:var(--red-pale);color:var(--red);">✗</span><span>Cost grows as your tree gets bigger</span></div>
+              </div>
+            </div>
+            <div class="sticker sticker-green">
+              <header class="sticker-title">🤫 Signals — Whisper to the Right Component</header>
+              <div class="explain-rows">
+                <div class="explain-row"><span class="explain-num explain-num-green">✓</span><span>The signal knows its own notify list — no scan needed</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-green">✓</span><span>1 watcher (Dashboard) + 1 @Input update (Chart)</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-green">✓</span><span>Cost = number of watchers, not tree size</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-blue">
+            <header class="callout-title callout-title-blue">💡 What if Table also reads myChartData()?</header>
+            <p>If Table's template also binds <code>[tableData]="myChartData()"</code>, Angular registers Table as a second watcher. The notify list becomes <code>[ Dashboard's template, Table's template ]</code>. When <code>myChartData.set(response)</code> runs, Angular re-renders <strong>both</strong> — still nothing else. Two precise updates. The other 7 components are never visited.</p>
+          </div>
+
+          <div class="callout callout-yellow">
+            <header class="callout-title callout-title-yellow">🤔 What does Chart actually receive? And does calling chartData() inside Chart register it as a subscriber?</header>
+            <p style="margin-bottom:.7rem;">When Dashboard's template runs <code>[chartData]="myChartData()"</code>, Angular calls <code>myChartData()</code> right there — reads the current value, say <code>ChartData[]</code> — and hands that <strong>plain array</strong> to Chart as an <code>@Input</code>. The signal itself never travels to Chart. Chart's <code>chartData</code> property is just a regular array, nothing more.</p>
+            <p style="margin-bottom:.7rem;">So if you call <code>this.chartData</code> (or loop over it) inside Chart's class or template — you are working with a plain array. There is no signal to subscribe to. <strong>Chart has no idea the data originally came from a signal.</strong></p>
+            <p>The reactive wire ends at Dashboard's template. Think of it like a water pipe: the signal is the tap, Dashboard's template is where the tap is open, and Chart's <code>@Input</code> just receives a cup of water — not a connection to the tap.</p>
+          </div>
+
+          <div class="callout callout-blue">
+            <header class="callout-title callout-title-blue">🤔 Wait — what is @Input and why is it here?</header>
+            <p style="margin-bottom:.7rem;"><code>@Input()</code> is an Angular decorator that marks a property as <strong>settable from the parent's template</strong>. Without it, Dashboard's template cannot assign a value to Chart's property.</p>
+            <p style="margin-bottom:.7rem;">When Dashboard writes <code>[chartData]="myChartData()"</code>, Angular internally does this:</p>
+            <div class="code-wrap" style="margin-bottom:.7rem;">
+              <div class="code-bar"><span class="code-filename">what Angular does behind the scenes</span></div>
+              <div class="code-body" style="font-size:.78rem;">chartComponentInstance.chartData = myChartData();&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// plain assignment</span></div>
+            </div>
+            <p>That's it. <code>@Input()</code> is the permission slip that lets a parent set a child's property. There is no signal involved on Chart's side — it just receives a plain value every time Dashboard re-renders.</p>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="route-section-title">Can Navbar Subscribe to Dashboard's Signal?</header>
+          <p class="sec-lead" style="margin-bottom:1rem;"><code>myChartData = signal&lt;ChartData[]&gt;([])</code> is a class property on <code>DashboardComponent</code>. It has zero visibility outside that class — same as any other private property.</p>
+
+          <div class="sig-tree-wrap mb-md">
+            <div class="sig-tree-header">
+              <span class="sig-tree-title">Navbar and Dashboard are siblings — no shared signal scope</span>
+            </div>
+            <div class="sig-walk">
+              <div class="sig-node sig-node-idle">AppRoot <span class="sig-tag sig-tag-grey">no access to Dashboard's internals</span></div>
+              <div class="nsw-children">
+                <div class="sig-node sig-node-idle" style="border-color:var(--red);color:var(--red);">Navbar <span class="sig-tag" style="background:var(--red-pale);color:var(--red);border:1px solid var(--red);">✗ cannot access myChartData — it's a sibling, not a child</span></div>
+                <div class="sig-node sig-node-target">Dashboard <span class="sig-tag sig-tag-green">myChartData = signal&lt;ChartData[]&gt;([]) lives here — private to this class</span></div>
+                <div class="nsw-children">
+                  <div class="sig-node sig-node-input">Chart 📈 <span class="sig-tag sig-tag-blue">can receive value via @Input — but only because Dashboard passes it down</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="g2 mb-md">
+            <div class="sticker sticker-top-green">
+              <header class="sticker-title">Option 1 — Signal in the Component</header>
+              <p class="card-body" style="margin-bottom:.6rem;">The signal lives in <code>DashboardComponent</code>. Only Dashboard's template is the watcher. Children like Chart can receive the value as an <code>@Input</code>, but siblings like Navbar cannot subscribe at all.</p>
+              <div class="chip-row"><span class="chip chip-green">✓ Simple</span><span class="chip chip-green">✓ No service needed</span><span class="chip chip-red">✗ Siblings can't subscribe</span></div>
+            </div>
+            <div class="sticker sticker-top-green">
+              <header class="sticker-title">Option 2 — Signal in a Service</header>
+              <p class="card-body" style="margin-bottom:.6rem;">Lift the signal into a shared <code>@Injectable</code> service. Now any component that injects the service can call <code>service.myChartData()</code> in its template — Navbar, Dashboard, Chart, or anyone else — and each becomes a watcher on the same notify list.</p>
+              <div class="chip-row"><span class="chip chip-green">✓ Cross-component sharing</span><span class="chip chip-green">✓ Siblings can subscribe</span></div>
+            </div>
+          </div>
+
+          <div class="callout callout-yellow">
+            <header class="callout-title callout-title-yellow">⚠️ The scope rule in one sentence</header>
+            <p>A signal defined in a component class is scoped to that component. To share a signal between components that are not in a parent→child relationship, move it into a Service.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-green">
+          <header class="callout-title callout-title-green">🔑 The Key Rule</header>
+          <p>Angular only tracks signal reads that happen in a <strong>reactive context</strong> — inside a component template, a <code>computed()</code>, or an <code>effect()</code>. Reading a signal in plain TypeScript code (not in a template or effect) won't trigger any re-render.</p>
+        </div>
+      </section>
+
+      <!-- ════ 03 SIGNAL VS PROPERTY ════ -->
+      <section data-sid="signal-vs-prop" class="section sec-panel">
+        <p class="eyebrow">03 · Signal vs Property</p>
+        <h2 class="sec-title">Why Not Just Use a <span>Normal Variable</span>?</h2>
+        <p class="sec-lead">
+          This is the question every developer asks first. The answer reveals why Signals exist at all.
+          <strong>JavaScript has no native way to watch a variable for changes</strong> — Angular had to invent one.
+        </p>
+
+        <div class="mental-section">
+          <header class="route-section-title">The Sticky Note vs the Group Chat</header>
+          <div class="g2 mb-md">
+            <div class="sticker sticker-red">
+              <header class="sticker-title">📝 Regular Property = Sticky Note on Your Desk</header>
+              <p class="card-body">You write a number on a sticky note. Your colleague has to physically walk over and check your desk every few minutes to see if the number changed. <strong>That's Zone.js</strong> — Angular walking your entire component tree after every event, reading every variable manually.</p>
+              <p class="card-body" style="margin-top:.5rem;"><strong>Problem:</strong> it walks even when nothing changed. And JavaScript has no <code>onChange</code> event for plain properties.</p>
+            </div>
+            <div class="sticker sticker-green">
+              <header class="sticker-title">💬 Signal = A Group Chat Message</header>
+              <p class="card-body">You post the new number in a group chat. <strong>Only the people who joined that chat get notified.</strong> Nobody else is disturbed. The notification is instant, and nobody has to keep checking.</p>
+              <p class="card-body" style="margin-top:.5rem;"><strong>In Angular terms:</strong> every template that calls <code>count()</code> has "joined the chat." When <code>count.set()</code> is called, only those templates re-render.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="subsec-label">Three Options Side by Side</header>
+          <div class="g3">
+            <div class="sticker sticker-left-red">
+              <header class="sticker-title">Regular Property</header>
+              <div class="code-wrap mt-sm">
+                <div class="code-body code-body-sm">
+                  count = <span class="vl">0</span>;<br/>
+                  count = <span class="vl">5</span>; <span style="color:var(--ink-light);font-style:italic;">// silent</span>
+                </div>
+              </div>
+              <p class="card-body"><strong class="c-ink">Template:</strong> <code>&#123;&#123; count &#125;&#125;</code><br/><strong class="c-ink">Angular detects change:</strong> Zone.js polls everything<br/><strong class="c-ink">Good for:</strong> static display values only</p>
+            </div>
+            <div class="sticker sticker-left-green">
+              <header class="sticker-title">Signal</header>
+              <div class="code-wrap mt-sm">
+                <div class="code-body code-body-sm">
+                  count = <span class="fn">signal</span>(<span class="vl">0</span>);<br/>
+                  count.<span class="fn">set</span>(<span class="vl">5</span>); <span style="color:var(--ink-light);font-style:italic;">// notifies</span>
+                </div>
+              </div>
+              <p class="card-body"><strong class="c-ink">Template:</strong> <code>&#123;&#123; count() &#125;&#125;</code><br/><strong class="c-ink">Angular detects change:</strong> signal notifies Angular directly<br/><strong class="c-ink">Good for:</strong> all UI state</p>
+            </div>
+            <div class="sticker sticker-left-blue">
+              <header class="sticker-title">Observable (RxJS)</header>
+              <div class="code-wrap mt-sm">
+                <div class="code-body code-body-sm">
+                  count$ = <span class="ky">new</span> <span class="fn">BehaviorSubject</span>(<span class="vl">0</span>);<br/>
+                  count$.<span class="fn">next</span>(<span class="vl">5</span>);
+                </div>
+              </div>
+              <p class="card-body"><strong class="c-ink">Template:</strong> <code>&#123;&#123; count$ | async &#125;&#125;</code><br/><strong class="c-ink">Angular detects change:</strong> async pipe subscribes<br/><strong class="c-ink">Good for:</strong> HTTP, event streams, complex async</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-yellow">
+          <header class="callout-title callout-title-yellow">⚠️ The () Is Not Optional</header>
+          <p>With a regular property you write <code>&#123;&#123; count &#125;&#125;</code>. With a signal you write <code>&#123;&#123; count() &#125;&#125;</code>. That call is how Angular registers your template as a "watcher." Forgetting the <code>()</code> renders the signal function object itself — you'll see something like <code>[Function]</code> on screen.</p>
+        </div>
+      </section>
+
+      <!-- ════ 04 CREATING SIGNALS ════ -->
+      <section data-sid="creating-signals" class="section sec-panel">
+        <p class="eyebrow">04 · Creating Signals</p>
+        <h2 class="sec-title">The Whiteboard <span>Number</span></h2>
+        <p class="sec-lead">
+          Think of a writable signal as a whiteboard with a number written on it.
+          Anyone can look at it. You control who can change it.
+          There are exactly 3 ways to interact with it.
+        </p>
+
+        <div class="mental-section">
+          <header class="route-section-title">The 3 Operations — With the Whiteboard Analogy</header>
+          <div class="sol-steps">
+            <div class="sol-step">
+              <div class="sol-num sol-num-green">1</div>
+              <div>
+                <p class="card-title"><code>signal(initialValue)</code> — Hang the whiteboard</p>
+                <p class="card-body">Creates a new writable signal with a starting value. TypeScript infers the type — you don't need to declare it.</p>
+                <div class="code-wrap">
+                  <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">component.ts</span></div>
+                  <div class="code-body code-body-sm">
+                    <span class="ky">const</span> count = <span class="fn">signal</span>(<span class="vl">0</span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// number</span><br/>
+                    <span class="ky">const</span> name&nbsp; = <span class="fn">signal</span>(<span class="st">'Alice'</span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// string</span><br/>
+                    <span class="ky">const</span> items = <span class="fn">signal</span>([<span class="st">'a'</span>, <span class="st">'b'</span>]);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// string[]</span><br/>
+                    <span class="ky">const</span> user&nbsp; = <span class="fn">signal</span>&lt;User | <span class="ky">null</span>&gt;(<span class="ky">null</span>);&nbsp;<span style="color:var(--ink-light);font-style:italic;">// explicit generic</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="sol-step">
+              <div class="sol-num sol-num-blue">2</div>
+              <div>
+                <p class="card-title"><code>.set(newValue)</code> — Erase and rewrite the number</p>
+                <p class="card-body">Replaces the current value with a completely new one. Use when you know exactly what the new value should be.</p>
+                <div class="code-wrap">
+                  <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">component.ts</span></div>
+                  <div class="code-body code-body-sm">
+                    count.<span class="fn">set</span>(<span class="vl">10</span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// was 0, now 10</span><br/>
+                    name.<span class="fn">set</span>(<span class="st">'Bob'</span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// was 'Alice', now 'Bob'</span><br/>
+                    user.<span class="fn">set</span>(&#123; id: <span class="vl">1</span>, name: <span class="st">'Bob'</span> &#125;);
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="sol-step">
+              <div class="sol-num sol-num-orange">3</div>
+              <div>
+                <p class="card-title"><code>.update(fn)</code> — Change based on what's already written</p>
+                <p class="card-body">Computes the new value from the current one. Equivalent to <code>count = count + 1</code> but for signals. Use when the new value depends on the old one.</p>
+                <div class="code-wrap">
+                  <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">component.ts</span></div>
+                  <div class="code-body code-body-sm">
+                    count.<span class="fn">update</span>(v =&gt; v + <span class="vl">1</span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// increment</span><br/>
+                    count.<span class="fn">update</span>(v =&gt; v * <span class="vl">2</span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// double it</span><br/>
+                    items.<span class="fn">update</span>(arr =&gt; [...arr, <span class="st">'c'</span>]);&nbsp;<span style="color:var(--ink-light);font-style:italic;">// add to array</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="subsec-label">Real Component Example</header>
+          <div class="code-wrap">
+            <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">counter.component.ts</span></div>
+            <div class="code-body">
+              <span class="ky">@Component</span>(&#123;<br/>
+              &nbsp;&nbsp;<span class="hi">selector</span>: <span class="st">'app-counter'</span>,<br/>
+              &nbsp;&nbsp;<span class="hi">template</span>: <span class="st">`<br/>
+              &nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;Count: &#123;&#123; count() &#125;&#125;&lt;/p&gt;<br/>
+              &nbsp;&nbsp;&nbsp;&nbsp;&lt;button (click)="increment()"&gt;+1&lt;/button&gt;<br/>
+              &nbsp;&nbsp;&nbsp;&nbsp;&lt;button (click)="reset()"&gt;Reset&lt;/button&gt;<br/>
+              &nbsp;&nbsp;`</span>,<br/>
+              &#125;)<br/>
+              <span class="ky">export class</span> <span class="fn">CounterComponent</span> &#123;<br/>
+              &nbsp;&nbsp;count = <span class="fn">signal</span>(<span class="vl">0</span>);<br/><br/>
+              &nbsp;&nbsp;<span class="fn">increment</span>() &#123; <span class="ky">this</span>.count.<span class="fn">update</span>(v =&gt; v + <span class="vl">1</span>); &#125;<br/>
+              &nbsp;&nbsp;<span class="fn">reset</span>()&nbsp;&nbsp;&nbsp;&nbsp;() &#123; <span class="ky">this</span>.count.<span class="fn">set</span>(<span class="vl">0</span>); &#125;<br/>
+              &#125;
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ 05 COMPUTED ════ -->
+      <section data-sid="computed" class="section sec-panel">
+        <p class="eyebrow">05 · computed()</p>
+        <h2 class="sec-title">The Spreadsheet <span>Formula Cell</span></h2>
+        <p class="sec-lead">
+          If you've used Excel, you know that a formula cell like <code>=A1*2</code> always shows double whatever A1 is.
+          You never manually update it — it stays correct automatically.
+          <strong><code>computed()</code> is exactly that — a derived value that always stays in sync.</strong>
+        </p>
+
+        <div class="mental-section">
+          <header class="route-section-title">How computed() Works</header>
+          <div class="sticker sticker-top-green mb-md">
+            <header class="sticker-title">📊 Excel Analogy</header>
+            <div class="explain-rows">
+              <div class="explain-row"><span class="explain-num explain-num-green">A1</span><span>Cell A1 = <code>const count = signal(5)</code> — your raw data</span></div>
+              <div class="explain-row"><span class="explain-num explain-num-green">B1</span><span>Cell B1 = <code>=A1*2</code> → <code>const doubled = computed(() =&gt; count() * 2)</code></span></div>
+              <div class="explain-row"><span class="explain-num explain-num-green">→</span><span>Change A1 to 7 → B1 automatically shows 14. <strong class="c-ink">You never touch B1.</strong></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="subsec-label">computed() in Code</header>
+          <div class="code-wrap mb-md">
+            <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">component.ts</span></div>
+            <div class="code-body">
+              <span class="ky">const</span> count   = <span class="fn">signal</span>(<span class="vl">5</span>);<br/>
+              <span class="ky">const</span> doubled = <span class="fn">computed</span>(() =&gt; count() * <span class="vl">2</span>);<br/><br/>
+              doubled();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// → 10</span><br/>
+              count.<span class="fn">set</span>(<span class="vl">7</span>);<br/>
+              doubled();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// → 14  ← automatically correct</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="subsec-label">3 Rules About computed()</header>
+          <div class="g3">
+            <div class="sticker sticker-left-green">
+              <header class="sticker-title">😴 Lazy</header>
+              <p class="card-body">The formula only runs when you actually read it. If nothing reads <code>doubled()</code>, Angular never calculates it. <strong>No wasted work.</strong></p>
+            </div>
+            <div class="sticker sticker-left-blue">
+              <header class="sticker-title">💾 Memoized</header>
+              <p class="card-body">Once calculated, the result is cached. Reading <code>doubled()</code> 100 times in a row without <code>count</code> changing only runs the formula <strong>once</strong>.</p>
+            </div>
+            <div class="sticker sticker-left-red">
+              <header class="sticker-title">🔒 Read-Only</header>
+              <p class="card-body"><code>doubled.set(99)</code> is a <strong>compile error</strong>. You can only change the source signal (<code>count</code>). Computed values are derived, never set directly.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="subsec-label">Real-World Example — Shopping Cart</header>
+          <div class="code-wrap">
+            <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">cart.component.ts</span></div>
+            <div class="code-body">
+              items = <span class="fn">signal</span>([<br/>
+              &nbsp;&nbsp;&#123; name: <span class="st">'Book'</span>,   price: <span class="vl">12</span> &#125;,<br/>
+              &nbsp;&nbsp;&#123; name: <span class="st">'Pen'</span>,    price: <span class="vl">3</span>  &#125;,<br/>
+              &nbsp;&nbsp;&#123; name: <span class="st">'Laptop'</span>, price: <span class="vl">999</span> &#125;,<br/>
+              ]);<br/><br/>
+              <span style="color:var(--ink-light);font-style:italic;">// These auto-update whenever items changes:</span><br/>
+              total&nbsp;&nbsp;&nbsp; = <span class="fn">computed</span>(() =&gt; <span class="ky">this</span>.items().<span class="fn">reduce</span>((s, i) =&gt; s + i.price, <span class="vl">0</span>));<br/>
+              itemCount = <span class="fn">computed</span>(() =&gt; <span class="ky">this</span>.items().length);<br/>
+              hasItems  = <span class="fn">computed</span>(() =&gt; <span class="ky">this</span>.items().length &gt; <span class="vl">0</span>);<br/><br/>
+              <span style="color:var(--ink-light);font-style:italic;">// Add an item — total, itemCount, hasItems all update automatically</span><br/>
+              <span class="fn">addItem</span>(item: Item) &#123;<br/>
+              &nbsp;&nbsp;<span class="ky">this</span>.items.<span class="fn">update</span>(arr =&gt; [...arr, item]);<br/>
+              &#125;
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ 06 EFFECTS ════ -->
+      <section data-sid="effects" class="section sec-panel">
+        <p class="eyebrow">06 · effect()</p>
+        <h2 class="sec-title">Push <span>Notifications</span> for Your Code</h2>
+        <p class="sec-lead">
+          <code>computed()</code> derives a new value. But sometimes you need to <em>do something</em>
+          when state changes — save to localStorage, log an event, call a non-Angular API.
+          <strong><code>effect()</code> is a callback that runs whenever its signals change.</strong>
+        </p>
+
+        <div class="mental-section">
+          <header class="route-section-title">The Push Notification Analogy</header>
+          <div class="g2 mb-md">
+            <div class="sticker sticker-red">
+              <header class="sticker-title">📧 Old Way — Manual Polling</header>
+              <p class="card-body">Every 30 seconds your phone opens your email app and checks for new messages. Even at 3am. Even when there's nothing new. <strong>That's Zone.js change detection on intervals.</strong></p>
+            </div>
+            <div class="sticker sticker-green">
+              <header class="sticker-title">🔔 effect() Way — Push Notification</header>
+              <p class="card-body">The server sends a ping the moment a new email arrives. Your phone only wakes up when there's something to do. <strong>That's effect() — runs only when a tracked signal changes.</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="subsec-label">effect() in Code</header>
+          <div class="code-wrap mb-md">
+            <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">component.ts</span></div>
+            <div class="code-body">
+              theme = <span class="fn">signal</span>(<span class="st">'light'</span>);<br/>
+              fontSize = <span class="fn">signal</span>(<span class="vl">16</span>);<br/><br/>
+              <span class="ky">constructor</span>() &#123;<br/>
+              &nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// Runs immediately, then again whenever theme OR fontSize changes</span><br/>
+              &nbsp;&nbsp;<span class="fn">effect</span>(() =&gt; &#123;<br/>
+              &nbsp;&nbsp;&nbsp;&nbsp;document.body.className = <span class="ky">this</span>.<span class="fn">theme</span>();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// tracked</span><br/>
+              &nbsp;&nbsp;&nbsp;&nbsp;document.body.style.fontSize = <span class="ky">this</span>.<span class="fn">fontSize</span>() + <span class="st">'px'</span>;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// tracked</span><br/>
+              &nbsp;&nbsp;&#125;);<br/>
+              &#125;
+            </div>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="subsec-label">3 Rules About effect()</header>
+          <div class="sol-steps">
+            <div class="sol-step">
+              <div class="sol-num sol-num-green">1</div>
+              <div>
+                <p class="card-title">Every signal read inside the callback becomes a dependency</p>
+                <p class="card-body">Angular automatically tracks which signals you read inside the <code>effect()</code> callback. When any of them change, the callback runs again. <strong>No manual subscription list needed.</strong></p>
+              </div>
+            </div>
+            <div class="sol-step">
+              <div class="sol-num sol-num-blue">2</div>
+              <div>
+                <p class="card-title">It runs once immediately, then on each change</p>
+                <p class="card-body">When you create an <code>effect()</code>, it runs once right away (to establish dependencies). After that, it re-runs whenever a tracked signal changes. <strong>No need to call it manually the first time.</strong></p>
+              </div>
+            </div>
+            <div class="sol-step">
+              <div class="sol-num sol-num-orange">3</div>
+              <div>
+                <p class="card-title">Don't use effect() to update signals — use computed() instead</p>
+                <p class="card-body">If you find yourself writing <code>effect(() =&gt; &#123; otherSignal.set(thisSignal()) &#125;)</code>, that's a sign you should use <code>computed()</code>. <strong>Effects are for side effects on non-reactive APIs</strong> (DOM, localStorage, third-party libraries) — not for deriving state.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ 07 READONLY ════ -->
+      <section data-sid="readonly" class="section sec-panel">
+        <p class="eyebrow">07 · asReadonly()</p>
+        <h2 class="sec-title">Your Bank Balance — <span>Visible but Protected</span></h2>
+        <p class="sec-lead">
+          You can check your bank balance any time you want. But you can't walk into the bank
+          and type any number you feel like. <strong><code>asReadonly()</code> exposes a signal's value
+          without giving write access.</strong>
+        </p>
+
+        <div class="mental-section">
+          <header class="route-section-title">The Problem It Solves</header>
+          <div class="callout callout-red-left mb-md">
+            <header class="callout-title callout-title-red">Without asReadonly() — any consumer can break your state</header>
+            <p>If you expose a writable signal from a service, any component that injects the service can call <code>count.set(-999)</code>. <strong>You have zero control over who modifies your state.</strong></p>
+          </div>
+          <div class="callout callout-green mb-md">
+            <header class="callout-title callout-title-green">With asReadonly() — consumers can see but not touch</header>
+            <p>You keep the writable signal private. You expose a readonly version. Components can read <code>count()</code> freely. Any attempt to call <code>count.set()</code> is a <strong>TypeScript compile error.</strong></p>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="subsec-label">The Pattern — Service with Encapsulated State</header>
+          <div class="code-wrap">
+            <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">counter.service.ts</span></div>
+            <div class="code-body">
+              <span class="ky">@Injectable</span>(&#123; <span class="hi">providedIn</span>: <span class="st">'root'</span> &#125;)<br/>
+              <span class="ky">export class</span> <span class="fn">CounterService</span> &#123;<br/>
+              &nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// ① Private writable — only THIS service can change it</span><br/>
+              &nbsp;&nbsp;<span class="ky">private readonly</span> _count = <span class="fn">signal</span>(<span class="vl">0</span>);<br/><br/>
+              &nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// ② Public readonly — anyone can READ, nobody can SET</span><br/>
+              &nbsp;&nbsp;<span class="ky">readonly</span> count = <span class="ky">this</span>._count.<span class="fn">asReadonly</span>();<br/><br/>
+              &nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// ③ Controlled mutations through methods only</span><br/>
+              &nbsp;&nbsp;<span class="fn">increment</span>() &#123; <span class="ky">this</span>._count.<span class="fn">update</span>(v =&gt; v + <span class="vl">1</span>); &#125;<br/>
+              &nbsp;&nbsp;<span class="fn">reset</span>()&nbsp;&nbsp;&nbsp;&nbsp; &#123; <span class="ky">this</span>._count.<span class="fn">set</span>(<span class="vl">0</span>); &#125;<br/>
+              &#125;<br/><br/>
+              <span style="color:var(--ink-light);font-style:italic;">// In any component:</span><br/>
+              counter = <span class="fn">inject</span>(<span class="fn">CounterService</span>);<br/>
+              <span style="color:var(--ink-light);font-style:italic;">// counter.count()         ✅ read — fine</span><br/>
+              <span style="color:var(--ink-light);font-style:italic;">// counter.count.set(99)   ❌ TypeScript error — readonly</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ 08 UNTRACKED ════ -->
+      <section data-sid="untracked" class="section sec-panel">
+        <p class="eyebrow">08 · untracked()</p>
+        <h2 class="sec-title">Peeking Without <span>Subscribing</span></h2>
+        <p class="sec-lead">
+          Normally, reading a signal inside a <code>computed()</code> or <code>effect()</code>
+          registers it as a dependency — the effect re-runs whenever that signal changes.
+          <strong><code>untracked()</code> lets you read the current value without creating that subscription.</strong>
+        </p>
+
+        <div class="mental-section">
+          <header class="route-section-title">The Stadium Analogy</header>
+          <div class="sticker sticker-top-blue mb-md">
+            <header class="sticker-title">🏟️ The Difference Between a Fan and a Passerby</header>
+            <p class="card-body">
+              You're at a stadium, watching the <strong>home team score</strong> (you're a registered fan — they text you updates).
+              You glance at the away team score on the board — you look at it, but you don't want the stadium
+              to start texting you every time the away team scores. You're <strong>reading without subscribing.</strong>
+            </p>
+            <p class="card-body" style="margin-top:.5rem;">
+              <code>untracked(awayScore)</code> = peeking at the away score as a passerby. Angular won't include it in your subscriptions.
+            </p>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="subsec-label">untracked() in Code</header>
+          <div class="g2 mb-md">
+            <div class="ba-code-panel ba-code-bad">
+              <div class="ba-code-head"><header>❌ Counter re-runs on BOTH signal changes</header></div>
+              <div class="code-body" style="font-size:.7rem;border-radius:0;">
+                <span class="fn">effect</span>(() =&gt; &#123;<br/>
+                &nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// Both are tracked — effect fires if EITHER changes</span><br/>
+                &nbsp;&nbsp;console.<span class="fn">log</span>(<span class="ky">this</span>.<span class="fn">currentUser</span>());<br/>
+                &nbsp;&nbsp;console.<span class="fn">log</span>(<span class="ky">this</span>.<span class="fn">counter</span>());&nbsp;<span style="color:var(--rd);">// unintended dependency</span><br/>
+                &#125;);
+              </div>
+            </div>
+            <div class="ba-code-panel ba-code-good">
+              <div class="ba-code-head"><header>✅ Only fires when currentUser changes</header></div>
+              <div class="code-body" style="font-size:.7rem;border-radius:0;">
+                <span class="fn">effect</span>(() =&gt; &#123;<br/>
+                &nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// Only currentUser is tracked</span><br/>
+                &nbsp;&nbsp;console.<span class="fn">log</span>(<span class="ky">this</span>.<span class="fn">currentUser</span>());<br/>
+                &nbsp;&nbsp;console.<span class="fn">log</span>(<span class="fn">untracked</span>(<span class="ky">this</span>.counter)); <span style="color:var(--ok);">// ✅ peek</span><br/>
+                &#125;);
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-blue">
+          <header class="callout-title callout-title-blue">When to use untracked()</header>
+          <p>Use it when a reactive function (effect or computed) needs to <strong>read a signal for context</strong> without being re-triggered by it. Common case: logging the value of a secondary signal alongside the primary one, without making the secondary a dependency.</p>
+        </div>
+      </section>
+
+      <!-- ════ 09 GOTCHAS ════ -->
+      <section data-sid="gotchas" class="section sec-panel">
+        <p class="eyebrow">09 · The Rules</p>
+        <h2 class="sec-title">3 Things That Will <span>Trip You Up</span></h2>
+        <p class="sec-lead">
+          Signals are simple — but there are three specific patterns that surprise developers coming from Zone.js.
+          Know these before you hit them in production.
+        </p>
+
+        <div class="sol-steps">
+          <div class="sol-step sol-step-err">
+            <div class="sol-num sol-num-err">1</div>
+            <div>
+              <header class="sticker-title">async + signals = you lose the reactive context after <code>await</code></header>
+              <p class="card-body">The reactive tracking system only works for synchronous code. <strong>Any signal read that happens after an <code>await</code> is not tracked.</strong> Angular can't create a dependency for code that runs later in a microtask queue.</p>
+              <div class="g2">
+                <div class="ba-code-panel ba-code-bad">
+                  <div class="ba-code-head"><header>❌ theme() not tracked — context lost after await</header></div>
+                  <div class="code-body" style="font-size:.68rem;border-radius:0;">
+                    <span class="fn">effect</span>(<span class="ky">async</span> () =&gt; &#123;<br/>
+                    &nbsp;&nbsp;<span class="ky">const</span> data = <span class="ky">await</span> <span class="fn">fetchData</span>();<br/>
+                    &nbsp;&nbsp;<span style="color:var(--red);">theme();</span>&nbsp;<span style="color:var(--ink-light);font-style:italic;">// 💥 not tracked</span><br/>
+                    &#125;);
+                  </div>
+                </div>
+                <div class="ba-code-panel ba-code-good">
+                  <div class="ba-code-head"><header>✅ Read signals BEFORE the await</header></div>
+                  <div class="code-body" style="font-size:.68rem;border-radius:0;">
+                    <span class="fn">effect</span>(<span class="ky">async</span> () =&gt; &#123;<br/>
+                    &nbsp;&nbsp;<span class="ky">const</span> t = <span class="fn">theme</span>();&nbsp;<span style="color:var(--ink-light);font-style:italic;">// ✅ tracked</span><br/>
+                    &nbsp;&nbsp;<span class="ky">const</span> data = <span class="ky">await</span> <span class="fn">fetchData</span>();<br/>
+                    &#125;);
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="sol-step">
+            <div class="sol-num sol-num-orange">2</div>
+            <div>
+              <p class="card-title">computed() is lazy — it doesn't run until you read it</p>
+              <p class="card-body">Don't rely on a computed signal "running in the background" to keep things up to date. <strong>It only recalculates when something reads it.</strong> If nothing reads it, the derivation never runs. This is a feature (no wasted work) but can surprise you if you expect it to run eagerly.</p>
+            </div>
+          </div>
+          <div class="sol-step">
+            <div class="sol-num sol-num-blue">3</div>
+            <div>
+              <p class="card-title">Arrays and objects: <code>.set()</code> with a new reference, not a mutation</p>
+              <p class="card-body">Signals use <code>Object.is()</code> to check if the value changed. If you mutate an array directly (<code>items().push('x')</code>), the reference stays the same — Angular sees "no change" and doesn't re-render. <strong>Always create a new array/object with the change applied.</strong></p>
+              <div class="g2">
+                <div class="ba-code-panel ba-code-bad">
+                  <div class="ba-code-head"><header>❌ Mutates in place — no re-render</header></div>
+                  <div class="code-body" style="font-size:.68rem;border-radius:0;">
+                    <span class="rd">items().<span class="fn">push</span>(<span class="st">'new'</span>);</span>&nbsp;<span style="color:var(--ink-light);font-style:italic;">// same ref</span>
+                  </div>
+                </div>
+                <div class="ba-code-panel ba-code-good">
+                  <div class="ba-code-head"><header>✅ New array reference — Angular sees the change</header></div>
+                  <div class="code-body" style="font-size:.68rem;border-radius:0;">
+                    items.<span class="fn">update</span>(arr =&gt; [...arr, <span class="st">'new'</span>]);
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ 10 RXJS ════ -->
+      <section data-sid="rxjs" class="section sec-panel">
+        <p class="eyebrow">10 · Signals vs RxJS</p>
+        <h2 class="sec-title">Which One Do <span>I Use?</span></h2>
+        <p class="sec-lead">
+          Signals and RxJS are not enemies — they solve different problems.
+          The confusion is that both deal with "values that change over time."
+          <strong>The difference is in how they change and what you want to do with them.</strong>
+        </p>
+
+        <div class="mental-section">
+          <header class="route-section-title">The Simple Rule</header>
+          <div class="g2 mb-md">
+            <div class="sticker sticker-left-green">
+              <div class="sticker-emoji">⚡</div>
+              <header class="sticker-title">Use Signals for...</header>
+              <div class="explain-rows">
+                <div class="explain-row"><span class="explain-num explain-num-green">→</span><span><strong class="c-ink">UI state</strong> — the selected tab, a counter, form values, loading state</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-green">→</span><span><strong class="c-ink">Derived state</strong> — total price, filtered list, formatted name</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-green">→</span><span><strong class="c-ink">Shared app state</strong> — replacing a simple <code>BehaviorSubject</code> in a service</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-green">→</span><span><strong class="c-ink">Component inputs</strong> — <code>@Input()</code> is becoming a signal (<code>input()</code>)</span></div>
+              </div>
+            </div>
+            <div class="sticker sticker-left-blue">
+              <div class="sticker-emoji">🌊</div>
+              <header class="sticker-title">Use RxJS for...</header>
+              <div class="explain-rows">
+                <div class="explain-row"><span class="explain-num explain-num-blue">→</span><span><strong class="c-ink">HTTP calls</strong> — <code>HttpClient</code> returns Observables; keep using them</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-blue">→</span><span><strong class="c-ink">Event streams</strong> — user typing, WebSocket messages, scroll events</span></div>
+                <div class="explain-row"><span class="explain-num explain-num-blue">→</span><span><strong class="c-ink">Complex async sequences</strong> — <code>switchMap</code>, <code>debounceTime</code>, <code>combineLatest</code></span></div>
+                <div class="explain-row"><span class="explain-num explain-num-blue">→</span><span><strong class="c-ink">Multicasting and buffering</strong> — <code>shareReplay</code>, <code>buffer</code></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="subsec-label">Bridging the Two Worlds</header>
+          <p class="card-body" style="margin-bottom:1rem;">Angular provides two functions to convert between Signals and Observables. <strong>You can freely mix both in the same app.</strong></p>
+          <div class="code-wrap mb-md">
+            <div class="code-bar"><div class="code-dots"><div class="code-dot" style="background:#ff5f57;"></div><div class="code-dot" style="background:#febc2e;"></div><div class="code-dot" style="background:#28c840;"></div></div><span class="code-filename">component.ts</span></div>
+            <div class="code-body">
+              <span class="ky">import</span> &#123; toSignal, toObservable &#125; <span class="ky">from</span> <span class="st">'@angular/core/rxjs-interop'</span>;<br/><br/>
+              <span style="color:var(--ink-light);font-style:italic;">// Observable → Signal (use in template without async pipe)</span><br/>
+              <span class="ky">const</span> data$ = <span class="ky">this</span>.http.<span class="fn">get</span>&lt;User[]&gt;(<span class="st">'/api/users'</span>);<br/>
+              <span class="ky">const</span> users = <span class="fn">toSignal</span>(data$, &#123; <span class="hi">initialValue</span>: [] &#125;);<br/>
+              <span style="color:var(--ink-light);font-style:italic;">// template: &#123;&#123; users() &#125;&#125; — no async pipe needed</span><br/><br/>
+              <span style="color:var(--ink-light);font-style:italic;">// Signal → Observable (use RxJS operators on a signal's values)</span><br/>
+              <span class="ky">const</span> search = <span class="fn">signal</span>(<span class="st">''</span>);<br/>
+              <span class="ky">const</span> search$ = <span class="fn">toObservable</span>(search).<span class="fn">pipe</span>(<br/>
+              &nbsp;&nbsp;<span class="fn">debounceTime</span>(<span class="vl">300</span>),<br/>
+              &nbsp;&nbsp;<span class="fn">switchMap</span>(q =&gt; <span class="ky">this</span>.http.<span class="fn">get</span>(<span class="st">`/api/search?q=$&#123;q&#125;`</span>))<br/>
+              );
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-green">
+          <header class="callout-title callout-title-green">🎯 The Bottom Line</header>
+          <p>If it's <strong>state that your template shows</strong> → Signal. If it's <strong>a stream of events or async data from outside</strong> → RxJS. When you need both, use <code>toSignal()</code> to bring an Observable into the signal world.</p>
+        </div>
+      </section>
+
+    </div><!-- /content-pane -->
+  </div><!-- /app-shell -->
+
+  <!-- ════ FINAL BANNER ════ -->
+  <div class="final-banner">
+    <h2>The Core Rule</h2>
+    <p>
+      <strong>A signal is a value with a built-in announcement system.</strong><br/>
+      Read it with <code>signal()</code>. Change it with <code>.set()</code>. Derive from it with <code>computed()</code>. React to it with <code>effect()</code>. Everything else follows.
+    </p>
+  </div>
+
+</div><!-- /pt-14 -->
+</main>
+
+<style>
+  /* ── Duolingo Design Tokens ── */
+  :root {
+    --green:        #58cc02;
+    --green-dark:   #46a302;
+    --green-light:  #d7ffb8;
+    --green-pale:   #f0fde4;
+    --blue:         #1cb0f6;
+    --blue-light:   #ccedfd;
+    --blue-pale:    #e8f7fe;
+    --ink:          #4b4b4b;
+    --ink-muted:    #777777;
+    --ink-light:    #afafaf;
+    --surface:      #ffffff;
+    --border:       #e5e5e5;
+    --red:          #ff4b4b;
+    --red-light:    #ffd7d7;
+    --red-pale:     #fff0f0;
+    --orange:       #ff9600;
+    --orange-pale:  #fff3de;
+    --yellow:       #ffc800;
+    --yellow-pale:  #fffbe6;
+    --purple:       #ce82ff;
+    --purple-pale:  #f7eeff;
+    --font-head:    'Nunito', system-ui, sans-serif;
+    --font-body:    'Nunito', system-ui, sans-serif;
+    --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+    --radius:       12px;
+    --border-w:     2px;
+    --text-caption: .78rem;
+    --text-body:    .9rem;
+    --fw-medium:    500;
+    --fw-bold:      700;
+    --ls-base:      0.025em;
+    --lh-body:      1.72;
+    --lh-caption:   1.5;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--surface);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout ── */
+  .pt-14 { padding-top: 60px; }
+  main { padding-top: 1.5rem; }
+
+  .app-shell {
+    display: grid;
+    grid-template-columns: 256px 1fr;
+    align-items: start;
+    max-width: 1360px;
+    margin: 0 auto;
+  }
+
+  /* ── Hero ── */
+  .hero-wrap {
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .hero {
+    text-align: center;
+    padding: 2.5rem 1.5rem 2rem;
+    max-width: 1360px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .28rem .75rem;
+    border-radius: var(--radius);
+    border: var(--border-w) solid var(--green);
+    background: var(--green-pale);
+    font-size: var(--text-caption);
+    font-weight: var(--fw-bold);
+    color: var(--green-dark);
+    letter-spacing: var(--ls-base);
+    margin-bottom: .9rem;
+  }
+  .pill-dot { width: .45rem; height: .45rem; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .hero h1 {
+    font-family: var(--font-head);
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: -.02em;
+    line-height: 1.15;
+    margin-bottom: .75rem;
+  }
+  .hero h1 span { color: var(--green); }
+  .hero-sub {
+    font-size: .92rem;
+    color: var(--ink);
+    max-width: 55ch;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* ── Sidebar ── */
+  .tl-sidebar {
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+    border-right: var(--border-w) solid var(--border);
+    background: var(--surface);
+    padding: 2rem 1rem 4rem 1.5rem;
+    scrollbar-width: thin;
+  }
+  @media (max-width: 900px) { .tl-sidebar { display: none; } }
+  .tl-group-label {
+    font-size: .6rem;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    padding: .55rem .4rem .3rem;
+    margin-top: .4rem;
+  }
+  .tl-list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    padding-bottom: .5rem;
+  }
+  .tl-list::before {
+    content: '';
+    position: absolute;
+    left: calc(1rem + .4rem + .65rem - 1px);
+    top: 0; bottom: 0;
+    width: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+  .tl-item {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    width: 100%;
+    padding: .38rem .4rem;
+    border-radius: var(--radius);
+    border: var(--border-w) solid transparent;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    transition: background .14s, border-color .14s;
+  }
+  .tl-item:hover {
+    background: var(--green-pale);
+    border-color: var(--green);
+  }
+  .tl-item.active {
+    background: var(--green-pale);
+    border-color: var(--green);
+  }
+  .tl-badge {
+    flex-shrink: 0;
+    width: 1.3rem;
+    height: 1.3rem;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .52rem;
+    font-weight: 900;
+    color: var(--ink);
+    transition: background .14s, color .14s, border-color .14s;
+  }
+  .tl-item.active .tl-badge,
+  .tl-item:hover  .tl-badge {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+  .tl-meta { display: flex; flex-direction: column; gap: .05rem; min-width: 0; }
+  .tl-step-num   { font-size: .55rem; font-weight: 700; color: var(--ink-light); letter-spacing: .08em; text-transform: uppercase; }
+  .tl-step-label { font-size: .72rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: var(--ls-base); }
+  .tl-item.active .tl-step-label,
+  .tl-item:hover  .tl-step-label { color: var(--green-dark); }
+
+  /* ── Content Pane ── */
+  .content-pane { min-height: 80vh; padding: 5rem 2rem 4rem 2rem; }
+
+  /* ── Section ── */
+  .section { display: none; }
+  .section.active { display: block; }
+  .sec-panel { animation: fadeIn .18s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .eyebrow {
+    font-size: var(--text-caption);
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--green-dark);
+    margin-bottom: .4rem;
+  }
+  .sec-title {
+    font-family: var(--font-head);
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: -.015em;
+    line-height: 1.2;
+    margin-bottom: .65rem;
+  }
+  .sec-title span { color: var(--green); }
+  .sec-lead {
+    font-size: 1rem;
+    color: var(--ink);
+    max-width: 68ch;
+    line-height: 1.75;
+    margin-bottom: 1.5rem;
+    letter-spacing: var(--ls-base);
+  }
+
+  /* ── Utility text classes ── */
+  .card-body  { font-size: var(--text-body); color: var(--ink); line-height: var(--lh-body); letter-spacing: var(--ls-base); font-weight: var(--fw-medium); }
+  .card-title { font-size: var(--text-body); font-weight: var(--fw-bold); color: var(--ink); letter-spacing: var(--ls-base); margin-bottom: .25rem; }
+  .c-ink { color: var(--ink); }
+
+  .subsec-label {
+    font-size: var(--text-caption);
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: .75rem;
+  }
+  .route-section-title {
+    font-size: var(--text-body);
+    font-weight: 900;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: .75rem;
+  }
+  .mental-section { margin-bottom: 1.75rem; }
+  .mb-md { margin-bottom: 1rem; }
+  .mb-lg { margin-bottom: 1.5rem; }
+  .mt-sm { margin-top: .5rem; }
+
+  /* ── Grid layouts ── */
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .9rem; }
+
+  /* ── Stickers ── */
+  .sticker {
+    border: var(--border-w) solid var(--border);
+    border-radius: var(--radius);
+    padding: .9rem;
+    background: var(--surface);
+  }
+  .sticker-title { font-size: var(--text-body); font-weight: var(--fw-bold); color: var(--ink); letter-spacing: var(--ls-base); margin-bottom: .4rem; }
+  .sticker-emoji { font-size: 1.5rem; margin-bottom: .35rem; line-height: 1; }
+
+  .sticker-red    { border-color: var(--red);    background: var(--red-pale);    }
+  .sticker-green  { border-color: var(--green);  background: var(--green-pale);  }
+  .sticker-blue   { border-color: var(--blue);   background: var(--blue-pale);   }
+  .sticker-orange { border-color: var(--orange); background: var(--orange-pale); }
+  .sticker-top-green  { border-top: 4px solid var(--green);  border-radius: var(--radius); padding: .9rem; background: var(--surface); }
+  .sticker-top-blue   { border-top: 4px solid var(--blue);   border-radius: var(--radius); padding: .9rem; background: var(--surface); }
+  .sticker-top-orange { border-top: 4px solid var(--orange); border-radius: var(--radius); padding: .9rem; background: var(--surface); }
+  .sticker-left-green  { border-left: 4px solid var(--green);  border-radius: var(--radius); padding: .9rem; background: var(--surface); border-top: var(--border-w) solid var(--border); border-right: var(--border-w) solid var(--border); border-bottom: var(--border-w) solid var(--border); }
+  .sticker-left-blue   { border-left: 4px solid var(--blue);   border-radius: var(--radius); padding: .9rem; background: var(--surface); border-top: var(--border-w) solid var(--border); border-right: var(--border-w) solid var(--border); border-bottom: var(--border-w) solid var(--border); }
+  .sticker-left-red    { border-left: 4px solid var(--red);    border-radius: var(--radius); padding: .9rem; background: var(--surface); border-top: var(--border-w) solid var(--border); border-right: var(--border-w) solid var(--border); border-bottom: var(--border-w) solid var(--border); }
+  .sticker-left-orange { border-left: 4px solid var(--orange); border-radius: var(--radius); padding: .9rem; background: var(--surface); border-top: var(--border-w) solid var(--border); border-right: var(--border-w) solid var(--border); border-bottom: var(--border-w) solid var(--border); }
+
+  /* ── Callouts ── */
+  .callout { border: var(--border-w) solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin-bottom: 1rem; }
+  .callout p { font-size: var(--text-body); color: var(--ink); line-height: var(--lh-body); }
+  .callout-title { font-size: var(--text-body); font-weight: var(--fw-bold); margin-bottom: .4rem; }
+  .callout-green  { background: var(--green-pale);  border-color: var(--green);  }
+  .callout-blue   { background: var(--blue-pale);   border-color: var(--blue);   }
+  .callout-yellow { background: var(--yellow-pale); border-color: var(--yellow); }
+  .callout-red-left { border-left: 4px solid var(--red); background: var(--red-pale); border-radius: var(--radius); padding: .9rem 1rem; margin-bottom: 1rem; }
+  .callout-title-green  { color: var(--green-dark); }
+  .callout-title-blue   { color: #0369a1; }
+  .callout-title-yellow { color: #92400e; }
+  .callout-title-red    { color: var(--red); }
+
+  /* ── Tags ── */
+  .tag-row { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .65rem; }
+  .chip {
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .05em;
+    padding: .15rem .5rem;
+    border-radius: var(--radius);
+    border: 1.5px solid transparent;
+  }
+  .chip-green { background: var(--green-pale); border-color: var(--green); color: var(--green-dark); }
+  .chip-red   { background: var(--red-pale);   border-color: var(--red);   color: var(--red);        }
+
+  /* ── Explain rows ── */
+  .explain-rows { display: flex; flex-direction: column; gap: .5rem; margin-top: .35rem; }
+  .explain-row  { display: flex; align-items: flex-start; gap: .6rem; font-size: var(--text-body); color: var(--ink); line-height: var(--lh-body); }
+  .explain-num  { flex-shrink: 0; width: 1.25rem; height: 1.25rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .58rem; font-weight: 900; }
+  .explain-num-green  { background: var(--green);  color: white; }
+  .explain-num-blue   { background: var(--blue);   color: white; }
+  .explain-num-orange { background: var(--orange); color: white; }
+
+  /* ── Sol steps ── */
+  .sol-steps { display: flex; flex-direction: column; gap: .85rem; margin-bottom: 1rem; }
+  .sol-step { display: flex; align-items: flex-start; gap: .85rem; }
+  .sol-step-err { background: var(--red-pale); border: var(--border-w) solid var(--red-light); border-radius: var(--radius); padding: .75rem; }
+  .sol-num {
+    flex-shrink: 0;
+    width: 1.7rem; height: 1.7rem;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .72rem; font-weight: 900;
+    color: white;
+  }
+  .sol-num-green  { background: var(--green); }
+  .sol-num-blue   { background: var(--blue); }
+  .sol-num-orange { background: var(--orange); }
+  .sol-num-red    { background: var(--red); }
+  .sol-num-err    { background: var(--red); }
+
+  /* ── Code blocks ── */
+  .code-wrap { border: var(--border-w) solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: .5rem; }
+  .code-bar {
+    display: flex; align-items: center; gap: .5rem;
+    padding: .4rem .75rem;
+    background: #f7f7f7;
+    border-bottom: 1px solid var(--border);
+  }
+  .code-dots { display: flex; gap: .3rem; }
+  .code-dot  { width: .65rem; height: .65rem; border-radius: 50%; }
+  .code-filename { font-size: .62rem; font-weight: 700; color: var(--ink); letter-spacing: .04em; margin-left: .2rem; }
+  .code-body {
+    padding: .85rem 1rem;
+    background: #fafafa;
+    font-family: var(--font-mono);
+    font-size: .75rem;
+    line-height: 1.8;
+    color: var(--ink);
+    overflow-x: auto;
+  }
+  .code-body-sm { font-size: .68rem; padding: .65rem .85rem; }
+
+  /* code tokens */
+  .ky  { color: #9333ea; font-weight: 700; }
+  .fn  { color: #0369a1; }
+  .st  { color: #16a34a; }
+  .hi  { color: #0891b2; }
+  .vl  { color: #d97706; }
+  .ok  { color: var(--green-dark); font-weight: 700; }
+  .rd  { color: var(--red); font-weight: 700; }
+
+  /* ── Before/After panels ── */
+  .ba-code-panel { border: var(--border-w) solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .ba-code-head  { padding: .45rem .85rem; font-size: .65rem; font-weight: 800; letter-spacing: .03em; }
+  .ba-code-bad  .ba-code-head { background: var(--red-pale);   color: var(--red);        border-bottom: 1px solid var(--red-light); }
+  .ba-code-good .ba-code-head { background: var(--green-pale); color: var(--green-dark); border-bottom: 1px solid #bbf7d0; }
+
+  /* ── Final Banner ── */
+  .final-banner {
+    background: var(--green);
+    padding: 1.25rem 2rem;
+    text-align: center;
+  }
+  .final-banner h2 {
+    font-family: var(--font-head);
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: .35rem;
+    letter-spacing: -.01em;
+  }
+  .final-banner p {
+    font-size: 1rem;
+    color: rgba(255,255,255,.88);
+    max-width: 60ch;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+  .final-banner code {
+    background: rgba(255,255,255,.2);
+    padding: .1rem .35rem;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: .88rem;
+  }
+
+  /* ══ Section 01 Graphic — Zoney vs Sparky ══ */
+  .s1-graphic {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    margin: 1.75rem 0 2rem;
+  }
+  .s1-panel-graphic {
+    border-radius: 16px;
+    border: 2.5px solid var(--border);
+    padding: 1.5rem 1.25rem 1.25rem;
+    text-align: center;
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+  .s1-panel-old { border-color: #fecaca; background: #fff8f8; }
+  .s1-panel-new { border-color: #bbf7d0; background: #f6fef0; }
+
+  .s1-panel-tag {
+    display: inline-block;
+    font-size: .62rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: .22rem .65rem;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+  }
+  .s1-tag-red   { background: var(--red-pale);   color: var(--red);        border: 1.5px solid var(--red-light); }
+  .s1-tag-green { background: var(--green-pale);  color: var(--green-dark); border: 1.5px solid var(--green); }
+
+  .s1-mascot { width: 120px; height: auto; display: block; margin: 0 auto .5rem; }
+
+  .s1-mascot-name {
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: .15rem;
+    letter-spacing: -.01em;
+  }
+  .s1-mascot-caption {
+    font-size: .72rem;
+    color: var(--ink);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  .s1-comps-row {
+    display: flex;
+    gap: .4rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: .75rem;
+  }
+  .s1-comp-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .2rem;
+    width: 2.8rem;
+    padding: .4rem .2rem;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    font-size: .65rem;
+    font-weight: 800;
+    color: var(--ink);
+    background: var(--surface);
+    letter-spacing: .04em;
+  }
+  .s1-comp-icon { font-size: .85rem; line-height: 1; }
+
+  /* Scan animation — orange flash sweeping across */
+  @keyframes comp-scan {
+    0%, 18%  { background: var(--surface);      border-color: var(--border);       color: var(--ink); transform: scale(1);    }
+    20%, 35% { background: var(--orange-pale);  border-color: var(--orange);       color: var(--orange);    transform: scale(1.12); }
+    55%, 100%{ background: var(--surface);      border-color: var(--border);       color: var(--ink); transform: scale(1);    }
+  }
+  .s1-comp-scan { animation: comp-scan 2.8s ease-in-out infinite; }
+  .s1-comp-changed {
+    border-color: var(--red) !important;
+    color: var(--red) !important;
+  }
+  @keyframes comp-scan-changed {
+    0%, 18%  { background: var(--red-pale);  border-color: var(--red);  color: var(--red);  transform: scale(1);    }
+    20%, 35% { background: #ffa0a0;          border-color: var(--red);  color: white;        transform: scale(1.15); }
+    55%, 100%{ background: var(--red-pale);  border-color: var(--red);  color: var(--red);  transform: scale(1);    }
+  }
+  .s1-comp-changed { animation: comp-scan-changed 2.8s ease-in-out infinite !important; }
+
+  /* Idle components (signal way) — greyed out */
+  .s1-comp-idle {
+    opacity: .35;
+    filter: grayscale(1);
+  }
+
+  /* Target component — pulse green */
+  @keyframes comp-target {
+    0%, 100% { background: var(--green-pale); border-color: var(--green);      transform: scale(1);    box-shadow: none; }
+    50%      { background: var(--green-light); border-color: var(--green-dark); transform: scale(1.13); box-shadow: 0 0 0 5px rgba(88,204,2,.22); }
+  }
+  .s1-comp-target {
+    animation: comp-target 1.6s ease-in-out infinite;
+    color: var(--green-dark);
+    border-color: var(--green);
+    background: var(--green-pale);
+  }
+
+  /* Character animations */
+  @keyframes zoney-run {
+    0%, 100% { transform: rotate(-4deg) translateY(0);  }
+    25%      { transform: rotate(4deg)  translateY(-5px); }
+    50%      { transform: rotate(-4deg) translateY(0);  }
+    75%      { transform: rotate(4deg)  translateY(-5px); }
+  }
+  .zoney-anim { animation: zoney-run .7s ease-in-out infinite; }
+
+  @keyframes sparky-float {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-10px) rotate(2deg); }
+  }
+  .sparky-anim { animation: sparky-float 2.2s ease-in-out infinite; }
+
+  /* VS pill */
+  .s1-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    background: var(--ink);
+    color: white;
+    font-size: .65rem;
+    font-weight: 900;
+    letter-spacing: .05em;
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  /* Verdict labels */
+  .s1-verdict {
+    font-size: .68rem;
+    font-weight: 700;
+    border-radius: var(--radius);
+    padding: .35rem .65rem;
+    line-height: 1.5;
+  }
+  .s1-verdict-bad  { background: var(--red-pale);   color: var(--red);        border: 1.5px solid var(--red-light); }
+  .s1-verdict-good { background: var(--green-pale);  color: var(--green-dark); border: 1.5px solid #bbf7d0; }
+
+  /* ══ Zone.js explanation card ══ */
+  .zonejs-card {
+    display: flex;
+    gap: 1rem;
+    background: #fef9ec;
+    border: 2px solid var(--yellow);
+    border-radius: 16px;
+    padding: 1.25rem;
+    align-items: flex-start;
+  }
+  .zonejs-icon { font-size: 2.2rem; flex-shrink: 0; line-height: 1; margin-top: .15rem; }
+  .zonejs-title { font-size: .9rem; font-weight: 900; color: var(--ink); margin-bottom: .45rem; letter-spacing: -.01em; }
+  .zonejs-flow {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-top: .85rem;
+    flex-wrap: wrap;
+  }
+  .zonejs-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .25rem;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: .5rem .65rem;
+    min-width: 80px;
+    text-align: center;
+  }
+  .zonejs-step-icon { font-size: 1.15rem; line-height: 1; }
+  .zonejs-step-label { font-size: .6rem; font-weight: 700; color: var(--ink); line-height: 1.4; }
+  .zonejs-step-panic { background: var(--red-pale); border-color: var(--red); }
+  .zonejs-step-panic .zonejs-step-label { color: var(--red); }
+  .zonejs-arrow { font-size: 1rem; color: var(--ink-light); font-weight: 700; flex-shrink: 0; }
+
+  /* ══ Animated Component Tree ══ */
+  .tree-demo {
+    background: #f8f9fa;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .tree-trigger {
+    background: white;
+    border-bottom: 2px solid var(--border);
+    padding: 1rem 1.5rem .75rem;
+    text-align: center;
+  }
+  .tree-trigger-btn {
+    display: inline-block;
+    background: var(--blue-pale);
+    border: 2px solid var(--blue);
+    border-radius: var(--radius);
+    padding: .45rem 1rem;
+    font-size: .78rem;
+    font-weight: 800;
+    color: #0369a1;
+    letter-spacing: .02em;
+    animation: btn-pulse 2s ease-in-out infinite;
+  }
+  @keyframes btn-pulse {
+    0%,100% { transform: scale(1); box-shadow: none; }
+    50% { transform: scale(1.04); box-shadow: 0 0 0 4px rgba(28,176,246,.2); }
+  }
+  .tree-trigger-arrow {
+    font-size: 1.2rem;
+    color: var(--ink-light);
+    margin: .3rem 0;
+    animation: arrow-bounce .8s ease-in-out infinite;
+  }
+  @keyframes arrow-bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(3px); }
+  }
+  .tree-zone-intercept {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: var(--orange-pale);
+    border: 1.5px solid var(--orange);
+    border-radius: var(--radius);
+    padding: .35rem .85rem;
+    font-size: .74rem;
+    font-weight: 700;
+    color: #92400e;
+  }
+  .tree-zone-dot {
+    width: .55rem;
+    height: .55rem;
+    border-radius: 50%;
+    background: var(--orange);
+    animation: zone-dot-blink .6s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes zone-dot-blink {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .4; transform: scale(.7); }
+  }
+
+  /* Tree layout */
+  .tree-visual {
+    padding: 1.5rem 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .tree-level {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    justify-content: center;
+  }
+  .tree-level-offset {
+    /* kept for responsive override reference */
+  }
+  .tree-node-wrap { padding: .35rem; }
+  .tree-node-gap  { width: 5rem; }
+
+  .tree-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .25rem;
+    width: 5.5rem;
+    padding: .6rem .4rem .5rem;
+    border-radius: 14px;
+    border: 2.5px solid var(--border);
+    background: white;
+    position: relative;
+    transition: transform .15s;
+  }
+  .tnode-emoji { font-size: 1.3rem; line-height: 1; }
+  .tnode-label { font-size: .68rem; font-weight: 800; color: var(--ink); }
+  .tnode-status {
+    font-size: .55rem;
+    font-weight: 700;
+    color: transparent;
+    background: var(--border);
+    border-radius: 4px;
+    padding: .1rem .3rem;
+  }
+  .tnode-changed-badge {
+    font-size: .52rem;
+    font-weight: 900;
+    color: white;
+    background: var(--red);
+    border-radius: 4px;
+    padding: .12rem .35rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  /* Scan animations — each node lights up orange in sequence */
+  @keyframes node-scan {
+    0%, 8%   { background: white;              border-color: var(--border); transform: scale(1); }
+    12%, 22% { background: var(--orange-pale); border-color: var(--orange); transform: scale(1.1); }
+    12%, 22% { box-shadow: 0 0 0 4px rgba(255,150,0,.18); }
+    35%,100% { background: white;              border-color: var(--border); transform: scale(1); box-shadow: none; }
+  }
+  @keyframes node-scan-status {
+    0%, 8%   { color: transparent; background: var(--border); }
+    12%, 22% { color: var(--orange); background: var(--orange-pale); }
+    35%,100% { color: transparent; background: var(--border); }
+  }
+  @keyframes node-changed {
+    0%, 8%   { background: var(--red-pale);  border-color: #fca5a5; transform: scale(1); }
+    12%, 22% { background: var(--red);       border-color: var(--red); transform: scale(1.14); box-shadow: 0 0 0 5px rgba(255,75,75,.22); }
+    35%,100% { background: var(--red-pale);  border-color: #fca5a5; transform: scale(1); box-shadow: none; }
+  }
+
+  /* Staggered delays: depth-first order, 0.6s apart, loop every 8s */
+  .tnode-1 { animation: node-scan    8s ease-in-out infinite 0s; }
+  .tnode-2 { animation: node-scan    8s ease-in-out infinite .6s; }
+  .tnode-3 { animation: node-scan    8s ease-in-out infinite 1.2s; }
+  .tnode-4 { animation: node-changed 8s ease-in-out infinite 1.8s; }
+  .tnode-5 { animation: node-scan    8s ease-in-out infinite 2.4s; }
+  .tnode-6 { animation: node-scan    8s ease-in-out infinite 3.0s; }
+  .tnode-7 { animation: node-scan    8s ease-in-out infinite 3.6s; }
+  .tnode-8 { animation: node-scan    8s ease-in-out infinite 4.2s; }
+  .tnode-9 { animation: node-scan    8s ease-in-out infinite 4.8s; }
+
+  /* Status text inside each node follows same timing */
+  .tnode-1 .tnode-status { animation: node-scan-status 8s ease-in-out infinite 0s; }
+  .tnode-2 .tnode-status { animation: node-scan-status 8s ease-in-out infinite .6s; }
+  .tnode-3 .tnode-status { animation: node-scan-status 8s ease-in-out infinite 1.2s; }
+  .tnode-5 .tnode-status { animation: node-scan-status 8s ease-in-out infinite 2.4s; }
+  .tnode-6 .tnode-status { animation: node-scan-status 8s ease-in-out infinite 3.0s; }
+  .tnode-7 .tnode-status { animation: node-scan-status 8s ease-in-out infinite 3.6s; }
+  .tnode-8 .tnode-status { animation: node-scan-status 8s ease-in-out infinite 4.2s; }
+  .tnode-9 .tnode-status { animation: node-scan-status 8s ease-in-out infinite 4.8s; }
+
+  /* Smaller nodes for level 4 children */
+  .tnode-sm { width: 4.5rem !important; }
+  .tnode-sm .tnode-emoji { font-size: 1rem; }
+  .tnode-sm .tnode-label { font-size: .6rem; }
+
+  /* Tree column (parent + connector + children as one vertical unit) */
+  .tree-col { display: flex; flex-direction: column; align-items: center; }
+  .tree-sub-level { display: flex; align-items: flex-start; }
+  .tree-node-gap-sm { width: .75rem; }
+  .tree-conn-tight { /* removed — replaced by tbranch */ }
+
+  /* Connector lines between tree nodes */
+  .tree-connectors {
+    display: flex;
+    justify-content: center;
+    gap: 5rem;
+    height: 1.6rem;
+    position: relative;
+    width: 100%;
+  }
+  .tree-conn-left, .tree-conn-right {
+    width: 2px;
+    height: 100%;
+    background: var(--border);
+  }
+
+  /* ── Branching connector (inside tree-col, auto-aligns with sub-level) ── */
+  .tbranch {
+    position: relative;
+    width: 100%;
+    height: 1.8rem;
+    flex-shrink: 0;
+  }
+  /* Vertical stem from parent down to bar */
+  .tbranch::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 2px; height: 50%;
+    background: var(--border);
+  }
+  /* Horizontal bar */
+  .tbranch::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 24%; right: 24%;
+    height: 2px;
+    background: var(--border);
+  }
+  /* Left drop */
+  .tbranch-l {
+    position: absolute;
+    top: 50%; bottom: 0;
+    left: 24%;
+    transform: translateX(-50%);
+    width: 2px;
+    background: var(--border);
+  }
+  /* Right drop */
+  .tbranch-r {
+    position: absolute;
+    top: 50%; bottom: 0;
+    right: 24%;
+    transform: translateX(50%);
+    width: 2px;
+    background: var(--border);
+  }
+  /* AppRoot has unequal children (Navbar narrow, Dashboard-col wide) — tune line positions */
+  .tbranch-root::after { left: 9%; right: 34%; }
+  .tbranch-root .tbranch-l { left: 9%; }
+  .tbranch-root .tbranch-r { right: 34%; }
+
+  /* Result bar */
+  .tree-result-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-top: 2px solid var(--border);
+    background: white;
+    padding: .85rem 1.5rem;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  .tree-result-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .85rem;
+    border-radius: var(--radius);
+    flex-shrink: 0;
+  }
+  .tree-result-total   { background: #f1f5f9; }
+  .tree-result-changed-item { background: var(--red-pale); }
+  .tree-result-wasted-item  { background: #f8f9fa; }
+  .tree-result-num {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1;
+    font-family: var(--font-head);
+  }
+  .tree-result-num-red  { color: var(--red); }
+  .tree-result-num-grey { color: var(--ink-light); }
+  .tree-result-lbl { font-size: .65rem; font-weight: 700; color: var(--ink); line-height: 1.4; }
+  .tree-result-divider { width: 1.5px; height: 2.2rem; background: var(--border); flex-shrink: 0; margin: 0 .25rem; }
+  .tree-result-verdict {
+    margin-left: auto;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--red);
+    background: var(--red-pale);
+    border: 1.5px solid #fca5a5;
+    border-radius: var(--radius);
+    padding: .35rem .75rem;
+  }
+
+  /* ══ Zone.js card + tree responsive ══ */
+  @media (max-width: 600px) {
+    .zonejs-flow { flex-direction: column; align-items: flex-start; }
+    .tree-result-bar { flex-direction: column; align-items: flex-start; }
+    .tree-result-verdict { margin-left: 0; }
+    .tree-level-offset { margin-left: 3rem; }
+    .tree-node-gap { width: 2rem; }
+  }
+
+  /* ══ Template output explanation card ══ */
+  .tpl-explain-card {
+    background: #f8faff;
+    border: 2px solid #bfdbfe;
+    border-radius: 16px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1.1rem;
+  }
+  .tpl-explain-title {
+    font-size: .82rem;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: .85rem;
+  }
+  .tpl-explain-body { display: flex; flex-direction: column; gap: .75rem; }
+  .tpl-step {
+    display: flex;
+    gap: .75rem;
+    align-items: flex-start;
+  }
+  .tpl-step-num {
+    width: 1.4rem; height: 1.4rem;
+    border-radius: 50%;
+    background: var(--blue);
+    color: white;
+    font-size: .65rem;
+    font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: .1rem;
+  }
+  .tpl-step-text { font-size: .75rem; color: var(--ink); line-height: 1.6; font-weight: 600; }
+  .tpl-step-text strong { color: var(--ink); }
+  .tpl-code-block {
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: .55rem .85rem;
+    margin: .45rem 0 .45rem;
+    line-height: 1.7;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .tpl-compare {
+    margin-top: .55rem;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: .65rem .85rem;
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+  }
+  .tpl-compare-row { display: flex; align-items: flex-start; gap: .65rem; }
+  .tpl-compare-label { font-size: .6rem; font-weight: 800; color: var(--ink); min-width: 5rem; padding-top: .15rem; line-height: 1.4; }
+  .tpl-compare-code {
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    background: #f1f5f9;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: .15rem .45rem;
+    color: var(--ink);
+  }
+  .tpl-compare-code-red { background: var(--red-pale); border-color: #fca5a5; }
+  .tpl-compare-result {
+    font-size: .68rem;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: .25rem .6rem;
+  }
+  .tpl-compare-same    { background: var(--green-pale); color: var(--green-dark); }
+  .tpl-compare-changed { background: var(--red-pale);   color: var(--red); }
+  .tpl-explain-note {
+    font-size: .7rem;
+    color: var(--ink);
+    font-weight: 600;
+    line-height: 1.6;
+    border-left: 3px solid var(--blue);
+    padding-left: .65rem;
+  }
+
+  /* ══ Zone.js vs Signal message comparison ══ */
+  .msg-compare {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 1.25rem;
+  }
+  .msg-card {
+    border-radius: 16px;
+    border: 2.5px solid var(--border);
+    padding: 1.1rem;
+    background: var(--surface);
+  }
+  .msg-card-bad  { border-color: #fecaca; background: #fff8f8; }
+  .msg-card-good { border-color: #bbf7d0; background: #f6fef0; }
+  .msg-card-from {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .65rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: .65rem;
+  }
+  .msg-from-dot {
+    width: .55rem; height: .55rem;
+    border-radius: 50%; flex-shrink: 0;
+  }
+  .msg-from-dot-orange { background: var(--orange); }
+  .msg-from-dot-green  { background: var(--green); }
+  .msg-bubble {
+    border-radius: 12px 12px 12px 2px;
+    padding: .65rem .85rem;
+    margin-bottom: .75rem;
+  }
+  .msg-bubble-orange { background: var(--orange-pale); border: 1.5px solid #fed7aa; }
+  .msg-bubble-green  { background: var(--green-pale);  border: 1.5px solid #bbf7d0; }
+  .msg-bubble-text { font-size: .78rem; font-weight: 700; color: var(--ink); line-height: 1.5; margin: 0; }
+  .msg-missing {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    margin-bottom: .75rem;
+    font-size: .72rem;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .msg-x     { color: var(--red);        margin-right: .35rem; font-weight: 900; }
+  .msg-check { color: var(--green-dark); margin-right: .35rem; font-weight: 900; }
+  .msg-result {
+    font-size: .7rem;
+    font-weight: 800;
+    border-radius: var(--radius);
+    padding: .35rem .65rem;
+    text-align: center;
+  }
+  .msg-result-bad  { background: var(--red-pale);  color: var(--red);        border: 1.5px solid #fca5a5; }
+  .msg-result-good { background: var(--green-pale); color: var(--green-dark); border: 1.5px solid #86efac; }
+  .msg-vs {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; color: var(--ink-light); font-weight: 900;
+    align-self: center; padding-top: 2rem;
+  }
+
+  /* ══ No early stop walk ══ */
+  .no-stop-card {
+    background: #fffbeb;
+    border: 2px solid var(--yellow);
+    border-radius: 16px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1.1rem;
+  }
+  .no-stop-title {
+    font-size: .82rem;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: .6rem;
+    letter-spacing: -.01em;
+  }
+  .no-stop-body { margin-bottom: .85rem; }
+  .no-stop-walk {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    overflow: hidden;
+  }
+  .nsw-step {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--ink);
+    padding: .3rem .65rem;
+    border-radius: var(--radius);
+    background: white;
+    border: 1.5px solid var(--border);
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .nsw-same    { }
+  .nsw-changed { background: var(--red-pale); border-color: #fca5a5; color: var(--ink); }
+  .nsw-arrow   { font-size: .75rem; color: var(--ink-light); padding-left: 1.5rem; line-height: 1.2; }
+  .nsw-children {
+    border-left: 2.5px solid var(--border);
+    padding-left: .85rem;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    padding-top: .3rem;
+    padding-bottom: .3rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .nsw-tag {
+    font-size: .6rem;
+    font-weight: 800;
+    border-radius: 6px;
+    padding: .1rem .4rem;
+    margin-left: auto;
+  }
+  .nsw-tag-grey { background: #f1f5f9; color: var(--ink); }
+  .nsw-tag-red  { background: var(--red); color: white; }
+  .nsw-keep { font-size: .62rem; font-weight: 800; color: var(--red); margin-left: .25rem; animation: nsw-blink 1.2s ease-in-out infinite; }
+  @keyframes nsw-blink { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+  /* ══ Silent assignment card ══ */
+  .silent-card {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 1.1rem 1.25rem;
+  }
+  .silent-title {
+    font-size: .82rem;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: .85rem;
+    letter-spacing: -.01em;
+  }
+  .silent-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .9rem;
+  }
+  .silent-side {
+    border-radius: 12px;
+    padding: .85rem;
+    border: 2px solid var(--border);
+  }
+  .silent-side-bad  { background: var(--red-pale);  border-color: #fca5a5; }
+  .silent-side-good { background: var(--green-pale); border-color: #86efac; }
+  .silent-side-label {
+    font-size: .6rem;
+    font-weight: 900;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: .45rem;
+  }
+  .silent-code {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: .35rem .65rem;
+    margin-bottom: .55rem;
+  }
+  .silent-code-green { border-color: #86efac; background: #f0fde4; color: var(--green-dark); }
+  .silent-effect {
+    display: flex;
+    gap: .45rem;
+    align-items: flex-start;
+    font-size: .7rem;
+    color: var(--ink);
+    line-height: 1.55;
+    font-weight: 600;
+  }
+  .silent-effect-icon { font-size: 1rem; flex-shrink: 0; }
+
+  /* ── Code Anatomy Panel ── */
+  .anatomy-panel { border-radius: var(--radius); border: var(--border-w) solid var(--border); overflow: hidden; }
+  .anatomy-bad  { border-color: var(--red); }
+  .anatomy-good { border-color: var(--green); }
+  .anatomy-head { padding: .6rem 1rem; font-size: .68rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+  .anatomy-head-red   { background: var(--red-pale);   color: var(--red);        }
+  .anatomy-head-green { background: var(--green-pale); color: var(--green-dark); }
+  .anatomy-panel .code-wrap { border-radius: 0; border-left: none; border-right: none; }
+  .anatomy-panel .code-body { border-radius: 0; }
+  .anatomy-panel .code-bar  { border-radius: 0; }
+  .anatomy-hl { border-radius: 3px; padding: 0 2px; }
+  .anatomy-hl-red   { background: #ffd7d7; color: #c53030; }
+  .anatomy-hl-green { background: var(--green-light); color: var(--green-dark); }
+  .anat-n { display: inline-flex; align-items: center; justify-content: center; width: 1rem; height: 1rem; border-radius: 50%; background: var(--border); font-size: .55rem; font-weight: 900; color: var(--ink); margin-left: .35rem; vertical-align: middle; }
+  .anatomy-notes { padding: .7rem 1rem; display: flex; flex-direction: column; gap: .4rem; }
+  .anatomy-bad  .anatomy-notes { background: #fff8f8; }
+  .anatomy-good .anatomy-notes { background: #f8fef2; }
+  .anatomy-note { display: flex; align-items: flex-start; gap: .45rem; font-size: .78rem; line-height: 1.5; color: var(--ink); }
+  .anat-badge { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 1.1rem; height: 1.1rem; border-radius: 50%; font-size: .58rem; font-weight: 900; margin-top: .1rem; }
+  .anat-badge-red   { background: var(--red-pale);   color: var(--red);        }
+  .anat-badge-green { background: var(--green-pale); color: var(--green-dark); }
+  .anat-substeps { display: flex; flex-direction: column; gap: .35rem; margin-top: .45rem; padding-left: .2rem; }
+  .anat-substep  { display: flex; align-items: flex-start; gap: .5rem; font-size: var(--text-caption); line-height: 1.55; }
+  .anat-sub-num  { flex-shrink: 0; font-weight: 800; color: var(--green-dark); min-width: 1.1rem; }
+  .anatomy-note-block { flex-direction: column; align-items: flex-start; gap: .3rem; }
+  .anat-note-head { display: flex; align-items: center; gap: .5rem; }
+
+  /* ── Signal trace steps ── */
+  .sig-trace { display: flex; flex-direction: column; gap: .5rem; }
+  .sig-trace-step { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem 1rem; border-radius: var(--radius); border: 1.5px solid transparent; }
+  .sig-step-blue  { background: #eff6ff; border-color: #bfdbfe; }
+  .sig-step-green { background: var(--green-pale); border-color: var(--green); }
+  .sig-trace-num { width: 1.6rem; height: 1.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 900; flex-shrink: 0; margin-top: .05rem; }
+  .sig-num-blue  { background: #bfdbfe; color: #1d4ed8; }
+  .sig-num-green { background: var(--green-light); color: var(--green-dark); }
+  .sig-trace-body strong { font-size: .88rem; color: var(--ink); display: block; margin-bottom: .2rem; font-weight: 700; }
+  .sig-trace-body p { font-size: var(--text-body); color: var(--ink); line-height: var(--lh-body); margin: 0; }
+
+  /* ── Signal tree (static, targeted) ── */
+  .sig-tree-wrap { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; background: #fafafa; }
+  .sig-tree-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; flex-wrap: wrap; gap: .5rem; }
+  .sig-tree-title { font-size: .72rem; font-weight: 700; color: var(--ink); letter-spacing: .05em; text-transform: uppercase; }
+  .sig-tree-badge { font-size: .72rem; font-weight: 800; color: var(--green-dark); background: var(--green-pale); border: 1px solid var(--green); padding: .15rem .65rem; border-radius: 20px; }
+  .sig-walk { display: flex; flex-direction: column; gap: .3rem; }
+  .sig-node { display: flex; align-items: center; gap: .5rem; font-size: var(--text-body); font-weight: 700; padding: .3rem .5rem; border-radius: 6px; }
+  .sig-node-idle   { color: var(--ink-light); }
+  .sig-node-target { color: var(--ink); background: var(--green-pale); border: 1.5px solid var(--green); }
+  .sig-tag { font-size: .68rem; font-weight: 600; padding: .12rem .45rem; border-radius: 20px; white-space: nowrap; }
+  .sig-tag-grey  { background: #f3f4f6; color: var(--ink); }
+  .sig-tag-green { background: var(--green-pale); color: var(--green-dark); border: 1px solid var(--green); }
+  .sig-tag-blue  { background: var(--blue-pale);  color: #0369a1;           border: 1px solid var(--blue); }
+
+  /* sig-node-input: @Input receiver (blue, not green watcher) */
+  .sig-node-input {
+    color: var(--ink);
+    background: var(--blue-pale);
+    border: 1.5px solid var(--blue);
+    border-radius: var(--radius-sm);
+    padding: .28rem .65rem;
+    font-size: var(--text-body);
+    font-weight: var(--fw-semi);
+  }
+
+  /* sig-step-red / sig-num-red: "never visited" step */
+  .sig-trace-step.sig-step-red { background: var(--red-pale); border-left-color: var(--red); }
+  .sig-trace-num.sig-num-red   { background: var(--red); color: #fff; }
+
+  /* ── Notify-list flow (nl-flow) ── */
+  .nl-flow { display: flex; flex-direction: column; gap: 0; }
+  .nl-arrow { text-align: center; font-size: 1.1rem; color: var(--ink); line-height: 1; padding: .2rem 0; }
+  .nl-state {
+    display: flex;
+    gap: .9rem;
+    align-items: flex-start;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: .85rem 1rem;
+    background: #fafafa;
+  }
+  .nl-state-grey   { background: #f9fafb; border-color: #d1d5db; }
+  .nl-state-orange { background: #fff7ed; border-color: var(--orange,#f97316); }
+  .nl-state-green  { background: var(--green-pale); border-color: var(--green); }
+  .nl-step-num {
+    flex-shrink: 0;
+    width: 1.6rem; height: 1.6rem;
+    border-radius: 50%;
+    background: var(--ink-muted);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nl-state-orange .nl-step-num { background: var(--orange,#f97316); }
+  .nl-state-green  .nl-step-num { background: var(--green-dark,#389e0d); }
+  .nl-step-body { display: flex; flex-direction: column; gap: .35rem; }
+  .nl-step-title { font-size: var(--text-body); font-weight: var(--fw-bold); color: var(--ink); }
+  .nl-list { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+  .nl-list-label { font-size: var(--text-caption); font-weight: var(--fw-semi); color: var(--ink); }
+  .nl-list-empty { font-size: var(--text-caption); font-style: italic; color: var(--ink); }
+  .nl-list-item  { font-size: var(--text-caption); font-weight: var(--fw-semi); padding: .1rem .45rem; border-radius: 20px; }
+  .nl-list-green { background: var(--green-pale); color: var(--green-dark); border: 1px solid var(--green); }
+  .nl-caption { font-size: var(--text-caption); color: var(--ink); line-height: 1.55; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .tl-sidebar { display: none; }
+    .content-pane { padding: 1rem; }
+    .g2, .g3 { grid-template-columns: 1fr; }
+    .s1-graphic { grid-template-columns: 1fr; }
+    .s1-vs { display: none; }
+  }
+</style>
+
+<script is:inline>
+  const items  = document.querySelectorAll('.tl-item');
+  const panels = document.querySelectorAll('.sec-panel');
+
+  function activate(sid) {
+    items.forEach(i  => i.classList.toggle('active',  i.dataset.target === sid));
+    panels.forEach(p => p.classList.toggle('active',  p.dataset.sid    === sid));
+    window.scrollTo({ top: document.querySelector('.app-shell').offsetTop - 72, behavior: 'smooth' });
+  }
+
+  items.forEach(item => item.addEventListener('click', () => activate(item.dataset.target)));
+</script>
+
+</body>
+</html>
