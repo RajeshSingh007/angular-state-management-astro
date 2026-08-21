@@ -38,12 +38,19 @@ import Navbar from '../components/Navbar.astro';
     <aside class="tl-sidebar" aria-label="Section navigation">
       <p class="tl-group-label">Foundation</p>
       <div class="tl-list">
+        <button class="tl-item active" data-target="fundamentals" type="button">
+          <span class="tl-badge">✦</span>
+          <span class="tl-meta">
+            <span class="tl-step-num">Start Here</span>
+            <span class="tl-step-label">The Fundamentals</span>
+          </span>
+        </button>
         {[
           { sid:'the-problem',    n:'01', label:'The Problem'       },
           { sid:'what-is-signal', n:'02', label:'What Is a Signal?' },
           { sid:'signal-vs-prop', n:'03', label:'Signal vs Property'},
         ].map(({ sid, n, label }) => (
-          <button class={`tl-item${sid === 'the-problem' ? ' active' : ''}`} data-target={sid} type="button">
+          <button class="tl-item" data-target={sid} type="button">
             <span class="tl-badge">{n}</span>
             <span class="tl-meta">
               <span class="tl-step-num">Section {n}</span>
@@ -90,8 +97,112 @@ import Navbar from '../components/Navbar.astro';
     <!-- ── Content Pane ── -->
     <div class="content-pane">
 
+      <!-- ════ THE FUNDAMENTALS ════ -->
+      <section data-sid="fundamentals" class="section sec-panel active">
+        <p class="eyebrow">The Fundamentals</p>
+        <h2 class="sec-title">Before Signals — <span>What Re-Render Actually Means</span></h2>
+        <p class="sec-lead">Every framework uses the word "re-render". Most developers have a blurry picture of what that actually means inside the browser. Get this right and everything else clicks into place.</p>
+
+        <div class="mental-section">
+          <header class="route-section-title">First Render vs Re-Render</header>
+
+          <div class="g2" style="margin-bottom:1.25rem;">
+            <div class="sticker-top-blue">
+              <p class="fund-label" style="color:var(--blue);">First Render — happens once</p>
+              <div class="fund-list">
+                <div class="fund-item">✦ Component class instances created in JS memory</div>
+                <div class="fund-item">✦ DOM nodes created — <code>&lt;div&gt;</code>, <code>&lt;h1&gt;</code>, <code>&lt;span&gt;</code></div>
+                <div class="fund-item">✦ Constructor runs, lifecycle hooks fire</div>
+                <div class="fund-item">✦ Binding expressions evaluated for the first time</div>
+                <div class="fund-item">✦ Initial values written to DOM node properties</div>
+              </div>
+            </div>
+            <div class="sticker-top-green">
+              <p class="fund-label" style="color:var(--green-dark);">Re-Render — data changed</p>
+              <div class="fund-list">
+                <div class="fund-item fund-no">✗ Instances are <strong>not</strong> destroyed or recreated</div>
+                <div class="fund-item fund-no">✗ DOM nodes are <strong>not</strong> deleted and rebuilt</div>
+                <div class="fund-item fund-no">✗ Constructor and lifecycle hooks do <strong>not</strong> run again</div>
+                <div class="fund-item fund-yes">✓ Binding expressions re-evaluated</div>
+                <div class="fund-item fund-yes">✓ DOM node properties updated — only where value changed</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-yellow">
+            <header class="callout-title callout-title-yellow">🔑 One-liner definition</header>
+            Re-render = <strong>re-evaluate binding expressions and write new values to existing DOM nodes.</strong> No destruction. No recreation. The instances and DOM nodes from the first render live for the entire component lifetime.
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="route-section-title">The DOM Is a Tree of JavaScript Objects</header>
+          <p class="sec-lead" style="margin-bottom:1rem;">When the browser parses HTML, it creates a JavaScript object for every element. Every <code>&lt;h1&gt;</code> on the page is a live JS object sitting in memory with properties like <code>textContent</code>, <code>style</code>, <code>className</code>. You can read and write them like any other JS object.</p>
+
+          <div class="g2" style="margin-bottom:1.25rem;">
+            <div class="code-wrap">
+              <div class="code-bar"><span class="code-filename">the DOM node is just a JS object</span></div>
+              <div class="code-body" style="font-size:.78rem;line-height:1.9;">
+                <span class="ky">const</span> h1 = document.<span class="fn">querySelector</span>(<span class="st">'h1'</span>);<br/>
+                <br/>
+                h1.textContent;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-light);font-style:italic;">// → "<strong>Score Zero</strong>"</span><br/>
+                <br/>
+                <span style="color:var(--ink-light);font-style:italic;">// plain JS property write</span><br/>
+                h1.textContent = <span class="st">'<strong>Score Five</strong>'</span>;<br/>
+                <span style="color:var(--ink-light);font-style:italic;">// UI updates — see below why</span>
+              </div>
+            </div>
+            <div class="fund-insights">
+              <div class="fund-insight">
+                <span class="fund-insight-icon">💡</span>
+                <span><code>h1.textContent = '<strong>Score Five</strong>'</code> is no different from <code>user.name = 'Alice'</code>. A plain property write on an existing JS object.</span>
+              </div>
+              <div class="fund-insight">
+                <span class="fund-insight-icon">💡</span>
+                <span>The <code>&lt;h1&gt;</code> DOM node already exists from the first render. You're changing one property value — not creating a new element.</span>
+              </div>
+              <div class="fund-insight">
+                <span class="fund-insight-icon">💡</span>
+                <span>Angular, React, Vue — all of them end up doing exactly this property write at the bottom of the stack.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mental-section">
+          <header class="route-section-title">JS Writes the DOM → Browser Detects It → Screen Updates</header>
+          <p class="sec-lead" style="margin-bottom:1rem;">Writing <code>element.textContent = 'new value'</code> does not instantly paint pixels. There are three distinct steps. Your code only does the first one.</p>
+
+          <div class="fund-pipeline">
+            <div class="fund-pipe-step" style="background:var(--blue-pale);border-color:var(--blue);">
+              <div class="fund-pipe-num" style="background:var(--blue);">1</div>
+              <div class="fund-pipe-title">Your code — JS writes to the DOM node</div>
+              <div class="fund-pipe-body"><code>h1.textContent = '<strong>Score Five</strong>'</code> — a synchronous property write. The JS object in memory updates instantly. <strong>No visual change yet.</strong></div>
+            </div>
+            <div class="fund-pipe-arrow">→</div>
+            <div class="fund-pipe-step" style="background:var(--orange-pale);border-color:var(--orange);">
+              <div class="fund-pipe-num" style="background:var(--orange);">2</div>
+              <div class="fund-pipe-title">Automatic — browser marks the node dirty <span style="font-weight:500;color:var(--ink-muted);font-size:.72rem;">(dirty = needs a visual refresh)</span></div>
+              <div class="fund-pipe-body">The browser's rendering engine detects the property changed and flags that node for repaint. <strong>Your code does not trigger this</strong> — the browser does it automatically.</div>
+            </div>
+            <div class="fund-pipe-arrow">→</div>
+            <div class="fund-pipe-step" style="background:var(--green-pale);border-color:var(--green);">
+              <div class="fund-pipe-num" style="background:var(--green);">3</div>
+              <div class="fund-pipe-title">Browser's job — repaints on the next frame</div>
+              <div class="fund-pipe-body">Once JS finishes, the browser runs: Layout → Paint → Composite. Only dirty nodes update. Happens in &lt;16ms at 60fps. <strong>Appears instant.</strong></div>
+            </div>
+          </div>
+
+          <div class="callout callout-yellow" style="margin-top:1.25rem;">
+            <header class="callout-title callout-title-yellow">🧠 Why it felt instant in DevTools</header>
+            When you open DevTools, click on an <code>&lt;h1&gt;</code> element in the Elements panel, then switch to the Console and type <code>document.querySelector('h1').textContent = 'David'</code> and hit Enter — JS executed → the DOM node's property updated in memory → call stack emptied → browser repainted in &lt;16ms. You saw "David" on screen almost before you let go of the key. <strong>This exact three-step pipeline runs every time a framework updates a binding.</strong>
+          </div>
+        </div>
+
+      </section>
+
       <!-- ════ 01 THE PROBLEM ════ -->
-      <section data-sid="the-problem" class="section sec-panel active">
+      <section data-sid="the-problem" class="section sec-panel">
         <p class="eyebrow">01 · The Problem</p>
         <h2 class="sec-title">Why Does Your UI <span>Lie to You</span>?</h2>
         <p class="sec-lead">
@@ -1706,6 +1817,27 @@ import Navbar from '../components/Navbar.astro';
   .callout-green  { background: var(--green-pale);  border-color: var(--green);  }
   .callout-blue   { background: var(--blue-pale);   border-color: var(--blue);   }
   .callout-yellow { background: var(--yellow-pale); border-color: var(--yellow); }
+
+  /* ── Fundamentals section ── */
+  .fund-label { font-size: .7rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-bottom: .65rem; }
+  .fund-list { display: flex; flex-direction: column; gap: .4rem; }
+  .fund-item { font-size: .77rem; color: var(--ink); line-height: 1.55; }
+  .fund-yes { color: var(--green-dark); font-weight: 700; }
+  .fund-no  { color: var(--red);        font-weight: 700; }
+  .fund-insights { display: flex; flex-direction: column; gap: .55rem; }
+  .fund-insight { display: flex; gap: .5rem; align-items: flex-start; font-size: .76rem; color: var(--ink); line-height: 1.6; background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: .65rem .85rem; }
+  .fund-insight-icon { font-size: 1rem; flex-shrink: 0; }
+  .fund-pipeline { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: start; gap: .5rem; }
+  .fund-pipe-step { border-radius: 10px; padding: .85rem 1rem; border: var(--border-w) solid var(--border); }
+  .fund-pipe-num { width: 26px; height: 26px; border-radius: 50%; font-size: .72rem; font-weight: 900; display: flex; align-items: center; justify-content: center; margin-bottom: .5rem; color: white; }
+  .fund-pipe-title { font-size: .79rem; font-weight: 800; color: var(--ink); margin-bottom: .3rem; }
+  .fund-pipe-body  { font-size: .74rem; color: var(--ink); line-height: 1.6; }
+  .fund-pipe-arrow { font-size: 1.1rem; color: var(--ink); font-weight: 800; padding-top: 1.5rem; align-self: start; }
+  @media (max-width: 700px) {
+    .fund-pipeline { grid-template-columns: 1fr; }
+    .fund-pipe-arrow { padding-top: 0; text-align: center; }
+  }
+
   .callout-red-left { border-left: 4px solid var(--red); background: var(--red-pale); border-radius: var(--radius); padding: .9rem 1rem; margin-bottom: 1rem; }
   .callout-title-green  { color: var(--green-dark); }
   .callout-title-blue   { color: #0369a1; }
